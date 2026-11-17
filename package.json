@@ -21,9 +21,11 @@
     "unplugin-vue-markdown": "^32.1.1",
     "vue": "^3.5.45",
     "vue-i18n": "^11.4.20",
-    "vue-router": "^5.5.1"
+    "vue-router": "^5.5.1",
+    "wrangler": "^4.162.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.69.1",
     "@shikijs/markdown-exit": "^4.6.0",
     "@tailwindcss/vite": "^4.3.5",
     "@tsconfig/node24": "^24.0.6",
