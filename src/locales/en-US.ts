@@ -1,6 +1,7 @@
 export default {
   article: {
     headingLink: 'Link to section: {title}',
+    onThisPage: 'On this page',
   },
   navigation: {
     content: 'Documentation content',

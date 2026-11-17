@@ -18,9 +18,10 @@ async function mount(initial = '/docs?example=keep') {
   })
   root.getBoundingClientRect = () => ({ top: 64, height: 400 }) as DOMRect
   const scroll = vi.fn()
-  function addHeading(id: string, offset: number, hidden = false) {
-    const heading = document.createElement('h2')
+  function addHeading(id: string, offset: number, hidden = false, tag: 'h2' | 'h3' = 'h2') {
+    const heading = document.createElement(tag)
     heading.id = id
+    heading.setAttribute('data-docs-heading', '')
     heading.hidden = hidden
     heading.getBoundingClientRect = () => ({
       top: 64 + offset - root.scrollTop, height: 32,
@@ -128,6 +129,24 @@ test('tracking batches scroll events, skips hidden headings, and reaches the las
     fixture.scrollTo(0)
     await fixture.flush()
     expect(fixture.router.currentRoute.value.hash).toBe('#overview')
+  } finally { fixture.close() }
+})
+
+test('tracking includes third-level article sections and ignores headings inside live demonstrations', async () => {
+  const fixture = await mount()
+  try {
+    const child = fixture.addHeading('颜色配置', 800, false, 'h3')
+    fixture.article.querySelector('[id="最后一步"]')!.before(child)
+    const demo = document.createElement('h2')
+    demo.id = 'demo-title'
+    demo.getBoundingClientRect = () => ({
+      top: 64 + 900 - fixture.root.scrollTop, height: 32,
+    }) as DOMRect
+    child.after(demo)
+    fixture.scrollTo(950)
+    await fixture.flush()
+    expect(fixture.router.currentRoute.value.hash).toBe('#颜色配置')
+    expect(fixture.scroll).not.toHaveBeenCalled()
   } finally { fixture.close() }
 })
 

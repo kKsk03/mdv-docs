@@ -29,6 +29,7 @@ import {
   type Locale,
 } from '@/content/registry'
 import { trackArticleHeadings } from '@/router/heading-tracker'
+import OnThisPage from '@/components/docs/OnThisPage.vue'
 
 const themeModes = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof themeModes)[number]
@@ -297,7 +298,8 @@ onBeforeUnmount(() => {
         </MdvAppBar>
       </template>
 
-      <main id="main-content" class="min-h-full min-w-0 p-6 md:p-8">
+      <main id="main-content" class="docs-page min-h-full min-w-0 p-6 md:p-8">
+        <OnThisPage :article="article" />
         <article ref="article" class="docs-prose">
           <RouterView />
         </article>
@@ -307,6 +309,34 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.docs-page {
+  display: grid;
+  max-inline-size: calc(880px + 224px + 7rem);
+  align-items: start;
+  row-gap: 1.5rem;
+  margin-inline: auto;
+}
+
+.docs-page > .docs-prose {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+@media (min-width: 1280px) {
+  .docs-page:has(.docs-outline) {
+    grid-template-columns: minmax(0, 880px) 224px;
+    column-gap: 3rem;
+  }
+
+  .docs-page > .docs-outline {
+    grid-area: 1 / 2;
+  }
+
+  .docs-page > .docs-prose {
+    grid-area: 1 / 1;
+  }
+}
+
 .docs-drawer-brand {
   margin: 0;
   font-size: 1.125rem;

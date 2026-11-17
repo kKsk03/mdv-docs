@@ -35,6 +35,7 @@ export function markdownHeadings(md: MarkdownExit) {
       used.add(id)
       heading.attrSet('id', id)
       heading.attrSet('tabindex', '-1')
+      heading.attrSet('data-docs-heading', '')
 
       const open = new state.Token('link_open', 'a', 1)
       open.attrSet('class', 'docs-heading-anchor')

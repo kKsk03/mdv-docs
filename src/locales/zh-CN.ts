@@ -1,6 +1,7 @@
 export default {
   article: {
     headingLink: '跳转到章节：{title}',
+    onThisPage: '本页目录',
   },
   navigation: {
     content: '文档内容',

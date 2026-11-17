@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 import type { Router } from 'vue-router'
+import { getArticleHeadings } from '../content/article-headings.ts'
 import {
   isTrackedArticleLocation,
   observeArticleScroll,
@@ -59,9 +60,8 @@ export function trackArticleHeadings(article: HTMLElement, router: Router): () =
   function update() {
     frame = undefined
     if (stopped || navigating || changingPage || pagePath !== router.currentRoute.value.path) return
-    const headings = Array.from(article.querySelectorAll<HTMLElement>(
-      'h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]',
-    )).filter(heading => !heading.closest('[hidden], [inert]') && heading.getBoundingClientRect().height > 0)
+    const headings = getArticleHeadings(article)
+      .filter(heading => heading.getBoundingClientRect().height > 0)
     if (!headings.length) return
 
     const readingLine = root!.getBoundingClientRect().top + 24

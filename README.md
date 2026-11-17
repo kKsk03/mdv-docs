@@ -41,6 +41,28 @@ Reference a heading using an ordinary Markdown fragment link:
 
 IDs keep Chinese characters, normalize and lowercase Latin text, remove punctuation, and replace whitespace or underscores with hyphens. For example, `Code block title` becomes `code-block-title`, and `代码块标题` remains `代码块标题`. Repeated IDs within a page receive `-1`, `-2`, and subsequent suffixes. Renaming a heading can change its URL; use the generated permalink when sharing or referencing it.
 
+### Page outline
+
+The shared **On this page** outline is generated automatically from the article's Markdown headings. Use one H1 for the article title, H2 for sections, and H3 for nested sections:
+
+```md
+# Button
+
+## Color
+
+### Custom colors
+
+## API
+
+### Props
+
+### Slots
+```
+
+H3 entries appear below their nearest H2 with a small indentation. H4 through H6 remain valid link targets and highlight their nearest listed section. Headings inside live Vue demonstrations and hidden content are excluded; no per-page outline configuration is needed.
+
+At viewport widths of 1280px and above, the outline stays on the right while reading. On narrower screens it becomes a collapsible panel before the article and closes after selecting a section. Pages without H2 or H3 headings have no outline. Links share the existing smooth scrolling and URL fragment tracking. One outlined selection indicator moves between entries and adjusts its width and height using MDV's 500ms standard easing, matching the Material Design 3 site. Layout changes reposition it immediately, and reduced-motion preferences disable the transition. Changing the page or language refreshes the entries automatically.
+
 ### Code formatting
 
 Use backticks for inline code, such as `pnpm`. Inline code uses MDV's secondary-container background and on-secondary-container text, matching the selected sidebar item and following the active theme.
