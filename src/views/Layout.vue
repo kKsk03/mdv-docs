@@ -6,6 +6,7 @@ import brightnessAutoIcon from '@iconify-icons/material-symbols/brightness-auto'
 import darkModeIcon from '@iconify-icons/material-symbols/dark-mode'
 import lightModeIcon from '@iconify-icons/material-symbols/light-mode'
 import menuIcon from '@iconify-icons/material-symbols/menu'
+import moreVertIcon from '@iconify-icons/material-symbols/more-vert'
 import translateIcon from '@iconify-icons/material-symbols/translate'
 import {
   MdvAppBar,
@@ -35,7 +36,7 @@ const themeModes = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof themeModes)[number]
 const themeStorageKey = 'mdv-docs-theme'
 
-function isThemeMode(value: string | null): value is ThemeMode {
+function isThemeMode(value: unknown): value is ThemeMode {
   return value === 'light' || value === 'dark' || value === 'system'
 }
 
@@ -152,7 +153,12 @@ function changeLocale(value: unknown) {
 }
 
 function cycleTheme() {
-  themeMode.value = nextThemeMode.value
+  changeTheme(nextThemeMode.value)
+}
+
+function changeTheme(value: unknown) {
+  if (!isThemeMode(value)) return
+  themeMode.value = value
 
   try {
     window.localStorage.setItem(themeStorageKey, themeMode.value)
@@ -261,38 +267,82 @@ onBeforeUnmount(() => {
             </MdvIconButton>
           </template>
           <template #actions>
-            <MdvTooltip :text="themeModeLabel" placement="bottom">
+            <template v-if="isDesktop">
+              <MdvTooltip :text="themeModeLabel" placement="bottom">
+                <template #trigger="{ triggerProps }">
+                  <MdvIconButton
+                    v-bind="triggerProps"
+                    variant="standard"
+                    :aria-label="themeButtonLabel"
+                    @click="cycleTheme"
+                  >
+                    <MdvIcon :icon="themeIcons[themeMode]" />
+                  </MdvIconButton>
+                </template>
+              </MdvTooltip>
+              <MdvMenu placement="bottom-end">
+                <template #trigger="{ triggerProps }">
+                  <MdvIconButton
+                    v-bind="triggerProps"
+                    variant="standard"
+                    :aria-label="t('language.label')"
+                    :title="t('language.label')"
+                  >
+                    <MdvIcon :icon="translateIcon" />
+                  </MdvIconButton>
+                </template>
+                <MdvMenuGroup
+                  selection-mode="single"
+                  :model-value="activeLocale"
+                  :label="t('language.label')"
+                  @update:model-value="changeLocale"
+                >
+                  <MdvMenuItem value="en-US" :label="t('language.english')" />
+                  <MdvMenuItem value="zh-CN" :label="t('language.chinese')" />
+                </MdvMenuGroup>
+              </MdvMenu>
+            </template>
+            <MdvMenu v-else placement="bottom-end" submenu-mode="push">
               <template #trigger="{ triggerProps }">
                 <MdvIconButton
                   v-bind="triggerProps"
                   variant="standard"
-                  :aria-label="themeButtonLabel"
-                  @click="cycleTheme"
+                  :aria-label="t('appbar.more')"
                 >
-                  <MdvIcon :icon="themeIcons[themeMode]" />
+                  <MdvIcon :icon="moreVertIcon" />
                 </MdvIconButton>
               </template>
-            </MdvTooltip>
-            <MdvMenu placement="bottom-end">
-              <template #trigger="{ triggerProps }">
-                <MdvIconButton
-                  v-bind="triggerProps"
-                  variant="standard"
-                  :aria-label="t('language.label')"
-                  :title="t('language.label')"
-                >
-                  <MdvIcon :icon="translateIcon" />
-                </MdvIconButton>
-              </template>
-              <MdvMenuGroup
-                selection-mode="single"
-                :model-value="activeLocale"
-                :label="t('language.label')"
-                @update:model-value="changeLocale"
-              >
-                <MdvMenuItem value="en-US" :label="t('language.english')" />
-                <MdvMenuItem value="zh-CN" :label="t('language.chinese')" />
-              </MdvMenuGroup>
+              <MdvMenuItem :label="t('theme.label')" :icon="themeIcons[themeMode]">
+                <template #children>
+                  <MdvMenuGroup
+                    selection-mode="single"
+                    :model-value="themeMode"
+                    :aria-label="t('theme.label')"
+                    @update:model-value="changeTheme"
+                  >
+                    <MdvMenuItem
+                      v-for="mode in themeModes"
+                      :key="mode"
+                      :value="mode"
+                      :label="themeLabels[mode]"
+                      :icon="themeIcons[mode]"
+                    />
+                  </MdvMenuGroup>
+                </template>
+              </MdvMenuItem>
+              <MdvMenuItem :label="t('language.label')" :icon="translateIcon">
+                <template #children>
+                  <MdvMenuGroup
+                    selection-mode="single"
+                    :model-value="activeLocale"
+                    :aria-label="t('language.label')"
+                    @update:model-value="changeLocale"
+                  >
+                    <MdvMenuItem value="en-US" :label="t('language.english')" />
+                    <MdvMenuItem value="zh-CN" :label="t('language.chinese')" />
+                  </MdvMenuGroup>
+                </template>
+              </MdvMenuItem>
             </MdvMenu>
           </template>
         </MdvAppBar>

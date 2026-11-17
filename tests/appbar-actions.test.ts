@@ -1,0 +1,163 @@
+import { afterEach, expect, test, vi } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
+import type { VueWrapper } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import { createMemoryHistory, createRouter } from 'vue-router'
+import Layout from '../src/views/Layout.vue'
+import { documentationPages, getRouteName, locales } from '../src/content/registry.ts'
+import enUS from '../src/locales/en-US.ts'
+import zhCN from '../src/locales/zh-CN.ts'
+
+let host: VueWrapper | undefined
+let restorePopover: (() => void) | undefined
+
+afterEach(() => {
+  host?.unmount()
+  host = undefined
+  restorePopover?.()
+  restorePopover = undefined
+  localStorage.clear()
+})
+
+// Keep real MDV menus and positioning; supply only jsdom's missing Popover state.
+function mockPopover() {
+  const opened = new Set<HTMLElement>()
+  const showDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'showPopover')
+  const hideDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'hidePopover')
+  Object.defineProperties(HTMLElement.prototype, {
+    showPopover: { configurable: true, value(this: HTMLElement) {
+      opened.add(this)
+      this.style.display = 'block'
+    } },
+    hidePopover: { configurable: true, value(this: HTMLElement) {
+      opened.delete(this)
+      this.style.removeProperty('display')
+    } },
+  })
+  const matches = Element.prototype.matches
+  vi.spyOn(Element.prototype, 'matches').mockImplementation(function (this: Element, selector) {
+    return selector === ':popover-open' ? opened.has(this as HTMLElement) : matches.call(this, selector)
+  })
+  restorePopover = () => {
+    if (showDescriptor) Object.defineProperty(HTMLElement.prototype, 'showPopover', showDescriptor)
+    else Reflect.deleteProperty(HTMLElement.prototype, 'showPopover')
+    if (hideDescriptor) Object.defineProperty(HTMLElement.prototype, 'hidePopover', hideDescriptor)
+    else Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover')
+  }
+  return opened
+}
+
+async function fixture(desktop = false) {
+  localStorage.clear()
+  const opened = mockPopover()
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const viewport = Object.assign(new EventTarget(), {
+    matches: desktop,
+    media: '(min-width: 768px)',
+  })
+  vi.stubGlobal('matchMedia', (query: string) => query === viewport.media ? viewport : reduced)
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: locales.flatMap(locale => documentationPages.map(page => ({
+      path: `/${locale}/${page.slug}`,
+      name: getRouteName(locale, page.id),
+      component: { template: '<p>Article content</p>' },
+      meta: { documentId: page.id, locale, title: page.title[locale] },
+    }))),
+  })
+  await router.push('/zh-CN/components/button')
+  const i18n = createI18n({ legacy: false, locale: 'zh-CN', messages: { 'en-US': enUS, 'zh-CN': zhCN } })
+  host = mount(Layout, { attachTo: document.body, global: { plugins: [router, i18n] } })
+  await flushPromises()
+  const wrapper = host
+  const action = (label: string) => wrapper.get(`.mdv-app-bar__actions button[aria-label="${label}"]`)
+  const item = (label: string) => {
+    const control = wrapper.findAll('[data-mdv-menu-item]').find(control => control.text() === label)
+    if (!control) throw new Error(`Missing menu item: ${label}`)
+    return control
+  }
+  async function resize(nextDesktop: boolean) {
+    viewport.matches = nextDesktop
+    viewport.dispatchEvent(new Event('change'))
+    await flushPromises()
+  }
+  return { wrapper, router, opened, action, item, resize }
+}
+
+test('compact actions group themes and languages in separate submenus and persist theme choices', async () => {
+  const { wrapper, opened, action, item } = await fixture()
+  expect(wrapper.findAll('.mdv-app-bar__actions > button')).toHaveLength(1)
+  expect(wrapper.find('.mdv-app-bar__actions button[aria-label="语言"]').exists()).toBe(false)
+  expect(item('跟随系统').attributes('aria-checked')).toBe('true')
+  for (const [label, value] of [['浅色模式', 'light'], ['深色模式', 'dark'], ['跟随系统', 'system']] as const) {
+    await action('更多选项').trigger('click')
+    await flushPromises()
+    expect(opened.size).toBe(1)
+    const rootMenu = [...opened][0]!
+    expect([...rootMenu.querySelectorAll('[data-mdv-menu-item]')]
+      .filter(control => control.closest('[role="menu"]') === rootMenu)
+      .map(control => control.textContent?.trim())).toEqual(['主题', '语言'])
+    await item('主题').trigger('click')
+    await flushPromises()
+    expect(opened.size).toBe(2)
+    const themePanelId = item('主题').attributes('aria-controls')
+    expect(wrapper.get(`#${themePanelId} .mdv-menu__back`).text()).toBe('主题')
+    await item(label).trigger('click')
+    await flushPromises()
+    expect(wrapper.attributes('data-mdv-theme')).toBe(value)
+    expect(localStorage.getItem('mdv-docs-theme')).toBe(value)
+    expect(item(label).attributes('aria-checked')).toBe('true')
+    expect(action('更多选项').attributes('aria-expanded')).toBe('false')
+    expect(opened.size).toBe(0)
+  }
+})
+
+test('language opens a push submenu and changes locale on the same article', async () => {
+  const { wrapper, router, opened, action, item } = await fixture()
+  await action('更多选项').trigger('click')
+  await flushPromises()
+  await item('语言').trigger('click')
+  await flushPromises()
+  expect(opened.size).toBe(2)
+  expect(item('语言').attributes('aria-expanded')).toBe('true')
+  const languagePanelId = item('语言').attributes('aria-controls')
+  expect(wrapper.get(`#${languagePanelId} .mdv-menu__back`).text()).toBe('语言')
+  expect(item('简体中文').attributes('aria-checked')).toBe('true')
+  await item('English').trigger('click')
+  await flushPromises()
+  expect(router.currentRoute.value.path).toBe('/en-US/components/button')
+  expect(localStorage.getItem('mdv-docs-locale')).toBe('en-US')
+  expect(item('English').attributes('aria-checked')).toBe('true')
+  expect(action('More options').attributes('aria-expanded')).toBe('false')
+  expect(opened.size).toBe(0)
+})
+
+test('changing breakpoints disposes open menu layers and preserves shared theme state', async () => {
+  const { wrapper, opened, action, item, resize } = await fixture()
+  await action('更多选项').trigger('click')
+  await flushPromises()
+  await item('主题').trigger('click')
+  await flushPromises()
+  await item('深色模式').trigger('click')
+  await flushPromises()
+  await action('更多选项').trigger('click')
+  await flushPromises()
+  await item('语言').trigger('click')
+  await flushPromises()
+  expect(opened.size).toBe(2)
+
+  await resize(true)
+  expect(opened.size).toBe(0)
+  expect(wrapper.findAll('.mdv-app-bar__actions > button')).toHaveLength(2)
+  expect(wrapper.find('.mdv-app-bar__actions button[aria-label="更多选项"]').exists()).toBe(false)
+  await action('主题：深色模式').trigger('click')
+  expect(wrapper.attributes('data-mdv-theme')).toBe('system')
+  await action('语言').trigger('click')
+  await flushPromises()
+  expect(opened.size).toBe(1)
+
+  await resize(false)
+  expect(opened.size).toBe(0)
+  expect(action('更多选项').attributes('aria-expanded')).toBe('false')
+  expect(item('跟随系统').attributes('aria-checked')).toBe('true')
+})

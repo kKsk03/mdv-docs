@@ -88,8 +88,12 @@ test('outline links navigate to nested sections, preserve the query, and close t
   const navigation = wrapper.get('nav')
   expect(toggle.attributes('aria-controls')).toBe(navigation.attributes('id'))
   expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(navigation.attributes('inert')).toBeDefined()
+  expect(navigation.attributes('aria-hidden')).toBe('true')
   await toggle.trigger('click')
   expect(toggle.attributes('aria-expanded')).toBe('true')
+  expect(navigation.attributes('inert')).toBeUndefined()
+  expect(navigation.attributes('aria-hidden')).toBeUndefined()
 
   const nested = wrapper.get('.docs-outline__sublist a')
   expect(nested.text()).toBe('自定义颜色')
@@ -99,12 +103,74 @@ test('outline links navigate to nested sections, preserve the query, and close t
   expect(router.currentRoute.value.hash).toBe('#自定义颜色')
   expect(router.currentRoute.value.query.example).toBe('keep')
   expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(navigation.attributes('inert')).toBeDefined()
+  expect(navigation.attributes('aria-hidden')).toBe('true')
   expect(wrapper.findAll('[aria-current="location"]')).toHaveLength(1)
   expect(nested.attributes('aria-current')).toBe('location')
   expect(scroll).toHaveBeenCalledOnce()
   expect(scroll.mock.calls[0]).toEqual([{
     behavior: 'smooth', block: 'start', inline: 'nearest',
   }])
+})
+
+test('compact navigation waits for the collapse before scrolling and cancels when reopened', async () => {
+  const { router, wrapper, scroll } = await fixture()
+  const toggle = wrapper.get('.docs-outline__toggle')
+  const content = wrapper.get('.docs-outline__content').element
+  let finishCollapse!: () => void
+  const finished = new Promise<void>(resolve => { finishCollapse = resolve })
+  const animations = vi.fn(() => [{ finished }])
+  Object.defineProperty(content, 'getAnimations', { value: animations })
+  await toggle.trigger('click')
+  await wrapper.get('.docs-outline__sublist a').trigger('click')
+  await flushPromises()
+  expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(router.currentRoute.value.hash).toBe('')
+  expect(scroll).not.toHaveBeenCalled()
+
+  finishCollapse()
+  await flushPromises()
+  expect(router.currentRoute.value.hash).toBe('#自定义颜色')
+  expect(scroll).toHaveBeenCalledOnce()
+
+  const nextFinished = new Promise<void>(resolve => { finishCollapse = resolve })
+  animations.mockReturnValue([{ finished: nextFinished }])
+  await toggle.trigger('click')
+  await wrapper.get('a[href$="#api"]').trigger('click')
+  await toggle.trigger('click')
+  finishCollapse()
+  await flushPromises()
+  expect(toggle.attributes('aria-expanded')).toBe('true')
+  expect(router.currentRoute.value.hash).toBe('#自定义颜色')
+  expect(scroll).toHaveBeenCalledOnce()
+})
+
+test('the desktop outline stays accessible and a collapsed compact outline becomes inert again', async () => {
+  const viewport = Object.assign(new EventTarget(), {
+    matches: true,
+    media: '(min-width: 1280px)',
+  })
+  const originalMatchMedia = window.matchMedia
+  vi.stubGlobal('matchMedia', (query: string) => query === viewport.media ? viewport : originalMatchMedia(query))
+  const { wrapper } = await fixture()
+  const navigation = wrapper.get('nav')
+  const toggle = wrapper.get('.docs-outline__toggle')
+  expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(navigation.attributes('inert')).toBeUndefined()
+  expect(navigation.attributes('aria-hidden')).toBeUndefined()
+
+  viewport.matches = false
+  viewport.dispatchEvent(new Event('change'))
+  await nextTick()
+  expect(navigation.attributes('inert')).toBeDefined()
+  expect(navigation.attributes('aria-hidden')).toBe('true')
+
+  await toggle.trigger('click')
+  expect(navigation.attributes('inert')).toBeUndefined()
+  viewport.matches = true
+  viewport.dispatchEvent(new Event('change'))
+  await nextTick()
+  expect(navigation.attributes('inert')).toBeUndefined()
 })
 
 test('current-section changes select the matching outline entry, including a deeper heading', async () => {

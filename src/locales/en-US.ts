@@ -1,4 +1,7 @@
 export default {
+  appbar: {
+    more: 'More options',
+  },
   article: {
     headingLink: 'Link to section: {title}',
     onThisPage: 'On this page',
@@ -15,6 +18,7 @@ export default {
     chinese: '简体中文',
   },
   theme: {
+    label: 'Theme',
     button: 'Theme: {mode}',
     modes: {
       light: 'Light mode',

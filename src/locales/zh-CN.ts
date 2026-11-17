@@ -1,4 +1,7 @@
 export default {
+  appbar: {
+    more: '更多选项',
+  },
   article: {
     headingLink: '跳转到章节：{title}',
     onThisPage: '本页目录',
@@ -15,6 +18,7 @@ export default {
     chinese: '简体中文',
   },
   theme: {
+    label: '主题',
     button: '主题：{mode}',
     modes: {
       light: '浅色模式',

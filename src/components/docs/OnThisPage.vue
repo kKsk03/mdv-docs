@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { MdvButton, MdvIcon } from '@mdv-ui/mdv'
@@ -14,9 +14,16 @@ const props = defineProps<{
 const route = useRoute()
 const { t } = useI18n({ useScope: 'global' })
 const contentId = `docs-outline-${useId()}`
+const content = useTemplateRef<HTMLElement>('content')
 const navigation = useTemplateRef<HTMLElement>('navigation')
 const indicator = useTemplateRef<HTMLElement>('indicator')
 const expanded = ref(false)
+const wideQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+  ? window.matchMedia('(min-width: 1280px)')
+  : null
+const isWide = ref(wideQuery?.matches ?? false)
+const contentVisible = computed(() => isWide.value || expanded.value)
+let navigationVersion = 0
 let indicatorRect: { x: number; y: number; width: number; height: number } | undefined
 const outline = shallowRef<ArticleOutline>({ title: null, items: [], sections: Object.create(null) })
 const activeId = computed(() => {
@@ -29,6 +36,19 @@ const activeId = computed(() => {
   return outline.value.sections[id] ?? outline.value.items[0]?.id
 })
 const title = computed(() => outline.value.title?.text ?? route.meta.title)
+
+function syncViewport() {
+  isWide.value = wideQuery?.matches ?? false
+}
+
+onMounted(() => {
+  syncViewport()
+  wideQuery?.addEventListener('change', syncViewport)
+})
+onBeforeUnmount(() => {
+  navigationVersion++
+  wideQuery?.removeEventListener('change', syncViewport)
+})
 
 watch(() => props.article, (article, _, onCleanup) => {
   if (!article) {
@@ -52,6 +72,7 @@ watch(() => props.article, (article, _, onCleanup) => {
 }, { immediate: true, flush: 'post' })
 
 watch(() => route.path, () => {
+  navigationVersion++
   expanded.value = false
   if (navigation.value) navigation.value.scrollTop = 0
 })
@@ -116,11 +137,25 @@ watch([navigation, outline], ([root], _, onCleanup) => {
   })
 }, { flush: 'post' })
 
-function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => unknown) {
-  void navigate(event)
-  if (!event.button && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-    expanded.value = false
+function toggleOutline() {
+  navigationVersion++
+  expanded.value = !expanded.value
+}
+
+async function navigateToSection(event: MouseEvent, navigate: (event?: MouseEvent) => unknown) {
+  if (event.defaultPrevented) return
+  if (event.button || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || isWide.value || !expanded.value) {
+    void navigate(event)
+    return
   }
+  event.preventDefault()
+  const version = ++navigationVersion
+  expanded.value = false
+  await nextTick()
+  // Finish changing the article's position before the router measures the target.
+  const animations = content.value?.getAnimations?.() ?? []
+  await Promise.all(animations.map(animation => animation.finished.catch(() => {})))
+  if (version === navigationVersion && content.value) void navigate()
 }
 </script>
 
@@ -137,7 +172,7 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
       full-width
       :aria-expanded="expanded"
       :aria-controls="contentId"
-      @click="expanded = !expanded"
+      @click="toggleOutline"
     >
       {{ t('article.onThisPage') }}
       <template #trailing>
@@ -148,38 +183,25 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
         />
       </template>
     </MdvButton>
-    <nav
-      :id="contentId"
-      ref="navigation"
-      class="docs-outline__navigation"
-      :class="{ 'docs-outline__navigation--expanded': expanded }"
-      :aria-label="t('article.onThisPage')"
+    <div
+      ref="content"
+      class="docs-outline__content"
+      :class="{ 'docs-outline__content--expanded': expanded }"
     >
-      <span ref="indicator" class="docs-outline__indicator" hidden aria-hidden="true" />
-      <ul class="docs-outline__list">
-        <li v-for="item in outline.items" :key="item.id">
-          <RouterLink
-            :to="{ path: route.path, query: route.query, hash: `#${item.id}` }"
-            custom
-            v-slot="{ href, navigate }"
-          >
-            <MdvButton
-              :href="href"
-              variant="text"
-              full-width
-              class="docs-outline__link"
-              :class="{
-                'docs-outline__link--active': activeId === item.id,
-                'docs-outline__link--ancestor': item.children.some(child => child.id === activeId),
-              }"
-              :aria-current="activeId === item.id ? 'location' : undefined"
-              @click="navigateToSection($event, navigate)"
-            >{{ item.text }}</MdvButton>
-          </RouterLink>
-          <ul v-if="item.children.length" class="docs-outline__list docs-outline__sublist">
-            <li v-for="child in item.children" :key="child.id">
+      <div class="docs-outline__clip">
+        <nav
+          :id="contentId"
+          ref="navigation"
+          class="docs-outline__navigation"
+          :aria-label="t('article.onThisPage')"
+          :inert="!contentVisible ? true : undefined"
+          :aria-hidden="!contentVisible ? true : undefined"
+        >
+          <span ref="indicator" class="docs-outline__indicator" hidden aria-hidden="true" />
+          <ul class="docs-outline__list">
+            <li v-for="item in outline.items" :key="item.id">
               <RouterLink
-                :to="{ path: route.path, query: route.query, hash: `#${child.id}` }"
+                :to="{ path: route.path, query: route.query, hash: `#${item.id}` }"
                 custom
                 v-slot="{ href, navigate }"
               >
@@ -188,16 +210,38 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
                   variant="text"
                   full-width
                   class="docs-outline__link"
-                  :class="{ 'docs-outline__link--active': activeId === child.id }"
-                  :aria-current="activeId === child.id ? 'location' : undefined"
+                  :class="{
+                    'docs-outline__link--active': activeId === item.id,
+                    'docs-outline__link--ancestor': item.children.some(child => child.id === activeId),
+                  }"
+                  :aria-current="activeId === item.id ? 'location' : undefined"
                   @click="navigateToSection($event, navigate)"
-                >{{ child.text }}</MdvButton>
+                >{{ item.text }}</MdvButton>
               </RouterLink>
+              <ul v-if="item.children.length" class="docs-outline__list docs-outline__sublist">
+                <li v-for="child in item.children" :key="child.id">
+                  <RouterLink
+                    :to="{ path: route.path, query: route.query, hash: `#${child.id}` }"
+                    custom
+                    v-slot="{ href, navigate }"
+                  >
+                    <MdvButton
+                      :href="href"
+                      variant="text"
+                      full-width
+                      class="docs-outline__link"
+                      :class="{ 'docs-outline__link--active': activeId === child.id }"
+                      :aria-current="activeId === child.id ? 'location' : undefined"
+                      @click="navigateToSection($event, navigate)"
+                    >{{ child.text }}</MdvButton>
+                  </RouterLink>
+                </li>
+              </ul>
             </li>
           </ul>
-        </li>
-      </ul>
-    </nav>
+        </nav>
+      </div>
+    </div>
   </aside>
 </template>
 
@@ -225,28 +269,40 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
 }
 
 .docs-outline__chevron {
-  transition: transform var(--mdv-sys-motion-duration-short-4) var(--mdv-sys-motion-easing-standard);
+  transition: transform var(--mdv-sys-motion-duration-medium-2) var(--mdv-sys-motion-easing-standard);
 }
 
 .docs-outline__chevron--expanded {
   transform: rotate(180deg);
 }
 
+.docs-outline__content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--mdv-sys-motion-duration-medium-2)
+    var(--mdv-sys-motion-easing-standard);
+}
+
+.docs-outline__content--expanded {
+  grid-template-rows: 1fr;
+}
+
+.docs-outline__clip {
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
 .docs-outline__navigation {
   position: relative;
-  display: none;
   max-block-size: min(50dvh, 24rem);
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  border-block-start: 1px solid var(--mdv-sys-color-outline-variant);
   padding: 0.5rem;
   scrollbar-width: thin;
   scrollbar-color: var(--mdv-sys-color-outline-variant) transparent;
-}
-
-.docs-outline__navigation--expanded {
-  display: block;
-  border-block-start: 1px solid var(--mdv-sys-color-outline-variant);
 }
 
 .docs-outline__list {
@@ -346,6 +402,11 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
     display: none;
   }
 
+  .docs-outline__content,
+  .docs-outline__clip {
+    display: contents;
+  }
+
   .docs-outline__navigation {
     display: block;
     max-block-size: none;
@@ -355,6 +416,7 @@ function navigateToSection(event: MouseEvent, navigate: (event: MouseEvent) => u
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .docs-outline__content,
   .docs-outline__chevron,
   .docs-outline__indicator {
     transition: none;
