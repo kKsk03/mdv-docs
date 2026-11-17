@@ -1,0 +1,108 @@
+.docs-api-table {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-block: 1.25rem 2rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid var(--mdv-sys-color-outline-variant);
+  border-radius: var(--mdv-sys-shape-corner-large);
+  background-color: var(--mdv-sys-color-surface-container-low);
+  color: var(--mdv-sys-color-on-surface);
+}
+
+.docs-api-table:focus-visible {
+  outline: 2px solid var(--mdv-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.docs-api-table table {
+  inline-size: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  text-align: start;
+}
+
+.docs-api-table .docs-api-table__props {
+  min-inline-size: 40rem;
+  table-layout: fixed;
+}
+
+.docs-api-table__attribute-column,
+.docs-api-table__property-column {
+  inline-size: 20%;
+}
+
+.docs-api-table__type-column {
+  inline-size: 44%;
+}
+
+.docs-api-table__default-column {
+  inline-size: 16%;
+}
+
+.docs-api-table :where(th, td) {
+  border-block-end: 1px solid var(--mdv-sys-color-outline-variant);
+  padding: 1rem;
+  overflow-wrap: anywhere;
+  text-align: start;
+  vertical-align: top;
+}
+
+.docs-api-table th {
+  font-weight: 500;
+}
+
+.docs-api-table thead {
+  background-color: var(--mdv-sys-color-surface-container);
+  color: var(--mdv-sys-color-on-surface-variant);
+}
+
+.docs-api-table thead th:not(:last-child),
+.docs-api-table__metadata > :not(:last-child) {
+  border-inline-end: 1px solid var(--mdv-sys-color-outline-variant);
+}
+
+.docs-api-table tbody:last-child > tr:last-child > * {
+  border-block-end: 0;
+}
+
+.docs-api-table .docs-api-table__description {
+  background-color: var(--mdv-sys-color-surface);
+}
+
+.docs-api-table__description :where(p, ul, ol) {
+  margin-block: 0.75rem;
+}
+
+.docs-api-table__description > :first-child {
+  margin-block-start: 0;
+}
+
+.docs-api-table__description > :last-child {
+  margin-block-end: 0;
+}
+
+.docs-api-table code {
+  border-radius: var(--mdv-sys-shape-corner-extra-small);
+  padding: 0.125em 0.375em;
+  background-color: var(--mdv-sys-color-secondary-container);
+  color: var(--mdv-sys-color-on-secondary-container);
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.docs-api-table__caption {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

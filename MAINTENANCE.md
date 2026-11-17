@@ -48,7 +48,7 @@ When an MDV component behaves incorrectly, identify whether the defect belongs t
 
 | Location | Responsibility |
 | --- | --- |
-| `tests/*.test.ts` | Behavioral regression suites for Markdown, code controls, and article navigation. |
+| `tests/*.test.ts` | Behavioral regression suites for Markdown, demo shells, code controls, and article navigation. |
 | `tests/fixtures/` | Small input documents needed by integration tests. |
 | `tests/setup.ts` | Shared DOM setup, reduced-motion control, and fixture cleanup. |
 | `tests/markdown.ts` | Compile Markdown through the actual Vite pipeline for parser assertions. |

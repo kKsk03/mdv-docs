@@ -28,14 +28,15 @@ export default {
     copyFailed: 'Copy failed. Please copy manually.',
   },
   demo: {
-    source: 'Source code',
-    buttonVariants: 'Button variants',
-    variants: {
-      filled: 'Filled',
-      tonal: 'Tonal',
-      outlined: 'Outlined',
-      elevated: 'Elevated',
-      text: 'Text',
-    },
+    source: 'Example code',
+  },
+  api: {
+    props: 'Component props',
+    slots: 'Component slots',
+    attribute: 'Template attribute',
+    property: 'JavaScript property',
+    type: 'Type',
+    default: 'Default',
+    name: 'Name',
   },
 }

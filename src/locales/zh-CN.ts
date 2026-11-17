@@ -29,13 +29,14 @@ export default {
   },
   demo: {
     source: '示例代码',
-    buttonVariants: '按钮变体',
-    variants: {
-      filled: '填充',
-      tonal: '色调',
-      outlined: '描边',
-      elevated: '凸起',
-      text: '文本',
-    },
+  },
+  api: {
+    props: '组件属性',
+    slots: '组件插槽',
+    attribute: '模板属性',
+    property: 'JavaScript 属性',
+    type: '类型',
+    default: '默认值',
+    name: '名称',
   },
 }

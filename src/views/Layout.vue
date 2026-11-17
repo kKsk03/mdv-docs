@@ -25,7 +25,7 @@ import {
   defaultDocumentId,
   getRouteName,
   isLocale,
-  navigationSections,
+  navigationItems,
   type Locale,
 } from '@/content/registry'
 import { trackArticleHeadings } from '@/router/heading-tracker'
@@ -59,6 +59,7 @@ const desktopQuery =
     : null
 const isDesktop = ref(desktopQuery?.matches ?? false)
 const mobileNavigationOpen = ref(false)
+const expandedGroups = ref<Record<string, boolean>>({})
 const drawerComponent = computed(() =>
   isDesktop.value ? MdvNavigationDrawer : MdvModalNavigationDrawer,
 )
@@ -94,6 +95,18 @@ const nextThemeMode = computed<ThemeMode>(() => {
   return themeModes[(currentIndex + 1) % themeModes.length]!
 })
 const themeButtonLabel = computed(() => t('theme.button', { mode: themeModeLabel.value }))
+watch(
+  () => route.meta.documentId,
+  (documentId) => {
+    for (const item of navigationItems) {
+      if ('pages' in item && item.pages.some((page) => page.id === documentId)) {
+        expandedGroups.value[item.id] = true
+      }
+    }
+  },
+  { immediate: true },
+)
+
 watch(
   () => route.meta.locale,
   (nextLocale) => {
@@ -174,30 +187,53 @@ onBeforeUnmount(() => {
       <template #header>
         <h2 class="docs-drawer-brand">Material Design Vue</h2>
       </template>
-      <MdvNavigationDrawerGroup
-        v-for="section in navigationSections"
-        :key="section.id"
-        :label="section.title[activeLocale]"
-      >
+      <template v-for="item in navigationItems" :key="item.id">
+        <MdvNavigationDrawerGroup
+          v-if="'pages' in item"
+          v-model:expanded="expandedGroups[item.id]"
+          :label="item.title[activeLocale]"
+          collapsible
+        >
+          <template #icon>
+            <MdvIcon :icon="item.icon" />
+          </template>
+          <RouterLink
+            v-for="page in item.pages"
+            :key="page.id"
+            :to="{ name: getRouteName(activeLocale, page.id) }"
+            custom
+            v-slot="{ href, navigate, isActive }"
+          >
+            <MdvNavigationDrawerItem
+              :href="href"
+              :label="page.title[activeLocale]"
+              :active="isActive"
+              @click="navigateFromDrawer($event, navigate)"
+            >
+              <template #icon>
+                <MdvIcon :icon="page.icon" />
+              </template>
+            </MdvNavigationDrawerItem>
+          </RouterLink>
+        </MdvNavigationDrawerGroup>
         <RouterLink
-          v-for="page in section.pages"
-          :key="page.id"
-          :to="{ name: getRouteName(activeLocale, page.id) }"
+          v-else
+          :to="{ name: getRouteName(activeLocale, item.id) }"
           custom
           v-slot="{ href, navigate, isActive }"
         >
           <MdvNavigationDrawerItem
             :href="href"
-            :label="page.title[activeLocale]"
+            :label="item.title[activeLocale]"
             :active="isActive"
             @click="navigateFromDrawer($event, navigate)"
           >
             <template #icon>
-              <MdvIcon :icon="page.icon" />
+              <MdvIcon :icon="item.icon" />
             </template>
           </MdvNavigationDrawerItem>
         </RouterLink>
-      </MdvNavigationDrawerGroup>
+      </template>
     </component>
 
     <MdvAppBarScaffold

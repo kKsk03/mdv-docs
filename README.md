@@ -17,10 +17,12 @@ The site is available at `/en-US/...` and `/zh-CN/...`. Opening `/` selects the 
 
 - `src/content/registry.ts` defines localized navigation, page titles, URLs, and Markdown loaders.
 - `src/content/en-US/` and `src/content/zh-CN/` contain the articles for each language.
-- `src/components/docs/demos/` contains Vue examples that can be shared by both language versions.
+- `src/components/docs/demos/<component>/<example>.vue` contains Vue examples shared by both language versions, such as `button/variant.vue` and `button/size.vue`.
 - `src/locales/` contains translations for navigation and other short interface text.
 
 To add a page, add its localized Markdown files, register the page and its route slug in `registry.ts`, then link it from the relevant article or demonstration. Keep article presentation rules under `.docs-prose` so they do not affect the MDV application shell or controls.
+
+The drawer lists Introduction and Setup directly, followed by a collapsible Components item containing Button. It has no static section headings. Top-level links, group controls, and child pages all have icons. Define top-level pages and expandable groups in `navigationItems`; routes are derived from the same registry, and navigating to a child page reveals its group.
 
 ### Heading links
 
@@ -86,6 +88,87 @@ Each tab needs a nonempty label followed by exactly one fenced code block. Label
 The Vite Markdown pipeline automatically imports local code wrappers only when used. Both standalone fences and tabbed fences use MDV's filled-card surface and corner tokens, theme colors, and language-label styling. The language label sits in the upper-right padding above the first code line, avoiding overlap during horizontal scrolling without adding a toolbar row. At desktop widths (768px and above) with a fine pointer and hover support, hover the top-right control area or focus its button with the keyboard to crossfade the language label into an MDV copy button; moving away fades back to the label. Mobile and touch devices show only the language label, with copy actions hidden from display and keyboard navigation. Reduced-motion settings disable the fade. Successful copying changes the clipboard icon and shows localized feedback for two seconds. Copying uses the current fence's plain text, without syntax markup or surrounding interface text.
 
 Code tabs are a local text-only adaptation of MDV Primary Tabs, including primary-colored selection, state layers, ripples, keyboard navigation, and a rounded spring indicator sized to the text label; articles do not need component imports. See `THIRD_PARTY_NOTICES.md` for retained source notices.
+
+### Component demonstrations
+
+Use `DemoBlock` as the shared shell for component examples. The default slot contains the live preview, and the `source` slot contains ordinary Markdown code fences. Keep a blank line before and after the fence inside the slot:
+
+````md
+<script setup lang="ts">
+import DemoBlock from '@/components/docs/DemoBlock.vue'
+import ButtonVariantDemo from '@/components/docs/demos/button/variant.vue'
+</script>
+
+<DemoBlock>
+  <ButtonVariantDemo />
+  <template #source>
+
+```vue
+<script setup lang="ts">
+import { MdvButton } from '@mdv-ui/mdv'
+</script>
+
+<template>
+  <MdvButton>Filled</MdvButton>
+</template>
+```
+
+  </template>
+</DemoBlock>
+````
+
+The article heading names the example. The shell supplies the outlined container, preview spacing, divider, and centered **Example code** button. Expanding reveals code between the divider and the button, pushing the button and following content down smoothly. It retains the preview and source nodes when collapsed, removes hidden code from interaction and screen readers, and disables motion for reduced-motion preferences. Each shell expands independently.
+
+The preview stretches its content across the available width using a single `minmax(0, 1fr)` grid column. Demo components can wrap their controls within that width; do not shrink wrapping groups to their labels' intrinsic widths, which can cause short Chinese labels to wrap before the container is actually full.
+
+Fences in the source slot use the same build-time syntax highlighting, line numbers, language labels, and copy controls as article code blocks. Keep reusable demo components focused on the preview; place explanatory source snippets in the localized articles and update them alongside changes to the live example.
+
+### API and slot tables
+
+Use `src/components/docs/ApiTable.vue` for props and `SlotsTable.vue` for slots. Both accept an `items` array, display each description below its metadata, and use MDV theme tokens. Keep localized descriptions in the article. Table headers follow the active site locale automatically.
+
+```md
+<script setup lang="ts">
+import ApiTable from '@/components/docs/ApiTable.vue'
+import SlotsTable from '@/components/docs/SlotsTable.vue'
+import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
+
+const props: ApiTableItem[] = [
+  { name: 'fullWidth', type: 'boolean', default: 'false', description: 'Fills the parent width.' },
+]
+
+const slots: SlotTableItem[] = [
+  { name: 'default', description: 'The button label.' },
+]
+</script>
+
+## Props
+
+<ApiTable :items="props" />
+
+## Slots
+
+<SlotsTable :items="slots" />
+```
+
+`ApiTableItem` uses `name` for the JavaScript prop name, `type` for its displayed type, and optional `default` and `description` strings. Write default values as code literals, such as `"'filled'"` or `'false'`; omitted defaults display an em dash. The template attribute is derived automatically (`fullWidth` becomes `full-width`); supply `attribute` only when it needs a different spelling. These are Vue props, so the table does not include a Web Components `Reflect` column. `SlotTableItem` uses `name` and an optional `description`.
+
+For formatted descriptions, add a named slot using the item's exact JavaScript name. It replaces the plain `description` string. Both tables support this pattern, including scoped access to the item as `{ item }`. Keep blank lines around Markdown content and put the slot tags at the start of the line so the closing tag is not parsed as part of a Markdown list:
+
+```md
+<ApiTable :items="props">
+<template #description-fullWidth>
+
+Set `full-width` to fill the available width.
+
+- The default is `false`.
+- The width follows the parent container.
+
+</template>
+</ApiTable>
+```
+
+The props table scrolls horizontally within its rounded container on narrow screens. The scroll region is keyboard-focusable, and native captions and headers associate descriptions with their prop or slot names. Text values are rendered as text; use Markdown slots rather than raw HTML strings. See the localized Button articles for a complete example.
 
 ## Validation
 
