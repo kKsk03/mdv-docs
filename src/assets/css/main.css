@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import '@mdv-ui/mdv/theme';
+@import '@mdv-ui/mdv/styles';
+@import './docs-content.css';
