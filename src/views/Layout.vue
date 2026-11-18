@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import brightnessAutoIcon from '@iconify-icons/material-symbols/brightness-auto'
@@ -27,10 +27,12 @@ import {
   getRouteName,
   isLocale,
   navigationItems,
+  type DocumentationPage,
+  type NavigationGroup,
+  type NavigationItem,
   type Locale,
 } from '@/content/registry'
-import { trackArticleHeadings } from '@/router/heading-tracker'
-import OnThisPage from '@/components/docs/OnThisPage.vue'
+import ArticlePage from '@/components/docs/ArticlePage.vue'
 
 const themeModes = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof themeModes)[number]
@@ -51,8 +53,6 @@ function getInitialThemeMode(): ThemeMode {
 
 const route = useRoute()
 const router = useRouter()
-const article = useTemplateRef<HTMLElement>('article')
-let stopHeadingTracking: (() => void) | undefined
 const { locale, t } = useI18n({ useScope: 'global' })
 const themeMode = ref<ThemeMode>(getInitialThemeMode())
 const desktopQuery =
@@ -97,12 +97,21 @@ const nextThemeMode = computed<ThemeMode>(() => {
   return themeModes[(currentIndex + 1) % themeModes.length]!
 })
 const themeButtonLabel = computed(() => t('theme.button', { mode: themeModeLabel.value }))
+
+function isNavigationGroup(item: NavigationItem): item is NavigationGroup {
+  return 'pages' in item
+}
+
+function pageLabel(page: DocumentationPage) {
+  return page.navigationLabel?.[activeLocale.value] ?? page.title[activeLocale.value]
+}
+
 watch(
   () => route.meta.documentId,
   (documentId) => {
-    for (const item of navigationItems) {
-      if ('pages' in item && item.pages.some((page) => page.id === documentId)) {
-        expandedGroups.value[item.id] = true
+    for (const group of navigationItems.filter(isNavigationGroup)) {
+      if (group.pages.some((page) => page.id === documentId)) {
+        expandedGroups.value[group.id] = true
       }
     }
   },
@@ -138,6 +147,21 @@ function navigateFromDrawer(event: MouseEvent, navigate: (event: MouseEvent) => 
   if (!isDesktop.value) mobileNavigationOpen.value = false
 }
 
+function prepareLeavingPage(page: Element) {
+  const bounds = page.getBoundingClientRect()
+  const element = page as HTMLElement
+  element.style.inlineSize = `${bounds.width}px`
+  element.style.blockSize = `${bounds.height}px`
+  const root = page.closest<HTMLElement>('.docs-article-scroll')
+  if (root && (root.scrollTop || root.scrollLeft)) {
+    // Preserve the outgoing reading position while the incoming page starts at the top.
+    element.style.insetBlockStart = `${-root.scrollTop}px`
+    root.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+  page.setAttribute('inert', '')
+  page.setAttribute('aria-hidden', 'true')
+}
+
 function changeLocale(value: unknown) {
   if (!isLocale(value)) return
 
@@ -168,13 +192,11 @@ function changeTheme(value: unknown) {
 }
 
 onMounted(() => {
-  if (article.value) stopHeadingTracking = trackArticleHeadings(article.value, router)
   syncViewport()
   desktopQuery?.addEventListener('change', syncViewport)
 })
 
 onBeforeUnmount(() => {
-  stopHeadingTracking?.()
   desktopQuery?.removeEventListener('change', syncViewport)
 })
 </script>
@@ -196,9 +218,10 @@ onBeforeUnmount(() => {
       </template>
       <template v-for="item in navigationItems" :key="item.id">
         <MdvNavigationDrawerGroup
-          v-if="'pages' in item"
+          v-if="isNavigationGroup(item)"
           v-model:expanded="expandedGroups[item.id]"
           :label="item.title[activeLocale]"
+          :divider="item.divider ?? false"
           collapsible
         >
           <template #icon>
@@ -213,13 +236,14 @@ onBeforeUnmount(() => {
           >
             <MdvNavigationDrawerItem
               :href="href"
-              :label="page.title[activeLocale]"
+              :label="pageLabel(page)"
               :active="isActive"
               @click="navigateFromDrawer($event, navigate)"
             >
               <template #icon>
                 <MdvIcon :icon="page.icon" />
               </template>
+              <template #badge>{{ page.title[activeLocale] }}</template>
             </MdvNavigationDrawerItem>
           </RouterLink>
         </MdvNavigationDrawerGroup>
@@ -231,7 +255,7 @@ onBeforeUnmount(() => {
         >
           <MdvNavigationDrawerItem
             :href="href"
-            :label="item.title[activeLocale]"
+            :label="pageLabel(item)"
             :active="isActive"
             @click="navigateFromDrawer($event, navigate)"
           >
@@ -348,42 +372,92 @@ onBeforeUnmount(() => {
         </MdvAppBar>
       </template>
 
-      <main id="main-content" class="docs-page min-h-full min-w-0 p-6 md:p-8">
-        <OnThisPage :article="article" />
-        <article ref="article" class="docs-prose">
-          <RouterView />
-        </article>
+      <main id="main-content" class="route-page-container">
+        <RouterView v-slot="{ Component, route: currentRoute }">
+          <Transition name="route-page" @before-leave="prepareLeavingPage">
+            <ArticlePage :key="currentRoute.path" class="route-page">
+              <component :is="Component" />
+            </ArticlePage>
+          </Transition>
+        </RouterView>
       </main>
     </MdvAppBarScaffold>
   </div>
 </template>
 
 <style scoped>
-.docs-page {
-  display: grid;
-  max-inline-size: calc(880px + 224px + 7rem);
-  align-items: start;
-  row-gap: 1.5rem;
-  margin-inline: auto;
+.route-page-container {
+  position: relative;
+  isolation: isolate;
+  min-inline-size: 0;
 }
 
-.docs-page > .docs-prose {
+.route-page {
+  position: relative;
   min-inline-size: 0;
   inline-size: 100%;
 }
 
-@media (min-width: 1280px) {
-  .docs-page:has(.docs-outline) {
-    grid-template-columns: minmax(0, 880px) 224px;
-    column-gap: 3rem;
-  }
+.route-page-enter-active,
+.route-page-leave-active {
+  transition-property: transform, opacity;
+  transition-duration: 0.7s;
+  transition-timing-function: linear(
+    0 0%,
+    0 1.8%,
+    0.01 3.6%,
+    0.03 6.35%,
+    0.07 9.1%,
+    0.13 11.4%,
+    0.19 13.4%,
+    0.27 15%,
+    0.34 16.1%,
+    0.54 18.35%,
+    0.66 20.6%,
+    0.72 22.4%,
+    0.77 24.6%,
+    0.81 27.3%,
+    0.85 30.4%,
+    0.88 35.1%,
+    0.92 40.6%,
+    0.94 47.2%,
+    0.96 55%,
+    0.98 64%,
+    0.99 74.4%,
+    1 86.4%,
+    1 100%
+  );
+  will-change: transform, opacity;
+}
 
-  .docs-page > .docs-outline {
-    grid-area: 1 / 2;
-  }
+.route-page-enter-active {
+  z-index: 1;
+}
 
-  .docs-page > .docs-prose {
-    grid-area: 1 / 1;
+.route-page-leave-active {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.route-page-enter-from,
+.route-page-leave-to {
+  transform: translateX(70%);
+  opacity: 0;
+}
+
+.route-page-enter-to,
+.route-page-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-page-enter-active,
+  .route-page-leave-active {
+    transition: none;
   }
 }
 

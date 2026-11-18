@@ -40,8 +40,10 @@ export function scrollToArticleHash(hash: string, router?: Router): false {
     return false
   }
 
-  const target = document.getElementById(id)
-  if (target?.closest('.docs-prose')) {
+  // Entering and leaving pages can briefly contain the same heading ID.
+  const target = Array.from(document.querySelectorAll<HTMLElement>('.docs-prose [id]'))
+    .find(element => element.id === id && !element.closest('[inert], [aria-hidden="true"]'))
+  if (target) {
     const root = target.closest<HTMLElement>('.docs-article-scroll')
     if (root) scrollObservers.get(root)?.()
     const reducedMotion = target.ownerDocument.defaultView

@@ -1,4 +1,6 @@
 .docs-article-scroll {
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
   scroll-behavior: smooth;
 }
 

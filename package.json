@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@iconify-icons/material-symbols": "^2.0.11",
-    "@mdv-ui/mdv": "0.1.4",
+    "@mdv-ui/mdv": "0.1.5",
     "pinia": "^4.1.0",
     "unplugin-vue-markdown": "^32.1.1",
     "vue": "^3.5.45",

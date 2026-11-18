@@ -1,6 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import type { VueWrapper } from '@vue/test-utils'
+import { h, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import Layout from '../src/views/Layout.vue'
@@ -47,7 +48,7 @@ function mockPopover() {
   return opened
 }
 
-async function fixture(desktop = false) {
+async function fixture(desktop = false, realTransitions = false) {
   localStorage.clear()
   const opened = mockPopover()
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -61,13 +62,21 @@ async function fixture(desktop = false) {
     routes: locales.flatMap(locale => documentationPages.map(page => ({
       path: `/${locale}/${page.slug}`,
       name: getRouteName(locale, page.id),
-      component: { template: '<p>Article content</p>' },
+      component: { render: () => h('div', [
+        h('h1', { id: page.id, 'data-docs-heading': '' }, page.title[locale]),
+        ...(page.id === 'introduction' ? [] : [
+          h('h2', { id: `${page.id}-section`, 'data-docs-heading': '' }, `${page.title[locale]} section`),
+        ]),
+      ]) },
       meta: { documentId: page.id, locale, title: page.title[locale] },
     }))),
   })
   await router.push('/zh-CN/components/button')
   const i18n = createI18n({ legacy: false, locale: 'zh-CN', messages: { 'en-US': enUS, 'zh-CN': zhCN } })
-  host = mount(Layout, { attachTo: document.body, global: { plugins: [router, i18n] } })
+  host = mount(Layout, {
+    attachTo: document.body,
+    global: { plugins: [router, i18n], stubs: { transition: !realTransitions } },
+  })
   await flushPromises()
   const wrapper = host
   const action = (label: string) => wrapper.get(`.mdv-app-bar__actions button[aria-label="${label}"]`)
@@ -110,6 +119,91 @@ test('compact actions group themes and languages in separate submenus and persis
     expect(action('更多选项').attributes('aria-expanded')).toBe('false')
     expect(opened.size).toBe(0)
   }
+})
+
+test('drawer lists introductory links before expandable components and localizes the page badge', async () => {
+  const { wrapper, router } = await fixture(true)
+  expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
+  expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
+    .toEqual(['简介', '安装与配置', '组件', 'MdvButton'])
+  expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
+    .toEqual(['按钮'])
+  expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('true')
+
+  await wrapper.get('.mdv-navigation-drawer-group__toggle').trigger('click')
+  await flushPromises()
+  expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('false')
+  await router.push('/zh-CN/getting-started/setup')
+  await router.push('/zh-CN/components/button')
+  await flushPromises()
+  expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('true')
+
+  await router.push('/en-US/components/button')
+  await flushPromises()
+  expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
+  expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
+    .toEqual(['Introduction', 'Setup', 'Components', 'MdvButton'])
+  expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
+    .toEqual(['Button'])
+})
+
+test('article changes replace the page while fragment and query updates preserve it', async () => {
+  const { wrapper, router } = await fixture(true)
+  const page = wrapper.get('.route-page').element
+
+  await router.replace({ hash: '#api' })
+  await flushPromises()
+  expect(wrapper.get('.route-page').element).toBe(page)
+  await router.replace({ query: { example: 'keep' } })
+  await flushPromises()
+  expect(wrapper.get('.route-page').element).toBe(page)
+
+  await router.push('/zh-CN/getting-started/setup')
+  await flushPromises()
+  const setupPage = wrapper.get('.route-page').element
+  expect(setupPage).not.toBe(page)
+  await router.push('/en-US/getting-started/setup')
+  await flushPromises()
+  expect(wrapper.get('.route-page').element).not.toBe(setupPage)
+})
+
+test('each transitioning page keeps its own article and outline when entering or leaving Introduction', async () => {
+  vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'setTimeout', 'clearTimeout'] })
+  const { wrapper, router } = await fixture(true, true)
+  const buttonPage = wrapper.get('.route-page')
+  const buttonOutline = buttonPage.get('.docs-outline').element
+  expect(buttonPage.get('.docs-outline__title').text()).toBe('按钮')
+  const scrollRoot = wrapper.get<HTMLElement>('.docs-article-scroll').element
+  scrollRoot.scrollTop = 360
+  const scroll = vi.fn((options: ScrollToOptions) => {
+    scrollRoot.scrollTop = options.top ?? scrollRoot.scrollTop
+    scrollRoot.scrollLeft = options.left ?? scrollRoot.scrollLeft
+  })
+  Object.defineProperty(scrollRoot, 'scrollTo', { value: scroll })
+
+  await router.push('/zh-CN/getting-started/introduction')
+  await nextTick()
+  expect(scroll).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
+  expect(scrollRoot.scrollTop).toBe(0)
+  expect((buttonPage.element as HTMLElement).style.insetBlockStart).toBe('-360px')
+  expect(wrapper.findAll('.route-page')).toHaveLength(2)
+  expect(buttonPage.attributes('inert')).toBeDefined()
+  expect(buttonPage.get('.docs-outline').element).toBe(buttonOutline)
+  expect(buttonPage.get('.docs-outline__title').text()).toBe('按钮')
+  const introduction = wrapper.get('.route-page:not([inert])')
+  expect(introduction.get('h1').text()).toBe('简介')
+  expect(introduction.find('.docs-outline').exists()).toBe(false)
+  await vi.advanceTimersByTimeAsync(800)
+  expect(wrapper.findAll('.route-page')).toHaveLength(1)
+
+  await router.push('/zh-CN/getting-started/setup')
+  await nextTick()
+  expect(introduction.attributes('inert')).toBeDefined()
+  expect(introduction.find('.docs-outline').exists()).toBe(false)
+  const setup = wrapper.get('.route-page:not([inert])')
+  expect(setup.get('.docs-outline__title').text()).toBe('安装与配置')
+  await vi.advanceTimersByTimeAsync(800)
+  expect(wrapper.findAll('.route-page')).toHaveLength(1)
 })
 
 test('language opens a push submenu and changes locale on the same article', async () => {

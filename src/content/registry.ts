@@ -1,7 +1,7 @@
 import type { MdvIconData } from '@mdv-ui/mdv'
 import introductionIcon from '@iconify-icons/material-symbols/menu-book'
 import setupIcon from '@iconify-icons/material-symbols/settings'
-import componentsIcon from '@iconify-icons/material-symbols/widgets-outline'
+import componentsIcon from '@iconify-icons/material-symbols/view-module'
 import buttonIcon from '@iconify-icons/material-symbols/smart-button'
 
 export const locales = ['en-US', 'zh-CN'] as const
@@ -16,6 +16,7 @@ export interface DocumentationPage {
   id: string
   slug: string
   title: LocalizedText
+  navigationLabel?: LocalizedText
   icon: MdvIconData
   documents: Record<Locale, MarkdownLoader>
 }
@@ -25,6 +26,7 @@ export interface NavigationGroup {
   title: LocalizedText
   icon: MdvIconData
   pages: DocumentationPage[]
+  divider?: boolean
 }
 
 export type NavigationItem = DocumentationPage | NavigationGroup
@@ -54,11 +56,13 @@ export const navigationItems: NavigationItem[] = [
     id: 'components',
     title: { 'en-US': 'Components', 'zh-CN': '组件' },
     icon: componentsIcon,
+    divider: true,
     pages: [
       {
         id: 'button',
         slug: 'components/button',
         title: { 'en-US': 'Button', 'zh-CN': '按钮' },
+        navigationLabel: { 'en-US': 'MdvButton', 'zh-CN': 'MdvButton' },
         icon: buttonIcon,
         documents: {
           'en-US': () => import('./en-US/components/button.md'),

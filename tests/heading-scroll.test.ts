@@ -26,6 +26,27 @@ test('fragment scrolling finds encoded Chinese IDs inside the article and ignore
   } finally { article.remove() }
 })
 
+test('fragment navigation selects the entering page when leaving content has the same heading ID', () => {
+  const article = document.createElement('article')
+  article.className = 'docs-prose'
+  const leaving = document.createElement('div')
+  leaving.setAttribute('inert', '')
+  leaving.setAttribute('aria-hidden', 'true')
+  const oldHeading = document.createElement('h2')
+  oldHeading.id = 'api'
+  oldHeading.scrollIntoView = vi.fn()
+  leaving.append(oldHeading)
+  const newHeading = document.createElement('h2')
+  newHeading.id = 'api'
+  newHeading.scrollIntoView = vi.fn()
+  article.append(leaving, newHeading)
+  document.body.append(article)
+
+  scrollToArticleHash('#api')
+  expect(oldHeading.scrollIntoView).not.toHaveBeenCalled()
+  expect(newHeading.scrollIntoView).toHaveBeenCalledOnce()
+})
+
 test('fragment navigation honors reduced motion instead of forcing a scroll animation', () => {
   const article = document.createElement('article')
   article.className = 'docs-prose'
