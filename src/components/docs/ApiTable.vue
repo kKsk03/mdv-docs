@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useId } from 'vue'
 import { useI18n } from 'vue-i18n'
+import DocsTable from './DocsTable.vue'
 import type { ApiTableItem } from './api-table.types'
 import './api-table.css'
 
@@ -17,7 +18,7 @@ function templateAttribute(item: ApiTableItem) {
 </script>
 
 <template>
-  <div class="docs-api-table" role="region" :aria-label="t('api.props')" tabindex="0">
+  <DocsTable class="docs-api-table" :label="t('api.props')" min-width="40rem">
     <table class="docs-api-table__props">
       <caption class="docs-api-table__caption">{{ t('api.props') }}</caption>
       <colgroup>
@@ -51,5 +52,5 @@ function templateAttribute(item: ApiTableItem) {
         </tr>
       </tbody>
     </table>
-  </div>
+  </DocsTable>
 </template>

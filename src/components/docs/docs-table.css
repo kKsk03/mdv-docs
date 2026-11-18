@@ -1,0 +1,66 @@
+.docs-table {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-block: 1.25rem 2rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid var(--mdv-sys-color-outline-variant);
+  border-radius: var(--mdv-sys-shape-corner-large);
+  background-color: var(--mdv-sys-color-surface-container-low);
+  color: var(--mdv-sys-color-on-surface);
+}
+
+.docs-table:focus-visible {
+  outline: 2px solid var(--mdv-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.docs-table table {
+  inline-size: 100%;
+  min-inline-size: var(--docs-table-min-width);
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  text-align: start;
+}
+
+.docs-table :where(th, td) {
+  border-block-end: 1px solid var(--mdv-sys-color-outline-variant);
+  padding: 1rem;
+  overflow-wrap: anywhere;
+  text-align: start;
+  vertical-align: top;
+}
+
+.docs-table th {
+  font-weight: 500;
+}
+
+.docs-table thead {
+  background-color: var(--mdv-sys-color-surface-container);
+  color: var(--mdv-sys-color-on-surface-variant);
+}
+
+.docs-table tr > :not(:last-child) {
+  border-inline-end: 1px solid var(--mdv-sys-color-outline-variant);
+}
+
+.docs-table tbody:last-child > tr:last-child > * {
+  border-block-end: 0;
+}
+
+.docs-table code {
+  border-radius: var(--mdv-sys-shape-corner-extra-small);
+  padding: 0.125em 0.375em;
+  background-color: var(--mdv-sys-color-secondary-container);
+  color: var(--mdv-sys-color-on-secondary-container);
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+  font-weight: 400;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}

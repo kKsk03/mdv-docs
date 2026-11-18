@@ -2,6 +2,8 @@
 
 The documentation site is a Vue 3 and Vite application. It uses MDV components for the shared interface and compiles Markdown files as Vue pages so articles can include reusable live examples.
 
+See [ROADMAP.md](./ROADMAP.md) for the complete component coverage checklist, A-Z navigation rule, and batches of three documentation pages.
+
 ## Development
 
 Use Node **24.22.1** and pnpm **12.14.0**. See [MAINTENANCE.md](./MAINTENANCE.md) for the development, testing, and submission workflow.
@@ -22,7 +24,7 @@ The site is available at `/en-US/...` and `/zh-CN/...`. Opening `/` selects the 
 
 To add a page, add its localized Markdown files, register the page and its route slug in `registry.ts`, then link it from the relevant article or demonstration. Keep article presentation rules under `.docs-prose` so they do not affect the MDV application shell or controls.
 
-The drawer lists **Introduction** and **Setup** directly, followed by a divider and a collapsible **Components** group. Its first child is `MdvButton`, using the MDV badge slot to show its title in the active locale (`按钮` or `Button`). There are no static section headings or intermediate Button group. The group and page items use distinct icons. Define the hierarchy in `navigationItems`; routes are derived from the same registry, and navigating to a child page reveals its group.
+The drawer lists **Introduction** and **Setup** directly, followed by a divider and a collapsible **Components** group. Its children are automatically sorted A-Z by their full English component names, ignoring the `Mdv` prefix, with the same order in both locales. Each uses the MDV badge slot to show its page title in the active locale, such as `复选框` or `Checkbox`. There are no static section headings or intermediate component groups. The group and page items use distinct icons. Define the hierarchy in `navigationItems`; routes are derived from the same registry, and navigating to a child page reveals its group.
 
 The App Bar shows separate theme and language buttons at widths of 768px and above. On smaller screens, a single **More options** button opens an MDV menu containing **Theme** and **Language**. Each item opens its own submenu: light, dark, and system modes under Theme, and the supported languages under Language. Both submenus use MDV's `push` mode with a back action in the same position. Current values are marked as selected, theme and language preferences are saved, and changing the language keeps the current documentation page. Changing the viewport across the breakpoint unmounts the previous actions and their open menus.
 
@@ -143,9 +145,32 @@ import { MdvButton } from '@mdv-ui/mdv'
 
 The article heading names the example. The shell supplies the outlined container, preview spacing, divider, and centered **Example code** button. Expanding reveals code between the divider and the button, pushing the button and following content down smoothly. It retains the preview and source nodes when collapsed, removes hidden code from interaction and screen readers, and disables motion for reduced-motion preferences. Each shell expands independently.
 
-The preview stretches its content across the available width using a single `minmax(0, 1fr)` grid column. Demo components can wrap their controls within that width; do not shrink wrapping groups to their labels' intrinsic widths, which can cause short Chinese labels to wrap before the container is actually full.
+The preview stretches its content across the available width using a single `minmax(0, 1fr)` grid column. Article typography excludes preview descendants, preserving component heading sizes, spacing, links, and native element styles. Demo components can wrap their controls within that width; do not shrink wrapping groups to their labels' intrinsic widths, which can cause short Chinese labels to wrap before the container is actually full.
 
 Fences in the source slot use the same build-time syntax highlighting, line numbers, language labels, and copy controls as article code blocks. Keep reusable demo components focused on the preview; place explanatory source snippets in the localized articles and update them alongside changes to the live example.
+
+### Content tables
+
+Wrap ordinary Markdown tables in `DocsTable` for the shared MDV surface, rounded border, header background, cell padding, and row/column dividers. Leave blank lines between the component tags and Markdown so the table is parsed correctly:
+
+````md
+<script setup lang="ts">
+import DocsTable from '@/components/docs/DocsTable.vue'
+</script>
+
+<DocsTable label="App Bar heights">
+
+| Size | Without subtitle | With subtitle |
+| --- | --- | --- |
+| Small | 64px | 64px |
+| Medium flexible | 112px | 136px |
+
+</DocsTable>
+````
+
+Set `label` to a localized, descriptive name for the keyboard-accessible scroll region. Inline code, links, and other Markdown formatting remain available in cells. Tables fill the available width; their default minimum width of `24rem` scrolls inside the wrapper on narrow screens. Use `min-width` to override that minimum when the content needs it. Native HTML tables can also go in the default slot.
+
+`ApiTable` and `SlotsTable` reuse this shell and `docs-table.css`; their metadata columns and description rows remain in `api-table.css`. Do not leave article tables unwrapped or duplicate the shell styles per page.
 
 ### API and slot tables
 

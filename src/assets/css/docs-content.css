@@ -16,7 +16,8 @@
   margin-block-start: 0;
 }
 
-.docs-prose :where(h1, h2, h3, h4, h5, h6) {
+/* Preview components retain their own typography and native element styles. */
+.docs-prose :where(h1, h2, h3, h4, h5, h6):not(:where(.docs-demo__preview *)) {
   position: relative;
   color: var(--mdv-sys-color-on-surface);
   font-weight: 600;
@@ -52,52 +53,52 @@
   outline-offset: 2px;
 }
 
-.docs-prose :where(h1) {
+.docs-prose :where(h1):not(:where(.docs-demo__preview *)) {
   margin-block: 0 1.25rem;
   font-size: 2rem;
 }
 
-.docs-prose :where(h2) {
+.docs-prose :where(h2):not(:where(.docs-demo__preview *)) {
   margin-block: 2.5rem 0.75rem;
   font-size: 1.5rem;
 }
 
-.docs-prose :where(h3) {
+.docs-prose :where(h3):not(:where(.docs-demo__preview *)) {
   margin-block: 2rem 0.5rem;
   font-size: 1.2rem;
 }
 
-.docs-prose :where(p, ul, ol, blockquote, pre, table) {
+.docs-prose :where(p, ul, ol, blockquote, pre, table):not(:where(.docs-demo__preview *)) {
   margin-block: 1rem;
 }
 
-.docs-prose :where(ul, ol) {
+.docs-prose :where(ul, ol):not(:where(.docs-demo__preview *)) {
   padding-inline-start: 1.5rem;
 }
 
-.docs-prose :where(ul) {
+.docs-prose :where(ul):not(:where(.docs-demo__preview *)) {
   list-style: disc;
 }
 
-.docs-prose :where(ol) {
+.docs-prose :where(ol):not(:where(.docs-demo__preview *)) {
   list-style: decimal;
 }
 
-.docs-prose :where(li + li) {
+.docs-prose :where(li + li):not(:where(.docs-demo__preview *)) {
   margin-block-start: 0.35rem;
 }
 
-.docs-prose :where(a) {
+.docs-prose :where(a):not(:where(.docs-demo__preview *)) {
   color: var(--mdv-sys-color-primary);
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
 
-.docs-prose :where(code) {
+.docs-prose :where(code):not(:where(.docs-demo__preview *)) {
   font-size: 0.9em;
 }
 
-.docs-prose :where(code:not(pre code)) {
+.docs-prose :where(code:not(pre code)):not(:where(.docs-demo__preview *)) {
   padding: 0.125em 0.375em;
   border-radius: var(--mdv-sys-shape-corner-extra-small);
   background-color: var(--mdv-sys-color-secondary-container);
@@ -108,7 +109,7 @@
   box-decoration-break: clone;
 }
 
-.docs-prose :where(pre) {
+.docs-prose :where(pre):not(:where(.docs-demo__preview *)) {
   overflow-x: auto;
   padding: 1rem;
   border: 1px solid var(--mdv-sys-color-outline-variant);
@@ -116,16 +117,16 @@
   background: var(--mdv-sys-color-surface-container-low);
 }
 
-.docs-prose :where(pre code) {
+.docs-prose :where(pre code):not(:where(.docs-demo__preview *)) {
   padding: 0;
   background: transparent;
 }
 
-.docs-prose :where(pre.shiki, pre.shiki span) {
+.docs-prose :where(pre.shiki, pre.shiki span):not(:where(.docs-demo__preview *)) {
   color: light-dark(var(--shiki-light), var(--shiki-dark));
 }
 
-.docs-prose :where(hr) {
+.docs-prose :where(hr):not(:where(.docs-demo__preview *)) {
   margin-block: 2rem;
   border-color: var(--mdv-sys-color-outline-variant);
 }

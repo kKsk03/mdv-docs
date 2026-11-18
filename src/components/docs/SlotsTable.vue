@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useId } from 'vue'
 import { useI18n } from 'vue-i18n'
+import DocsTable from './DocsTable.vue'
 import type { SlotTableItem } from './api-table.types'
 import './api-table.css'
 
@@ -13,7 +14,7 @@ const tableId = `docs-slots-${useId()}`
 </script>
 
 <template>
-  <div class="docs-api-table" role="region" :aria-label="t('api.slots')" tabindex="0">
+  <DocsTable class="docs-api-table" :label="t('api.slots')" min-width="0">
     <table>
       <caption class="docs-api-table__caption">{{ t('api.slots') }}</caption>
       <thead>
@@ -32,5 +33,5 @@ const tableId = `docs-slots-${useId()}`
         </tr>
       </tbody>
     </table>
-  </div>
+  </DocsTable>
 </template>

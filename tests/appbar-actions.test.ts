@@ -121,30 +121,30 @@ test('compact actions group themes and languages in separate submenus and persis
   }
 })
 
-test('drawer lists introductory links before expandable components and localizes the page badge', async () => {
+test('drawer sorts component names A-Z after introductory links and localizes their badges', async () => {
   const { wrapper, router } = await fixture(true)
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
-    .toEqual(['简介', '安装与配置', '组件', 'MdvButton'])
+    .toEqual(['简介', '安装与配置', '组件', 'MdvAppBar', 'MdvAutocomplete', 'MdvBadge', 'MdvButton', 'MdvCheckbox'])
   expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
-    .toEqual(['按钮'])
+    .toEqual(['应用栏', '自动补全', '徽标', '按钮', '复选框'])
   expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('true')
 
   await wrapper.get('.mdv-navigation-drawer-group__toggle').trigger('click')
   await flushPromises()
   expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('false')
   await router.push('/zh-CN/getting-started/setup')
-  await router.push('/zh-CN/components/button')
+  await router.push('/zh-CN/components/checkbox')
   await flushPromises()
   expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('true')
 
-  await router.push('/en-US/components/button')
+  await router.push('/en-US/components/checkbox')
   await flushPromises()
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
-    .toEqual(['Introduction', 'Setup', 'Components', 'MdvButton'])
+    .toEqual(['Introduction', 'Setup', 'Components', 'MdvAppBar', 'MdvAutocomplete', 'MdvBadge', 'MdvButton', 'MdvCheckbox'])
   expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
-    .toEqual(['Button'])
+    .toEqual(['App Bar', 'Autocomplete', 'Badge', 'Button', 'Checkbox'])
 })
 
 test('article changes replace the page while fragment and query updates preserve it', async () => {

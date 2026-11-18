@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
       id="docs-navigation"
       v-model="navigationOpen"
       title="Material Design Vue"
-      width="280px"
+      width="360px"
     >
       <template #header>
         <h2 class="docs-drawer-brand">Material Design Vue</h2>

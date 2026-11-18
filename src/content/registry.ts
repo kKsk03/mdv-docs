@@ -3,6 +3,10 @@ import introductionIcon from '@iconify-icons/material-symbols/menu-book'
 import setupIcon from '@iconify-icons/material-symbols/settings'
 import componentsIcon from '@iconify-icons/material-symbols/view-module'
 import buttonIcon from '@iconify-icons/material-symbols/smart-button'
+import checkboxIcon from '@iconify-icons/material-symbols/check-box-outline'
+import appBarIcon from '@iconify-icons/material-symbols/web-asset-outline'
+import autocompleteIcon from '@iconify-icons/material-symbols/manage-search'
+import badgeIcon from '@iconify-icons/material-symbols/notifications-outline'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -31,6 +35,12 @@ export interface NavigationGroup {
 
 export type NavigationItem = DocumentationPage | NavigationGroup
 
+function sortComponentPages(pages: DocumentationPage[]) {
+  const name = (page: DocumentationPage) =>
+    (page.navigationLabel?.['en-US'] ?? page.title['en-US']).replace(/^Mdv/i, '')
+  return [...pages].sort((a, b) => name(a).localeCompare(name(b), 'en-US', { sensitivity: 'base' }))
+}
+
 export const navigationItems: NavigationItem[] = [
   {
     id: 'introduction',
@@ -57,7 +67,7 @@ export const navigationItems: NavigationItem[] = [
     title: { 'en-US': 'Components', 'zh-CN': '组件' },
     icon: componentsIcon,
     divider: true,
-    pages: [
+    pages: sortComponentPages([
       {
         id: 'button',
         slug: 'components/button',
@@ -69,7 +79,51 @@ export const navigationItems: NavigationItem[] = [
           'zh-CN': () => import('./zh-CN/components/button.md'),
         },
       },
-    ],
+      {
+        id: 'checkbox',
+        slug: 'components/checkbox',
+        title: { 'en-US': 'Checkbox', 'zh-CN': '复选框' },
+        navigationLabel: { 'en-US': 'MdvCheckbox', 'zh-CN': 'MdvCheckbox' },
+        icon: checkboxIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/checkbox.md'),
+          'zh-CN': () => import('./zh-CN/components/checkbox.md'),
+        },
+      },
+      {
+        id: 'app-bar',
+        slug: 'components/app-bar',
+        title: { 'en-US': 'App Bar', 'zh-CN': '应用栏' },
+        navigationLabel: { 'en-US': 'MdvAppBar', 'zh-CN': 'MdvAppBar' },
+        icon: appBarIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/app-bar.md'),
+          'zh-CN': () => import('./zh-CN/components/app-bar.md'),
+        },
+      },
+      {
+        id: 'autocomplete',
+        slug: 'components/autocomplete',
+        title: { 'en-US': 'Autocomplete', 'zh-CN': '自动补全' },
+        navigationLabel: { 'en-US': 'MdvAutocomplete', 'zh-CN': 'MdvAutocomplete' },
+        icon: autocompleteIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/autocomplete.md'),
+          'zh-CN': () => import('./zh-CN/components/autocomplete.md'),
+        },
+      },
+      {
+        id: 'badge',
+        slug: 'components/badge',
+        title: { 'en-US': 'Badge', 'zh-CN': '徽标' },
+        navigationLabel: { 'en-US': 'MdvBadge', 'zh-CN': 'MdvBadge' },
+        icon: badgeIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/badge.md'),
+          'zh-CN': () => import('./zh-CN/components/badge.md'),
+        },
+      },
+    ]),
   },
 ]
 
