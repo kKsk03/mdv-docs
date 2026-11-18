@@ -7,6 +7,9 @@ import checkboxIcon from '@iconify-icons/material-symbols/check-box-outline'
 import appBarIcon from '@iconify-icons/material-symbols/web-asset-outline'
 import autocompleteIcon from '@iconify-icons/material-symbols/manage-search'
 import badgeIcon from '@iconify-icons/material-symbols/notifications-outline'
+import bottomSheetIcon from '@iconify-icons/material-symbols/vertical-align-bottom'
+import buttonGroupIcon from '@iconify-icons/material-symbols/view-column-outline'
+import cardIcon from '@iconify-icons/material-symbols/rectangle-outline'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -69,10 +72,43 @@ export const navigationItems: NavigationItem[] = [
     divider: true,
     pages: sortComponentPages([
       {
+        id: 'bottom-sheet',
+        slug: 'components/bottom-sheet',
+        title: { 'en-US': 'Bottom Sheet', 'zh-CN': '底部面板' },
+        navigationLabel: { 'en-US': 'BottomSheet', 'zh-CN': 'BottomSheet' },
+        icon: bottomSheetIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/bottom-sheet.md'),
+          'zh-CN': () => import('./zh-CN/components/bottom-sheet.md'),
+        },
+      },
+      {
+        id: 'button-group',
+        slug: 'components/button-group',
+        title: { 'en-US': 'Button Group', 'zh-CN': '按钮组' },
+        navigationLabel: { 'en-US': 'ButtonGroup', 'zh-CN': 'ButtonGroup' },
+        icon: buttonGroupIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/button-group.md'),
+          'zh-CN': () => import('./zh-CN/components/button-group.md'),
+        },
+      },
+      {
+        id: 'card',
+        slug: 'components/card',
+        title: { 'en-US': 'Card', 'zh-CN': '卡片' },
+        navigationLabel: { 'en-US': 'Card', 'zh-CN': 'Card' },
+        icon: cardIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/card.md'),
+          'zh-CN': () => import('./zh-CN/components/card.md'),
+        },
+      },
+      {
         id: 'button',
         slug: 'components/button',
         title: { 'en-US': 'Button', 'zh-CN': '按钮' },
-        navigationLabel: { 'en-US': 'MdvButton', 'zh-CN': 'MdvButton' },
+        navigationLabel: { 'en-US': 'Button', 'zh-CN': 'Button' },
         icon: buttonIcon,
         documents: {
           'en-US': () => import('./en-US/components/button.md'),
@@ -83,7 +119,7 @@ export const navigationItems: NavigationItem[] = [
         id: 'checkbox',
         slug: 'components/checkbox',
         title: { 'en-US': 'Checkbox', 'zh-CN': '复选框' },
-        navigationLabel: { 'en-US': 'MdvCheckbox', 'zh-CN': 'MdvCheckbox' },
+        navigationLabel: { 'en-US': 'Checkbox', 'zh-CN': 'Checkbox' },
         icon: checkboxIcon,
         documents: {
           'en-US': () => import('./en-US/components/checkbox.md'),
@@ -94,7 +130,7 @@ export const navigationItems: NavigationItem[] = [
         id: 'app-bar',
         slug: 'components/app-bar',
         title: { 'en-US': 'App Bar', 'zh-CN': '应用栏' },
-        navigationLabel: { 'en-US': 'MdvAppBar', 'zh-CN': 'MdvAppBar' },
+        navigationLabel: { 'en-US': 'AppBar', 'zh-CN': 'AppBar' },
         icon: appBarIcon,
         documents: {
           'en-US': () => import('./en-US/components/app-bar.md'),
@@ -105,7 +141,7 @@ export const navigationItems: NavigationItem[] = [
         id: 'autocomplete',
         slug: 'components/autocomplete',
         title: { 'en-US': 'Autocomplete', 'zh-CN': '自动补全' },
-        navigationLabel: { 'en-US': 'MdvAutocomplete', 'zh-CN': 'MdvAutocomplete' },
+        navigationLabel: { 'en-US': 'Autocomplete', 'zh-CN': 'Autocomplete' },
         icon: autocompleteIcon,
         documents: {
           'en-US': () => import('./en-US/components/autocomplete.md'),
@@ -116,7 +152,7 @@ export const navigationItems: NavigationItem[] = [
         id: 'badge',
         slug: 'components/badge',
         title: { 'en-US': 'Badge', 'zh-CN': '徽标' },
-        navigationLabel: { 'en-US': 'MdvBadge', 'zh-CN': 'MdvBadge' },
+        navigationLabel: { 'en-US': 'Badge', 'zh-CN': 'Badge' },
         icon: badgeIcon,
         documents: {
           'en-US': () => import('./en-US/components/badge.md'),

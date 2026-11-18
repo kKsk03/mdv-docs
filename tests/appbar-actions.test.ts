@@ -125,9 +125,9 @@ test('drawer sorts component names A-Z after introductory links and localizes th
   const { wrapper, router } = await fixture(true)
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
-    .toEqual(['简介', '安装与配置', '组件', 'MdvAppBar', 'MdvAutocomplete', 'MdvBadge', 'MdvButton', 'MdvCheckbox'])
+    .toEqual(['简介', '安装与配置', '组件', 'AppBar', 'Autocomplete', 'Badge', 'BottomSheet', 'Button', 'ButtonGroup', 'Card', 'Checkbox'])
   expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
-    .toEqual(['应用栏', '自动补全', '徽标', '按钮', '复选框'])
+    .toEqual(['应用栏', '自动补全', '徽标', '底部面板', '按钮', '按钮组', '卡片', '复选框'])
   expect(wrapper.get('.mdv-navigation-drawer-group__toggle').attributes('aria-expanded')).toBe('true')
 
   await wrapper.get('.mdv-navigation-drawer-group__toggle').trigger('click')
@@ -142,9 +142,9 @@ test('drawer sorts component names A-Z after introductory links and localizes th
   await flushPromises()
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
-    .toEqual(['Introduction', 'Setup', 'Components', 'MdvAppBar', 'MdvAutocomplete', 'MdvBadge', 'MdvButton', 'MdvCheckbox'])
+    .toEqual(['Introduction', 'Setup', 'Components', 'AppBar', 'Autocomplete', 'Badge', 'BottomSheet', 'Button', 'ButtonGroup', 'Card', 'Checkbox'])
   expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
-    .toEqual(['App Bar', 'Autocomplete', 'Badge', 'Button', 'Checkbox'])
+    .toEqual(['App Bar', 'Autocomplete', 'Badge', 'Bottom Sheet', 'Button', 'Button Group', 'Card', 'Checkbox'])
 })
 
 test('article changes replace the page while fragment and query updates preserve it', async () => {

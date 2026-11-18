@@ -9,7 +9,7 @@ This is the local checklist for documenting MDV in this repository. Use it to se
 The inventory was checked against the sibling library's `src/index.ts`, `COMPONENTS.md`, `ROADMAP.md`, and playground catalog, and the installed package's public declarations and component sources.
 
 - The library exports **67 public Vue components**. All 67 are assigned exactly once to **41 documentation pages** below.
-- **5 pages are complete:** App Bar, Autocomplete, Badge, Button, and Checkbox. **36 pages remain**, arranged into **12 batches of 3**.
+- **8 pages are complete:** App Bar, Autocomplete, Badge, Bottom Sheet, Button, Button Group, Card, and Checkbox. **33 pages remain**, arranged into **11 batches of 3**.
 - Related items, groups, providers, scaffolds, and variants are documented in their owning page when listed below. Each included component needs its own API coverage on that page.
 - Public types belong with the components that use them. The `useSnackbar` helper belongs on the Snackbar page. Dynamic-color functions have a separate guide task below.
 - Introduction and Setup already exist in both locales. The shared demo shell, API tables, Markdown highlighting, heading links, page outline, and page transitions are already implemented.
@@ -28,19 +28,19 @@ Checked items represent documentation completed in the local workspace. They do 
 
 ### First-batch prerequisite
 
-- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales now use AppBar, Autocomplete, Badge, Button, Checkbox; future entries are sorted automatically.
+- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales now use AppBar, Autocomplete, Badge, BottomSheet, Button, ButtonGroup, Card, Checkbox; future entries are sorted automatically.
 
 ## Component checklist (A-Z)
 
-The leading component name is the page's sidebar label and sorting key. Slugs below are relative to `/<locale>/components/`; Button and Checkbox retain their existing URLs.
+The leading component name identifies the public component and its sorting key. Drawer labels omit the `Mdv` prefix in both locales, keeping the remaining name unchanged, such as `BottomSheet` or `ButtonGroup`. Slugs below are relative to `/<locale>/components/`; Button and Checkbox retain their existing URLs.
 
 - [x] **MdvAppBar** — `app-bar`. Includes `MdvAppBarScaffold`. Covers sizes, appearance, title alignment, images, scrolling, and scaffold/navigation composition.
 - [x] **MdvAutocomplete** — `autocomplete`. Covers editable suggestions, free-text values, local filtering, application-managed remote search, loading, and form behavior.
 - [x] **MdvBadge** — `badge`. Covers small dots, large content, counts, placement, accessible naming, and composition with interactive content.
-- [ ] **MdvBottomSheet** — `bottom-sheet`. Includes `MdvBottomSheetScaffold`. Cover modal and standard layouts, height states, gestures, scrolling, focus, and close behavior.
+- [x] **MdvBottomSheet** — `bottom-sheet`. Includes `MdvBottomSheetScaffold`. Covers modal and standard layouts, height states, gesture rules, scrolling, focus, forms, and close behavior.
 - [x] **MdvButton** — `button`. Existing reference page covering variants, sizes, shapes, colors, icons, links, loading, disabled states, and API.
-- [ ] **MdvButtonGroup** — `button-group`. Includes `MdvButtonGroupItem`. Cover standard/connected layouts, actions, independent toggles, selection, sizing, and keyboard behavior.
-- [ ] **MdvCard** — `card`. Cover outlined/filled/elevated variants, content slots, internal actions, whole-card actions/links, disabled states, and semantics.
+- [x] **MdvButtonGroup** — `button-group`. Includes `MdvButtonGroupItem`. Covers standard/connected layouts, actions, independent toggles, selection, sizing, forms, and keyboard behavior.
+- [x] **MdvCard** — `card`. Covers outlined/filled/elevated variants, content slots, internal actions, whole-card actions/links, disabled states, and semantics.
 - [ ] **MdvCarousel** — `carousel`. Cover supported layouts, media, item keys, controlled navigation, alternative controls, dragging, keyboard operation, and reduced motion.
 - [x] **MdvCheckbox** — `checkbox`. Covers boolean/array models, indeterminate state, select-all, labels, colors, disabled/error states, forms, and API.
 - [ ] **MdvChip** — `chip`. Includes `MdvChipSet`. Cover chip variants, selection, removal, leading/trailing content, colors, wrapping, and keyboard behavior.
@@ -83,8 +83,8 @@ This schedule follows the unchecked A-Z entries above. The component checklist i
 | Batch | Pages |
 | --- | --- |
 | 1 — complete | `MdvAppBar`, `MdvAutocomplete`, `MdvBadge` |
-| **2 — next** | `MdvBottomSheet`, `MdvButtonGroup`, `MdvCard` |
-| 3 | `MdvCarousel`, `MdvChip`, `MdvCircularProgress` |
+| 2 — complete | `MdvBottomSheet`, `MdvButtonGroup`, `MdvCard` |
+| **3 — next** | `MdvCarousel`, `MdvChip`, `MdvCircularProgress` |
 | 4 | `MdvDatePicker`, `MdvDateRangePicker`, `MdvDialog` |
 | 5 | `MdvDivider`, `MdvFab`, `MdvFabMenu` |
 | 6 | `MdvFullscreenDialog`, `MdvIcon`, `MdvIconButton` |
@@ -98,17 +98,16 @@ This schedule follows the unchecked A-Z entries above. The component checklist i
 
 ## Latest completed batch
 
-Batch 1 adds aligned English and Chinese articles for App Bar (including Scaffold), Autocomplete, and Badge, with 17 shared English demos, matching source fences, API and slot tables, events, methods, native attributes, and accessibility guidance. Examples use the installed MDV 0.1.5 APIs.
+Batch 2 adds aligned English and Chinese articles for Bottom Sheet (including Scaffold), Button Group (including Item), and Card, with 18 shared English demos and 36 matching displayed-source fences. Each page covers installed MDV 0.1.5 props, slots, applicable models/events/methods, public types, native attributes, and accessibility scope. Navigation remains automatically sorted A-Z, with localized badges and distinct icons.
 
-- Navigation is sorted automatically by the full English component name, ignoring `Mdv`; regression coverage checks the order and localized badges in both languages.
-- Ordinary article tables now use `DocsTable`, sharing the MDV surface, cell spacing, dividers, and keyboard-accessible horizontal scrolling with API/Slots tables. Both localized App Bar height and scroll-behavior tables use the wrapper; desktop light/dark and 390px overflow checks passed.
-- Fixed a documentation integration issue found during browser review: article typography was overriding live App Bar heading sizes, weight, and margins. Prose element styles now exclude demo previews, preserving MDV rendering without library overrides.
-- `pnpm check` was blocked by the `run-s` launcher with `spawn EPERM`. Running its stages separately succeeded: `pnpm type-check`, `pnpm test:unit` (11 files, 82 tests), and `pnpm build-only`. The production build also passed after the typography correction.
-- Production-preview browser checks covered all six direct locale routes, language switching on the current page, heading navigation, highlighted source expansion, API tables, light/dark presentation, and 390px/1280px layouts. All six pages fit the narrow content region; code and API overflow stays inside its own wrapper. No browser warnings or errors were captured.
-- Interactive browser checks covered all four App Bar scroll modes, collapse/reverse scrolling, and its own Scaffold back-to-top action; Autocomplete filtering, disabled suggestions, keyboard selection, free text, simulated loading/empty results, required validation, model submission, and reset; Badge count formatting, clearing/restoring the indicator, and preserving button state when hidden.
-- Behavior tests cover stale-search cancellation and unmount cleanup, Autocomplete form submission/reset, Badge state composition, and reduced-motion handling for the App Bar demo's back-to-top action. Real touch, screen readers, IME composition, browser reduced-motion settings, RTL, and custom local themes remain unverified in this batch.
+- Bottom Sheet examples cover modal results, controlled height states, long content, guarded dismissal, native dialog forms and retained drafts, a standard Scaffold with hiding/reopening, and handle alternatives. Documentation follows the actual shared scroll region for header/body/actions rather than describing fixed headers or footers.
+- Button Group examples cover standard actions, connected single/multiple selection, independent icon toggles, all five sizes, shape/density, loading/disabled states and colors, and repeated native form values/reset. Card examples distinguish static cards with independent actions from one whole-card button/link, with media, custom headers, disabling, and externally controlled dragged appearance.
+- Added eight behavior tests for group selection/form/reset/loading and card action/disabled semantics. Both locales' navigation assertions include all eight pages. `pnpm check` was blocked by the existing `run-s` launcher restriction (`spawn EPERM`); its stages passed separately: `pnpm type-check`, `pnpm test:unit` (12 files, 90 tests), and `pnpm build-only`. The production build also passed after correcting the sheet scroll descriptions.
+- Production-preview checks covered all six localized routes, locale switching on Card, localized A-Z navigation, heading links, highlighted source expansion, API/slot tables, desktop and 390px layouts, and light/dark presentation. Page scrolling stayed within the content surface; wide code, API tables, and large button groups retained internal overflow. No browser warnings or errors were captured.
+- Browser interactions verified modal close results, controlled expansion, guard rejection/acceptance, native required validation and dialog-form results, draft retention, Tab/Shift+Tab focus containment and Escape restoration; Scaffold partial/expanded/hidden transitions, reopening and uncovered main-page interaction; button-group arrow-focus versus Space activation, multiple/independent selection, form submission/reset; and Card keyboard activation and disabled link semantics.
+- No library defect was reproduced in this batch. Real touch gestures, screen readers, IME, browser reduced-motion settings, custom local themes, forced colors, and RTL remain unverified. The Scaffold's expanded sheet can cover main-page controls; background interaction was checked while those controls were uncovered.
 
-Next batch: **MdvBottomSheet** (including Scaffold), **MdvButtonGroup** (including Item), and **MdvCard**.
+Next batch: **MdvCarousel**, **MdvChip** (including ChipSet), and **MdvCircularProgress**.
 
 ## Review checklist for each batch
 
