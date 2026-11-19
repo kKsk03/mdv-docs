@@ -28,6 +28,12 @@ import loadingIndicatorIcon from '@iconify-icons/material-symbols/animation'
 import menuIcon from '@iconify-icons/material-symbols/menu-open'
 import navigationBarIcon from '@iconify-icons/material-symbols/bottom-navigation'
 import navigationDrawerIcon from '@iconify-icons/material-symbols/side-navigation'
+import navigationRailIcon from '@iconify-icons/material-symbols/view-sidebar-outline'
+import radioIcon from '@iconify-icons/material-symbols/radio-button-checked'
+import searchBarIcon from '@iconify-icons/material-symbols/search'
+import segmentedButtonIcon from '@iconify-icons/material-symbols/view-week-outline'
+import selectIcon from '@iconify-icons/material-symbols/arrow-drop-down-circle-outline'
+import sideSheetIcon from '@iconify-icons/material-symbols/dock-to-right-outline'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -89,6 +95,72 @@ export const navigationItems: NavigationItem[] = [
     icon: componentsIcon,
     divider: true,
     pages: sortComponentPages([
+      {
+        id: 'segmented-button',
+        slug: 'components/segmented-button',
+        title: { 'en-US': 'Segmented Button', 'zh-CN': '分段按钮' },
+        navigationLabel: { 'en-US': 'SegmentedButton', 'zh-CN': 'SegmentedButton' },
+        icon: segmentedButtonIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/segmented-button.md'),
+          'zh-CN': () => import('./zh-CN/components/segmented-button.md'),
+        },
+      },
+      {
+        id: 'select',
+        slug: 'components/select',
+        title: { 'en-US': 'Select', 'zh-CN': '选择器' },
+        navigationLabel: { 'en-US': 'Select', 'zh-CN': 'Select' },
+        icon: selectIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/select.md'),
+          'zh-CN': () => import('./zh-CN/components/select.md'),
+        },
+      },
+      {
+        id: 'side-sheet',
+        slug: 'components/side-sheet',
+        title: { 'en-US': 'Side Sheet', 'zh-CN': '侧边面板' },
+        navigationLabel: { 'en-US': 'SideSheet', 'zh-CN': 'SideSheet' },
+        icon: sideSheetIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/side-sheet.md'),
+          'zh-CN': () => import('./zh-CN/components/side-sheet.md'),
+        },
+      },
+      {
+        id: 'navigation-rail',
+        slug: 'components/navigation-rail',
+        title: { 'en-US': 'Navigation Rail', 'zh-CN': '导航轨' },
+        navigationLabel: { 'en-US': 'NavigationRail', 'zh-CN': 'NavigationRail' },
+        icon: navigationRailIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/navigation-rail.md'),
+          'zh-CN': () => import('./zh-CN/components/navigation-rail.md'),
+        },
+      },
+      {
+        id: 'radio',
+        slug: 'components/radio',
+        title: { 'en-US': 'Radio', 'zh-CN': '单选框' },
+        navigationLabel: { 'en-US': 'Radio', 'zh-CN': 'Radio' },
+        icon: radioIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/radio.md'),
+          'zh-CN': () => import('./zh-CN/components/radio.md'),
+        },
+      },
+      {
+        id: 'search-bar',
+        slug: 'components/search-bar',
+        title: { 'en-US': 'Search Bar', 'zh-CN': '搜索栏' },
+        navigationLabel: { 'en-US': 'SearchBar', 'zh-CN': 'SearchBar' },
+        icon: searchBarIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/search-bar.md'),
+          'zh-CN': () => import('./zh-CN/components/search-bar.md'),
+        },
+      },
       {
         id: 'menu',
         slug: 'components/menu',
