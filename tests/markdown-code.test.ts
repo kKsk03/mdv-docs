@@ -178,4 +178,4 @@ test('all current localized Markdown pages compile through the real pipeline', a
     count++
   }
   expect(count).toBeGreaterThanOrEqual(6)
-})
+}, 30_000)

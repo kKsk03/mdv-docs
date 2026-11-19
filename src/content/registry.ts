@@ -25,6 +25,9 @@ import iconButtonIcon from '@iconify-icons/material-symbols/touch-app-outline'
 import linearProgressIcon from '@iconify-icons/material-symbols/linear-scale'
 import listIcon from '@iconify-icons/material-symbols/format-list-bulleted'
 import loadingIndicatorIcon from '@iconify-icons/material-symbols/animation'
+import menuIcon from '@iconify-icons/material-symbols/menu-open'
+import navigationBarIcon from '@iconify-icons/material-symbols/bottom-navigation'
+import navigationDrawerIcon from '@iconify-icons/material-symbols/side-navigation'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -86,6 +89,39 @@ export const navigationItems: NavigationItem[] = [
     icon: componentsIcon,
     divider: true,
     pages: sortComponentPages([
+      {
+        id: 'menu',
+        slug: 'components/menu',
+        title: { 'en-US': 'Menu', 'zh-CN': '菜单' },
+        navigationLabel: { 'en-US': 'Menu', 'zh-CN': 'Menu' },
+        icon: menuIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/menu.md'),
+          'zh-CN': () => import('./zh-CN/components/menu.md'),
+        },
+      },
+      {
+        id: 'navigation-bar',
+        slug: 'components/navigation-bar',
+        title: { 'en-US': 'Navigation Bar', 'zh-CN': '导航栏' },
+        navigationLabel: { 'en-US': 'NavigationBar', 'zh-CN': 'NavigationBar' },
+        icon: navigationBarIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/navigation-bar.md'),
+          'zh-CN': () => import('./zh-CN/components/navigation-bar.md'),
+        },
+      },
+      {
+        id: 'navigation-drawer',
+        slug: 'components/navigation-drawer',
+        title: { 'en-US': 'Navigation Drawer', 'zh-CN': '导航抽屉' },
+        navigationLabel: { 'en-US': 'NavigationDrawer', 'zh-CN': 'NavigationDrawer' },
+        icon: navigationDrawerIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/navigation-drawer.md'),
+          'zh-CN': () => import('./zh-CN/components/navigation-drawer.md'),
+        },
+      },
       {
         id: 'linear-progress',
         slug: 'components/linear-progress',
