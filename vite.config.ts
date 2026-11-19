@@ -11,6 +11,10 @@ import { markdownHeadings } from './build/markdown-headings.ts'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  build: {
+    // Preserve native :dir() matching; lowering it to :lang() breaks scoped RTL demos.
+    cssTarget: ['chrome120', 'edge120', 'firefox114', 'safari16.4', 'ios16.4'],
+  },
   plugins: [
     vue({ include: [/\.vue$/, /\.md$/] }),
     Markdown({

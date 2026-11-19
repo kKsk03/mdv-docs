@@ -16,6 +16,15 @@ import circularProgressIcon from '@iconify-icons/material-symbols/progress-activ
 import datePickerIcon from '@iconify-icons/material-symbols/calendar-month-outline'
 import dateRangePickerIcon from '@iconify-icons/material-symbols/date-range-outline'
 import dialogIcon from '@iconify-icons/material-symbols/chat-bubble-outline'
+import dividerIcon from '@iconify-icons/material-symbols/horizontal-rule'
+import fabIcon from '@iconify-icons/material-symbols/add-circle-outline'
+import fabMenuIcon from '@iconify-icons/material-symbols/expand-circle-up-outline'
+import fullscreenDialogIcon from '@iconify-icons/material-symbols/fullscreen'
+import iconIcon from '@iconify-icons/material-symbols/image-outline'
+import iconButtonIcon from '@iconify-icons/material-symbols/touch-app-outline'
+import linearProgressIcon from '@iconify-icons/material-symbols/linear-scale'
+import listIcon from '@iconify-icons/material-symbols/format-list-bulleted'
+import loadingIndicatorIcon from '@iconify-icons/material-symbols/animation'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -77,6 +86,105 @@ export const navigationItems: NavigationItem[] = [
     icon: componentsIcon,
     divider: true,
     pages: sortComponentPages([
+      {
+        id: 'linear-progress',
+        slug: 'components/linear-progress',
+        title: { 'en-US': 'Linear Progress', 'zh-CN': '线性进度指示器' },
+        navigationLabel: { 'en-US': 'LinearProgress', 'zh-CN': 'LinearProgress' },
+        icon: linearProgressIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/linear-progress.md'),
+          'zh-CN': () => import('./zh-CN/components/linear-progress.md'),
+        },
+      },
+      {
+        id: 'list',
+        slug: 'components/list',
+        title: { 'en-US': 'List', 'zh-CN': '列表' },
+        navigationLabel: { 'en-US': 'List', 'zh-CN': 'List' },
+        icon: listIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/list.md'),
+          'zh-CN': () => import('./zh-CN/components/list.md'),
+        },
+      },
+      {
+        id: 'loading-indicator',
+        slug: 'components/loading-indicator',
+        title: { 'en-US': 'Loading Indicator', 'zh-CN': '加载指示器' },
+        navigationLabel: { 'en-US': 'LoadingIndicator', 'zh-CN': 'LoadingIndicator' },
+        icon: loadingIndicatorIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/loading-indicator.md'),
+          'zh-CN': () => import('./zh-CN/components/loading-indicator.md'),
+        },
+      },
+      {
+        id: 'fullscreen-dialog',
+        slug: 'components/fullscreen-dialog',
+        title: { 'en-US': 'Fullscreen Dialog', 'zh-CN': '全屏对话框' },
+        navigationLabel: { 'en-US': 'FullscreenDialog', 'zh-CN': 'FullscreenDialog' },
+        icon: fullscreenDialogIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/fullscreen-dialog.md'),
+          'zh-CN': () => import('./zh-CN/components/fullscreen-dialog.md'),
+        },
+      },
+      {
+        id: 'icon',
+        slug: 'components/icon',
+        title: { 'en-US': 'Icon', 'zh-CN': '图标' },
+        navigationLabel: { 'en-US': 'Icon', 'zh-CN': 'Icon' },
+        icon: iconIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/icon.md'),
+          'zh-CN': () => import('./zh-CN/components/icon.md'),
+        },
+      },
+      {
+        id: 'icon-button',
+        slug: 'components/icon-button',
+        title: { 'en-US': 'Icon Button', 'zh-CN': '图标按钮' },
+        navigationLabel: { 'en-US': 'IconButton', 'zh-CN': 'IconButton' },
+        icon: iconButtonIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/icon-button.md'),
+          'zh-CN': () => import('./zh-CN/components/icon-button.md'),
+        },
+      },
+      {
+        id: 'divider',
+        slug: 'components/divider',
+        title: { 'en-US': 'Divider', 'zh-CN': '分割线' },
+        navigationLabel: { 'en-US': 'Divider', 'zh-CN': 'Divider' },
+        icon: dividerIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/divider.md'),
+          'zh-CN': () => import('./zh-CN/components/divider.md'),
+        },
+      },
+      {
+        id: 'fab',
+        slug: 'components/fab',
+        title: { 'en-US': 'FAB', 'zh-CN': '浮动操作按钮' },
+        navigationLabel: { 'en-US': 'Fab', 'zh-CN': 'Fab' },
+        icon: fabIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/fab.md'),
+          'zh-CN': () => import('./zh-CN/components/fab.md'),
+        },
+      },
+      {
+        id: 'fab-menu',
+        slug: 'components/fab-menu',
+        title: { 'en-US': 'FAB Menu', 'zh-CN': '浮动操作菜单' },
+        navigationLabel: { 'en-US': 'FabMenu', 'zh-CN': 'FabMenu' },
+        icon: fabMenuIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/fab-menu.md'),
+          'zh-CN': () => import('./zh-CN/components/fab-menu.md'),
+        },
+      },
       {
         id: 'date-picker',
         slug: 'components/date-picker',

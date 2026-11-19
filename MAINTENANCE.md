@@ -17,6 +17,8 @@ When adding or updating a dependency, use pnpm and commit `package.json` and `pn
 
 The current Vue tooling uses TypeScript 6 with `vue-tsc` 3. TypeScript 7 is incompatible with the current `vue-tsc` command because it does not export `typescript/lib/tsc`. Upgrade these tools as a compatible combination and run the complete validation gate before changing the supported combination.
 
+The production CSS target is Chrome/Edge 120, Firefox 114, and Safari/iOS 16.4. Keep native `:dir()` selectors: Vite's default Chrome/Edge 111 target lowers them to language selectors, which do not preserve an explicit or inherited `dir="rtl"` in English and Chinese examples. JavaScript keeps Vite's default target. After changing CSS targets or minification, verify scoped RTL in the production preview, including Linear Progress graphic mirroring; a development preview alone does not cover this transformation.
+
 ## Change workflow
 
 1. Read the relevant source, localized articles, and existing tests. Identify the scope and expected behavior before editing.
