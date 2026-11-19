@@ -1,6 +1,6 @@
 # Documentation Roadmap
 
-Updated: 2026-11-18. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
+Updated: 2026-11-19. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
 
 This is the local checklist for documenting MDV in this repository. Use it to select, implement, and review three component pages at a time. Read [AGENTS.md](./AGENTS.md) for project decisions and [MAINTENANCE.md](./MAINTENANCE.md) for validation procedures.
 
@@ -9,7 +9,7 @@ This is the local checklist for documenting MDV in this repository. Use it to se
 The inventory was checked against the sibling library's `src/index.ts`, `COMPONENTS.md`, `ROADMAP.md`, and playground catalog, and the installed package's public declarations and component sources.
 
 - The library exports **67 public Vue components**. All 67 are assigned exactly once to **41 documentation pages** below.
-- **8 pages are complete:** App Bar, Autocomplete, Badge, Bottom Sheet, Button, Button Group, Card, and Checkbox. **33 pages remain**, arranged into **11 batches of 3**.
+- **14 pages are complete:** App Bar, Autocomplete, Badge, Bottom Sheet, Button, Button Group, Card, Carousel, Checkbox, Chip, Circular Progress, Date Picker, Date Range Picker, and Dialog. **27 pages remain**, arranged into **9 batches of 3**.
 - Related items, groups, providers, scaffolds, and variants are documented in their owning page when listed below. Each included component needs its own API coverage on that page.
 - Public types belong with the components that use them. The `useSnackbar` helper belongs on the Snackbar page. Dynamic-color functions have a separate guide task below.
 - Introduction and Setup already exist in both locales. The shared demo shell, API tables, Markdown highlighting, heading links, page outline, and page transitions are already implemented.
@@ -28,7 +28,7 @@ Checked items represent documentation completed in the local workspace. They do 
 
 ### First-batch prerequisite
 
-- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales now use AppBar, Autocomplete, Badge, BottomSheet, Button, ButtonGroup, Card, Checkbox; future entries are sorted automatically.
+- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales share the same automatically sorted component names and localized badges; extend the assertions with each batch.
 
 ## Component checklist (A-Z)
 
@@ -41,13 +41,13 @@ The leading component name identifies the public component and its sorting key. 
 - [x] **MdvButton** — `button`. Existing reference page covering variants, sizes, shapes, colors, icons, links, loading, disabled states, and API.
 - [x] **MdvButtonGroup** — `button-group`. Includes `MdvButtonGroupItem`. Covers standard/connected layouts, actions, independent toggles, selection, sizing, forms, and keyboard behavior.
 - [x] **MdvCard** — `card`. Covers outlined/filled/elevated variants, content slots, internal actions, whole-card actions/links, disabled states, and semantics.
-- [ ] **MdvCarousel** — `carousel`. Cover supported layouts, media, item keys, controlled navigation, alternative controls, dragging, keyboard operation, and reduced motion.
+- [x] **MdvCarousel** — `carousel`. Covers four layouts, media, stable keys, controlled navigation, custom content/controls, gesture configuration, keyboard operation, and reduced-motion behavior.
 - [x] **MdvCheckbox** — `checkbox`. Covers boolean/array models, indeterminate state, select-all, labels, colors, disabled/error states, forms, and API.
-- [ ] **MdvChip** — `chip`. Includes `MdvChipSet`. Cover chip variants, selection, removal, leading/trailing content, colors, wrapping, and keyboard behavior.
-- [ ] **MdvCircularProgress** — `circular-progress`. Cover determinate/indeterminate states, straight/wavy appearance, sizing, progress values, and accessible labels.
-- [ ] **MdvDatePicker** — `date-picker`. Cover single-date values, supported layouts, text/calendar entry, date restrictions, locale labels, keyboard behavior, and forms.
-- [ ] **MdvDateRangePicker** — `date-range-picker`. Cover complete ranges, supported modal/fullscreen layouts, range restrictions, entry, validation, and forms.
-- [ ] **MdvDialog** — `dialog`. Cover content/actions, controlled opening, close policy, async confirmation, focus restoration, scrolling, forms, and nested overlays.
+- [x] **MdvChip** — `chip`. Includes `MdvChipSet`. Covers variants, group/independent selection, removal, decorative slots, colors, wrapping/scrolling, keyboard focus, and explicit form composition.
+- [x] **MdvCircularProgress** — `circular-progress`. Covers determinate/indeterminate modes, flat/wavy appearance, sizing/strokes, progress units, local themes, and accessible labels/status messages.
+- [x] **MdvDatePicker** — `date-picker`. Covers ISO dates, all four layout options, calendar/text drafts, restrictions, field states, locale/label separation, controlled acceptance, custom triggers, keyboard behavior, and native forms/validation/reset.
+- [x] **MdvDateRangePicker** — `date-range-picker`. Covers complete inclusive ranges, modal/fullscreen layouts, interior-date restrictions, localized entry, validation, controlled acceptance, separate form values, fieldsets, and reset.
+- [x] **MdvDialog** — `dialog`. Covers content/actions, close results, controlled rejection, retained/destroyed content, asynchronous guards, native forms, focus restoration, long content, local themes, and nested dialogs.
 - [ ] **MdvDivider** — `divider`. Cover horizontal/vertical orientation, insets, decorative/semantic use, sizing, and RTL.
 - [ ] **MdvFab** — `fab`. Includes `MdvExtendedFab`. Cover sizes, colors, icons/labels, native actions/links, placement, extended expansion, and scroll behavior.
 - [ ] **MdvFabMenu** — `fab-menu`. Includes `MdvFabMenuItem`. Cover expressive/baseline presentation, triggers, action items, selection/close events, positioning, and keyboard/focus behavior.
@@ -84,9 +84,9 @@ This schedule follows the unchecked A-Z entries above. The component checklist i
 | --- | --- |
 | 1 — complete | `MdvAppBar`, `MdvAutocomplete`, `MdvBadge` |
 | 2 — complete | `MdvBottomSheet`, `MdvButtonGroup`, `MdvCard` |
-| **3 — next** | `MdvCarousel`, `MdvChip`, `MdvCircularProgress` |
-| 4 | `MdvDatePicker`, `MdvDateRangePicker`, `MdvDialog` |
-| 5 | `MdvDivider`, `MdvFab`, `MdvFabMenu` |
+| 3 — complete | `MdvCarousel`, `MdvChip`, `MdvCircularProgress` |
+| 4 — complete | `MdvDatePicker`, `MdvDateRangePicker`, `MdvDialog` |
+| **5 — next** | `MdvDivider`, `MdvFab`, `MdvFabMenu` |
 | 6 | `MdvFullscreenDialog`, `MdvIcon`, `MdvIconButton` |
 | 7 | `MdvLinearProgress`, `MdvList`, `MdvLoadingIndicator` |
 | 8 | `MdvMenu`, `MdvNavigationBar`, `MdvNavigationDrawer` |
@@ -98,16 +98,17 @@ This schedule follows the unchecked A-Z entries above. The component checklist i
 
 ## Latest completed batch
 
-Batch 2 adds aligned English and Chinese articles for Bottom Sheet (including Scaffold), Button Group (including Item), and Card, with 18 shared English demos and 36 matching displayed-source fences. Each page covers installed MDV 0.1.5 props, slots, applicable models/events/methods, public types, native attributes, and accessibility scope. Navigation remains automatically sorted A-Z, with localized badges and distinct icons.
+Batch 4 adds aligned English and Chinese articles for Date Picker, Date Range Picker, and Dialog, with 19 shared English demos and 38 matching displayed-source fences. Each page covers installed MDV 0.1.5 props/defaults, slots, models/events, methods, public types, native attributes, and accessibility. Navigation includes all 14 pages, sorted A-Z without the Mdv prefix, with localized badges and distinct icons.
 
-- Bottom Sheet examples cover modal results, controlled height states, long content, guarded dismissal, native dialog forms and retained drafts, a standard Scaffold with hiding/reopening, and handle alternatives. Documentation follows the actual shared scroll region for header/body/actions rather than describing fixed headers or footers.
-- Button Group examples cover standard actions, connected single/multiple selection, independent icon toggles, all five sizes, shape/density, loading/disabled states and colors, and repeated native form values/reset. Card examples distinguish static cards with independent actions from one whole-card button/link, with media, custom headers, disabling, and externally controlled dragged appearance.
-- Added eight behavior tests for group selection/form/reset/loading and card action/disabled semantics. Both locales' navigation assertions include all eight pages. `pnpm check` was blocked by the existing `run-s` launcher restriction (`spawn EPERM`); its stages passed separately: `pnpm type-check`, `pnpm test:unit` (12 files, 90 tests), and `pnpm build-only`. The production build also passed after correcting the sheet scroll descriptions.
-- Production-preview checks covered all six localized routes, locale switching on Card, localized A-Z navigation, heading links, highlighted source expansion, API/slot tables, desktop and 390px layouts, and light/dark presentation. Page scrolling stayed within the content surface; wide code, API tables, and large button groups retained internal overflow. No browser warnings or errors were captured.
-- Browser interactions verified modal close results, controlled expansion, guard rejection/acceptance, native required validation and dialog-form results, draft retention, Tab/Shift+Tab focus containment and Escape restoration; Scaffold partial/expanded/hidden transitions, reopening and uncovered main-page interaction; button-group arrow-focus versus Space activation, multiple/independent selection, form submission/reset; and Card keyboard activation and disabled link semantics.
-- No library defect was reproduced in this batch. Real touch gestures, screen readers, IME, browser reduced-motion settings, custom local themes, forced colors, and RTL remain unverified. The Scaffold's expanded sheet can cover main-page controls; background interaction was checked while those controls were uncovered.
+- Date Picker examples cover responsive/explicit layouts, input/calendar views, constraints and field states, locale formatting versus interface labels, controlled date/close acceptance, custom triggers, and native submission/custom validity/reset. The article records the fixed 360px docked layout boundary and distinguishes accepted values, panel drafts, confirmation, close acceptance, and animation completion.
+- Date Range Picker examples cover inclusive complete pairs, modal/fullscreen and text views, unavailable dates inside a range, reversed/incomplete input, parent rejection, separate ISO form fields, fieldset disabling, and reset. Each date demo includes a complete English labels object and can be copied independently.
+- Dialog examples cover action results, rejected closure, retained/destroyed internal state, asynchronous guards, ordinary and native dialog forms, long content, nested dialogs, and local dark themes. The guide documents the default alertdialog role and explicitly uses role="dialog" for complex forms/content; close() acceptance is separate from the closed event.
+- Added ten behavior tests for date entry/acceptance, native serialization/validation/reset, range constraints, Dialog results/focus, parent rejection/content lifecycle, async guards, native forms, and nesting. Both locales' navigation assertions include all 14 pages. `pnpm check` was blocked by the existing run-s launcher restriction (spawn EPERM); its stages passed separately: `pnpm type-check`, `pnpm test:unit` (14 files, 109 tests), and `pnpm build-only`. The build reports a 508.42 kB main JavaScript chunk (168.53 kB gzip), above Vite's 500 kB warning threshold; bundle optimization remains separate work.
+- Production-preview checks covered all six localized routes, locale switching, localized A-Z navigation, heading/compact-outline navigation, highlighted source expansion, API/slot tables, 1280px desktop and 390px layouts, and light/dark presentation. Wide source and tables kept overflow inside their wrappers after page transitions settled. No page warnings or errors were captured.
+- Browser interactions verified single-date arrow/Enter confirmation, invalid/valid modal input, range draft completeness and saving, mobile fullscreen calendars/input, and rejecting a controlled close once before accepting dismissal. Dialog checks covered action results, native required-form validation and saving, asynchronous dismissal, nested Escape/focus restoration with local theme inheritance, mobile sizing, and long-body overflow with available actions. Native dialog-form results, content destruction, and date form/reset edge cases additionally passed DOM tests with narrow mocks for jsdom's missing native dialog methods.
+- No library defect was reproduced in this batch, and no library files were changed. Real touch gestures/keyboards, screen readers, IME, browser reduced-motion settings, forced colors, RTL, responsive migration while open, and cross-browser combinations remain unverified. Reduced-motion queries were enabled for relevant DOM tests; those tests do not establish visual motion quality.
 
-Next batch: **MdvCarousel**, **MdvChip** (including ChipSet), and **MdvCircularProgress**.
+Next batch: **MdvDivider**, **MdvFab** (including ExtendedFab), and **MdvFabMenu**.
 
 ## Review checklist for each batch
 

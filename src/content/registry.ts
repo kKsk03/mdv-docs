@@ -10,6 +10,12 @@ import badgeIcon from '@iconify-icons/material-symbols/notifications-outline'
 import bottomSheetIcon from '@iconify-icons/material-symbols/vertical-align-bottom'
 import buttonGroupIcon from '@iconify-icons/material-symbols/view-column-outline'
 import cardIcon from '@iconify-icons/material-symbols/rectangle-outline'
+import carouselIcon from '@iconify-icons/material-symbols/view-carousel-outline'
+import chipIcon from '@iconify-icons/material-symbols/label-outline'
+import circularProgressIcon from '@iconify-icons/material-symbols/progress-activity'
+import datePickerIcon from '@iconify-icons/material-symbols/calendar-month-outline'
+import dateRangePickerIcon from '@iconify-icons/material-symbols/date-range-outline'
+import dialogIcon from '@iconify-icons/material-symbols/chat-bubble-outline'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -71,6 +77,72 @@ export const navigationItems: NavigationItem[] = [
     icon: componentsIcon,
     divider: true,
     pages: sortComponentPages([
+      {
+        id: 'date-picker',
+        slug: 'components/date-picker',
+        title: { 'en-US': 'Date Picker', 'zh-CN': '日期选择器' },
+        navigationLabel: { 'en-US': 'DatePicker', 'zh-CN': 'DatePicker' },
+        icon: datePickerIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/date-picker.md'),
+          'zh-CN': () => import('./zh-CN/components/date-picker.md'),
+        },
+      },
+      {
+        id: 'date-range-picker',
+        slug: 'components/date-range-picker',
+        title: { 'en-US': 'Date Range Picker', 'zh-CN': '日期范围选择器' },
+        navigationLabel: { 'en-US': 'DateRangePicker', 'zh-CN': 'DateRangePicker' },
+        icon: dateRangePickerIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/date-range-picker.md'),
+          'zh-CN': () => import('./zh-CN/components/date-range-picker.md'),
+        },
+      },
+      {
+        id: 'dialog',
+        slug: 'components/dialog',
+        title: { 'en-US': 'Dialog', 'zh-CN': '对话框' },
+        navigationLabel: { 'en-US': 'Dialog', 'zh-CN': 'Dialog' },
+        icon: dialogIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/dialog.md'),
+          'zh-CN': () => import('./zh-CN/components/dialog.md'),
+        },
+      },
+      {
+        id: 'carousel',
+        slug: 'components/carousel',
+        title: { 'en-US': 'Carousel', 'zh-CN': '轮播' },
+        navigationLabel: { 'en-US': 'Carousel', 'zh-CN': 'Carousel' },
+        icon: carouselIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/carousel.md'),
+          'zh-CN': () => import('./zh-CN/components/carousel.md'),
+        },
+      },
+      {
+        id: 'chip',
+        slug: 'components/chip',
+        title: { 'en-US': 'Chip', 'zh-CN': '纸片' },
+        navigationLabel: { 'en-US': 'Chip', 'zh-CN': 'Chip' },
+        icon: chipIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/chip.md'),
+          'zh-CN': () => import('./zh-CN/components/chip.md'),
+        },
+      },
+      {
+        id: 'circular-progress',
+        slug: 'components/circular-progress',
+        title: { 'en-US': 'Circular Progress', 'zh-CN': '圆形进度指示器' },
+        navigationLabel: { 'en-US': 'CircularProgress', 'zh-CN': 'CircularProgress' },
+        icon: circularProgressIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/circular-progress.md'),
+          'zh-CN': () => import('./zh-CN/components/circular-progress.md'),
+        },
+      },
       {
         id: 'bottom-sheet',
         slug: 'components/bottom-sheet',
