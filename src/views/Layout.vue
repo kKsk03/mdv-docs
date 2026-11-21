@@ -24,10 +24,11 @@ import {
 } from '@mdv-ui/mdv'
 import {
   defaultDocumentId,
+  getComponentName,
+  getComponentTranslation,
   getRouteName,
   isLocale,
   navigationItems,
-  type DocumentationPage,
   type NavigationGroup,
   type NavigationItem,
   type Locale,
@@ -100,10 +101,6 @@ const themeButtonLabel = computed(() => t('theme.button', { mode: themeModeLabel
 
 function isNavigationGroup(item: NavigationItem): item is NavigationGroup {
   return 'pages' in item
-}
-
-function pageLabel(page: DocumentationPage) {
-  return page.navigationLabel?.[activeLocale.value] ?? page.title[activeLocale.value]
 }
 
 watch(
@@ -236,14 +233,16 @@ onBeforeUnmount(() => {
           >
             <MdvNavigationDrawerItem
               :href="href"
-              :label="pageLabel(page)"
+              :label="getComponentName(page)"
               :active="isActive"
               @click="navigateFromDrawer($event, navigate)"
             >
               <template #icon>
                 <MdvIcon :icon="page.icon" />
               </template>
-              <template #badge>{{ page.title[activeLocale] }}</template>
+              <template v-if="getComponentTranslation(page, activeLocale)" #badge>
+                {{ getComponentTranslation(page, activeLocale) }}
+              </template>
             </MdvNavigationDrawerItem>
           </RouterLink>
         </MdvNavigationDrawerGroup>
@@ -255,7 +254,7 @@ onBeforeUnmount(() => {
         >
           <MdvNavigationDrawerItem
             :href="href"
-            :label="pageLabel(item)"
+            :label="item.navigationLabel?.[activeLocale] ?? item.title[activeLocale]"
             :active="isActive"
             @click="navigateFromDrawer($event, navigate)"
           >

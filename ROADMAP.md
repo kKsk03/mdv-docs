@@ -23,13 +23,13 @@ Checked items represent documentation completed in the local workspace. They do 
 
 1. Work on **three documentation pages per batch**, including their listed companion components. Select the next three unchecked entries in the A-Z checklist unless the user changes the priority.
 2. Sort component drawer entries by the primary English component name, ignoring the common `Mdv` prefix and comparing the entire name case-insensitively. Use the same order in both locales. Introduction and Setup keep their existing top-level order.
-3. Keep `src/content/registry.ts` as the source of truth for component routes and navigation. Use localized badge text and distinct icons. Add entries when their pages are implemented, rather than adding empty article routes for the entire inventory.
+3. Keep `src/content/registry.ts` as the source of truth for component routes and navigation. Use distinct icons and shared English names in the drawer and Introduction grid. Show translated titles only in non-English locales. Add entries when their pages are implemented, rather than adding empty article routes for the entire inventory.
 4. Use one article per locale at `src/content/<locale>/components/<slug>.md`, sharing English demo components under `src/components/docs/demos/<component>/`. Keep article prose and shared controls localized.
 5. Document the current installed behavior and known scope. Use the library guide and playground as references, then verify against actual sources. Treat component defects as integration feedback and address library-owned issues under the library's collaboration rules.
 
 ### First-batch prerequisite
 
-- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales share the same automatically sorted component names and localized badges; extend the assertions with each batch.
+- [x] Implement stable A-Z component ordering in the registry and update navigation regression coverage. Both locales share the same automatically sorted component names. Show badges only for translations and extend the assertions with each batch.
 
 ## Component checklist (A-Z)
 
@@ -128,7 +128,7 @@ Use these checks for every page in the active batch. Mark the component entry co
 - [ ] Write aligned `zh-CN` and `en-US` articles with practical guidance and accurate scope limits.
 - [ ] Add shared, interactive English demos using `DemoBlock`; keep displayed source synchronized with each live example.
 - [ ] Document applicable props/defaults, models, slots, events, methods, public types, native attributes, and form behavior.
-- [ ] Register both locale routes, localized badges, and icons; verify A-Z ordering, active navigation, direct links, heading links, and locale switching.
+- [ ] Register both locale routes, localized titles, and icons; verify A-Z ordering, translation-only badges and subtitles, active navigation, direct links, heading links, and locale switching.
 - [ ] Check applicable desktop/mobile layouts, light/dark/local themes, long content, disabled/error/loading states, keyboard/focus behavior, and reduced motion.
 - [ ] Add meaningful behavior coverage for demo logic or integration changes; run the validation gate from `MAINTENANCE.md` and record the actual result.
 - [ ] Record reproducible library-owned defects and remaining validation limits; update the component checkboxes, counts, and next batch.
@@ -137,14 +137,14 @@ Use these checks for every page in the active batch. Mark the component entry co
 
 These are follow-up documentation tasks, separate from the component-page count. Introduction and Setup remain the existing starting points.
 
-- [x] Expand Introduction with the supported library scope, component categories, and links to setup and examples.
+- [x] Expand Introduction with the supported library scope, a flat component library grid, and links to setup and examples.
 - [ ] Review Setup against the installed package, including optional icon data, individual component imports, CSS order, consumer-side Tailwind generation, and font behavior.
 - [ ] Add theme/style guidance covering light/dark/system and local scopes, MDV color roles, CSS variables and Tailwind mappings, typography/fonts, shapes, elevation, motion, and reduced motion.
 - [ ] Add dynamic-color guidance for `createMdvColorScheme`, `applyMdvColorScheme`, their public types, seed requirements, scoped application, cleanup, and server/browser boundaries.
 - [ ] Add integration guidance for native forms, accessible names and keyboard interaction, IME, overlay composition, routing, SSR/hydration limits, and individual imports/bundle considerations.
 - [ ] Establish a visible documented-version policy and keep it aligned with the installed package before publishing the site.
 
-Introduction validation: Checked all 14 links per locale against the registry and production output, including the Button variants and Text Field validation anchors. `pnpm type-check`, `pnpm test:unit` (23 files, 220 tests), and `pnpm build-only` passed separately. `pnpm check` stopped with `spawn EPERM`, and approval for a retry was unavailable. The Vite chunk-size warning remains. The approval service also blocked the browser preview, so direct page loads, anchor scrolling, and demo interactions remain unverified in a browser.
+Introduction and navigation validation: The registry supplies one card per component page and the same English names for the grid and drawer. Integration tests verified the inventory, order, names, translated subtitles and badges, and card links in both locales. `pnpm check` passed (24 files, 222 tests, and a production build); the existing Vite chunk-size warning remains. A browser spot check confirmed that switching to English removes both translations, the two-column grid fits at 390px, and Enter opens the localized article.
 
 Component editorial review validation: `pnpm check` passed (23 files, 220 tests, and a production build). All internal article links and fragments resolved, and retained demos and displayed source matched across locales. Production preview spot checks covered the Chinese Navigation Rail outline, rail expansion and example code, and the English Date Range Picker link to Date Picker localization. With both sidebars visible at 1280px, the unchanged Date Range Picker text-entry demo clipped the end field on the right; investigate its container layout separately. Broader browser coverage and the existing Vite chunk-size warning remain open.
 

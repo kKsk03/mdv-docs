@@ -71,10 +71,18 @@ export interface NavigationGroup {
 
 export type NavigationItem = DocumentationPage | NavigationGroup
 
+export function getComponentName(page: DocumentationPage) {
+  return (page.navigationLabel?.['en-US'] ?? page.title['en-US']).replace(/^Mdv/i, '')
+}
+
+export function getComponentTranslation(page: DocumentationPage, locale: Locale) {
+  return locale === 'en-US' ? undefined : page.title[locale]
+}
+
 function sortComponentPages(pages: DocumentationPage[]) {
-  const name = (page: DocumentationPage) =>
-    (page.navigationLabel?.['en-US'] ?? page.title['en-US']).replace(/^Mdv/i, '')
-  return [...pages].sort((a, b) => name(a).localeCompare(name(b), 'en-US', { sensitivity: 'base' }))
+  return [...pages].sort((a, b) =>
+    getComponentName(a).localeCompare(getComponentName(b), 'en-US', { sensitivity: 'base' }),
+  )
 }
 
 export const navigationItems: NavigationItem[] = [

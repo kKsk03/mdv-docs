@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { MdvIcon } from '@mdv-ui/mdv'
+import appsIcon from '@iconify-icons/material-symbols/apps'
+import ComponentLibrary from '@/components/docs/ComponentLibrary.vue'
+</script>
+
 # Introduction
 
 MDV (`@mdv-ui/mdv`) is a Material Design 3 component library for Vue 3. Use it to add UI controls, navigation, and feedback to an existing Vue application.
@@ -6,15 +12,9 @@ MDV (`@mdv-ui/mdv`) is a Material Design 3 component library for Vue 3. Use it t
 
 MDV requires Vue 3 (version 3.5 or later) and Tailwind CSS v4. The package includes TypeScript declarations and separate stylesheets for the theme and components. Your application uses Tailwind to generate the utility classes that MDV needs; the package does not ship precompiled Tailwind utilities.
 
-## Find a component
+## <MdvIcon :icon="appsIcon" class="me-2 inline-block align-[-0.15em] text-mdv-primary" /> Component Library
 
-Start with the task your interface needs to support:
-
-- **Actions:** Use a [Button](/en-US/components/button) for a labeled action or an [Icon Button](/en-US/components/icon-button) for a compact action.
-- **Forms:** Collect text with a [Text Field](/en-US/components/text-field) or let users choose a time with the [Time Picker](/en-US/components/time-picker).
-- **Content:** Group related information in a [Card](/en-US/components/card) or arrange a series of items in a [List](/en-US/components/list).
-- **Navigation:** Put destinations in a [Navigation Drawer](/en-US/components/navigation-drawer) or switch between related views with [Tabs](/en-US/components/tabs).
-- **Overlays and feedback:** Ask for confirmation in a [Dialog](/en-US/components/dialog), describe a control with a [Tooltip](/en-US/components/tooltip), or show a brief status message in a [Snackbar](/en-US/components/snackbar).
+<ComponentLibrary locale="en-US" />
 
 ## Get started
 

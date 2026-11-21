@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { MdvIcon } from '@mdv-ui/mdv'
+import appsIcon from '@iconify-icons/material-symbols/apps'
+import ComponentLibrary from '@/components/docs/ComponentLibrary.vue'
+</script>
+
 # 简介
 
 MDV（`@mdv-ui/mdv`）是基于 Material Design 3 的 Vue 3 组件库。你可以在现有的 Vue 应用中用它添加界面控件、导航和操作反馈。
@@ -6,15 +12,9 @@ MDV（`@mdv-ui/mdv`）是基于 Material Design 3 的 Vue 3 组件库。你可�
 
 MDV 需要 Vue 3.5 或更新的 Vue 3 版本，以及 Tailwind CSS v4。组件库提供 TypeScript 类型声明，以及独立的主题样式和组件样式。MDV 所需的工具类由你的应用通过 Tailwind 生成，组件库不提供预编译的 Tailwind 工具类。
 
-## 按用途查找组件
+## <MdvIcon :icon="appsIcon" class="me-2 inline-block align-[-0.15em] text-mdv-primary" /> 组件库
 
-可以根据界面需要支持的任务选择组件：
-
-- **操作**：用[按钮](/zh-CN/components/button)提供带文字标签的操作，或用[图标按钮](/zh-CN/components/icon-button)节省空间。
-- **表单**：用[文本框](/zh-CN/components/text-field)收集文本，或用[时间选择器](/zh-CN/components/time-picker)让用户选择时刻。
-- **内容展示**：用[卡片](/zh-CN/components/card)组织相关信息，或用[列表](/zh-CN/components/list)展示一组条目。
-- **导航**：用[导航抽屉](/zh-CN/components/navigation-drawer)提供页面入口，或用[标签页](/zh-CN/components/tabs)切换相关视图。
-- **浮层与反馈**：用[对话框](/zh-CN/components/dialog)请求确认，用[提示气泡](/zh-CN/components/tooltip)解释控件，或用[消息提示](/zh-CN/components/snackbar)显示简短的状态消息。
+<ComponentLibrary locale="zh-CN" />
 
 ## 开始使用
 

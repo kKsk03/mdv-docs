@@ -121,7 +121,7 @@ test('compact actions group themes and languages in separate submenus and persis
   }
 })
 
-test('drawer sorts component names A-Z after introductory links and localizes their badges', async () => {
+test('drawer sorts English component names A-Z and shows badges only for translations', async () => {
   const { wrapper, router } = await fixture(true)
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
@@ -143,8 +143,7 @@ test('drawer sorts component names A-Z after introductory links and localizes th
   expect(wrapper.findAll('.mdv-navigation-drawer-group__heading')).toHaveLength(0)
   expect(wrapper.findAll('.mdv-navigation-drawer__label').map(label => label.text()))
     .toEqual(['Introduction', 'Setup', 'Components', 'AppBar', 'Autocomplete', 'Badge', 'BottomSheet', 'Button', 'ButtonGroup', 'Card', 'Carousel', 'Checkbox', 'Chip', 'CircularProgress', 'DatePicker', 'DateRangePicker', 'Dialog', 'Divider', 'Fab', 'FabMenu', 'FullscreenDialog', 'Icon', 'IconButton', 'LinearProgress', 'List', 'LoadingIndicator', 'Menu', 'NavigationBar', 'NavigationDrawer', 'NavigationRail', 'Radio', 'SearchBar', 'SegmentedButton', 'Select', 'SideSheet', 'Slider', 'Snackbar', 'SplitButton', 'Switch', 'Tabs', 'TextField', 'TimePicker', 'Toolbar', 'Tooltip'])
-  expect(wrapper.findAll('.mdv-navigation-drawer__badge').map(badge => badge.text()))
-    .toEqual(['App Bar', 'Autocomplete', 'Badge', 'Bottom Sheet', 'Button', 'Button Group', 'Card', 'Carousel', 'Checkbox', 'Chip', 'Circular Progress', 'Date Picker', 'Date Range Picker', 'Dialog', 'Divider', 'FAB', 'FAB Menu', 'Fullscreen Dialog', 'Icon', 'Icon Button', 'Linear Progress', 'List', 'Loading Indicator', 'Menu', 'Navigation Bar', 'Navigation Drawer', 'Navigation Rail', 'Radio', 'Search Bar', 'Segmented Button', 'Select', 'Side Sheet', 'Slider', 'Snackbar', 'Split Button', 'Switch', 'Tabs', 'Text Field', 'Time Picker', 'Toolbar', 'Tooltip'])
+  expect(wrapper.find('.mdv-navigation-drawer__badge').exists()).toBe(false)
 })
 
 test('article changes replace the page while fragment and query updates preserve it', async () => {
