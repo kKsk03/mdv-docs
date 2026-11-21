@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import NavigationBarBasicDemo from '@/components/docs/demos/navigationBar/basic.vue'
 import NavigationBarOrientationDemo from '@/components/docs/demos/navigationBar/orientation.vue'
 import NavigationBarLinksDemo from '@/components/docs/demos/navigationBar/links.vue'
-import NavigationBarThemeDemo from '@/components/docs/demos/navigationBar/theme.vue'
 
 const barProps: ApiTableItem[] = [
   { name: 'orientation', type: "'auto' | 'vertical' | 'horizontal'", default: "'auto'", description: 'Arrangement of each item’s icon and label. Auto uses vertical below a 600px bar container width and horizontal at 600px or above. The bar itself remains at the bottom.' },
@@ -26,14 +24,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'badge', description: 'Optional Badge or count content positioned near the icon. Receives { active }. Include important notification information in the destination’s accessible name.' },
 ]
 </script>
-
 # Navigation Bar
 
-`MdvNavigationBar` provides a fixed bottom navigation surface. Each `MdvNavigationBarItem` represents a top-level destination with an always-visible label and an icon. Prefer 3–5 short destinations. For many destinations or a wider persistent sidebar, choose another navigation component in application layout code.
+Use `MdvNavigationBar` for a small set of primary destinations at the bottom of the viewport. Place one `MdvNavigationBarItem` per destination.
 
-## Destinations, active icons, and badges
+## Destinations and badges
 
-The application owns the current destination. Update `active` after navigation succeeds; neither the bar nor its items have a selection `v-model`. The icon slot receives `active` so it can switch artwork without moving the label or badge.
+Set `active` from the current destination. Use the icon slot’s `active` value to switch artwork and the `badge` slot for a count or status. Give the bar a distinct accessible name.
 
 <DemoBlock>
   <NavigationBarBasicDemo />
@@ -77,13 +74,9 @@ const destinations = [
   </template>
 </DemoBlock>
 
-The live previews use a containing block to keep the real fixed-position bar inside their example viewport. This is preview framing, not a Navigation Bar positioning prop. In an application, the bar is normally fixed to the actual viewport.
+## Icon and label layout
 
-The example announces the Explore badge through its destination name. A count by itself should not become an unrelated keyboard target or replace the destination's visible label.
-
-## Automatic and explicit orientation
-
-`orientation` describes icon/label arrangement within each destination, not the physical placement of the bar. `auto` uses its named container's width: below 600px is vertical; 600px and above is horizontal. Explicit `vertical` and `horizontal` force that arrangement.
+`orientation` sets the icon and label arrangement. `auto` stacks them below a 600px container width and places them side by side at 600px or above. Reserve space in page content for the fixed bar.
 
 <DemoBlock>
   <NavigationBarOrientationDemo />
@@ -126,22 +119,9 @@ const destinations = [{ label: 'Home', icon: homeIcon }, { label: 'Search', icon
   </template>
 </DemoBlock>
 
-Enable the 720px preview to inspect the medium layout, scrolling the example horizontally when necessary. MDV does not automatically replace the bar with a Rail or Drawer at larger widths.
+## Links and routing
 
-<DocsTable label="Navigation bar dimensions" min-width="32rem">
-
-| Arrangement | Minimum bar height | Minimum item height | Indicator |
-| --- | --- | --- | --- |
-| Vertical | 80px | 56px | 64 × 32px icon capsule |
-| Horizontal | 64px | 48px | Capsule behind icon and label |
-
-</DocsTable>
-
-These are minimums; wrapped labels and larger text can increase the height. Horizontal items have a 168px maximum width and the item collection is capped at 840px. Safe-area bottom insets are handled by MDV. Reserve space in the page content for the actual bar height and safe area so its final content is not covered; the fixed anchor adds no layout space.
-
-## Native links and router integration
-
-Use `href` for a real destination. Native navigation, modified clicks, and link semantics remain available. With Vue Router, its custom RouterLink slot supplies `href`, `isExactActive`, and `navigate`; bind those to the item instead of nesting an anchor inside another interactive element.
+Use `href` for links. With Vue Router, get `href`, `isExactActive`, and `navigate` from a custom `RouterLink` slot instead of nesting a link. Guard custom click callbacks yourself: `disabled` removes native navigation but does not stop the callback.
 
 <DemoBlock>
   <NavigationBarLinksDemo />
@@ -186,63 +166,7 @@ const destinations = [
   </template>
 </DemoBlock>
 
-These are live documentation links. Intro and Setup leave this article; Navigation points to this page. The example follows the current documentation locale while keeping demonstration labels in English.
-
-Use the router's active state rather than immediately changing a separate active model before navigation guards finish. A disabled link omits its `href`, sets `aria-disabled="true"`, and has `tabindex="-1"`. No URL is generated by the component itself.
-
-In MDV 0.1.5, disabling a link removes native navigation but does not suppress an application-provided click callback. The example checks the disabled state before calling RouterLink's `navigate`; keep this check for custom navigation callbacks. This library integration issue is tracked in the documentation roadmap.
-
-## Local themes, direction, and longer labels
-
-Theme scopes supply surface and indicator roles. RTL follows logical layout direction, and labels remain visible even when they need to wrap. Keep top-level labels concise rather than hiding them to make room.
-
-<DemoBlock>
-  <NavigationBarThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBadge, MdvCheckbox, MdvIcon, MdvNavigationBar, MdvNavigationBarItem } from '@mdv-ui/mdv'
-import homeIcon from '@iconify-icons/material-symbols/home-outline'
-import mailIcon from '@iconify-icons/material-symbols/mail-outline'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const rtl = ref(false)
-const current = ref('Inbox')
-const destinations = [{ label: 'Home', icon: homeIcon }, { label: 'Inbox', icon: mailIcon }, { label: 'Recently saved', icon: bookmarkIcon }]
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Use right-to-left navigation bars" />
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" :dir="rtl ? 'rtl' : 'ltr'" class="relative isolate h-56 min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low text-mdv-on-surface [contain:layout]">
-        <p class="p-5 pb-32 text-sm">{{ theme }} · {{ current }}</p>
-        <MdvNavigationBar orientation="vertical" :aria-label="`${theme} example destinations`">
-          <MdvNavigationBarItem v-for="destination in destinations" :key="destination.label" :label="destination.label" :active="current === destination.label" :aria-label="destination.label === 'Inbox' ? 'Inbox, more than 9 unread messages' : undefined" @click="current = destination.label">
-            <template #icon><MdvIcon :icon="destination.icon" /></template>
-            <template v-if="destination.label === 'Inbox'" #badge><MdvBadge variant="large" content="9+" /></template>
-          </MdvNavigationBarItem>
-        </MdvNavigationBar>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-The active indicator uses `secondary-container`; the active icon uses `on-secondary-container`. Other text/icons use `on-surface-variant`. On hover, an inactive capsule grows from its center in 200ms; selected items retain their indicator, and focus/pressed states add their state layer. Reduced motion shortens transitions; forced colors use system borders and focus colors. There is no public color or hidden-label prop.
-
-## Keyboard, semantics, and layout ownership
-
-The root is a native navigation landmark. Give it a distinct `aria-label` or `aria-labelledby`, especially when a page also has a drawer or an article outline. Items retain button/link semantics and the current destination exposes `aria-current="page"`.
-
-All enabled destinations participate in normal Tab order. Buttons activate with native Enter/Space, links follow native anchor rules, and disabled destinations are excluded from Tab. There is no roving tab stop, arrow-key selection, tablist/panel relationship, or swipe navigation.
-
-The application decides responsive breakpoints, routing, active destination, and content padding. The bar does not couple itself to AppBarScaffold, manage document scroll, or create content panels. Avoid placing a fixed bar inside an ancestor with `transform` or layout containment unless that ancestor is deliberately its containing viewport, as in these demos.
+---
 
 ## API
 

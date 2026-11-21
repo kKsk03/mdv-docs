@@ -7,10 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import FabBasicDemo from '@/components/docs/demos/fab/basic.vue'
 import FabSizeDemo from '@/components/docs/demos/fab/size.vue'
 import FabColorDemo from '@/components/docs/demos/fab/color.vue'
-import FabExtendedDemo from '@/components/docs/demos/fab/extended.vue'
-import FabPlacementDemo from '@/components/docs/demos/fab/placement.vue'
 import FabScrollDemo from '@/components/docs/demos/fab/scroll.vue'
-import FabFormDemo from '@/components/docs/demos/fab/form.vue'
 
 const sharedProps: ApiTableItem[] = [
   { name: 'color', type: 'MdvFabColor', default: "'primary-container'", description: 'primary-container, secondary-container, tertiary-container, primary, secondary, tertiary, or surface. Icon FABs in a floating toolbar can receive a contextual default.' },
@@ -41,14 +38,13 @@ const extendedFabSlots: SlotTableItem[] = [
   { name: 'leading', description: 'Optional decorative icon, hidden from assistive technology and inert. Required for collapsing. No parameters.' },
 ]
 </script>
-
 # FAB
 
-A floating action button represents the primary action on a screen. `MdvFab` uses an icon; `MdvExtendedFab` adds a short label. Choose the presentation that makes the action clear and keep one primary floating action per screen. The comparisons below show alternatives, rather than a suggested collection of simultaneous primary actions.
+Use a floating action button for the primary action in a view. Choose `MdvFab` for an icon or `MdvExtendedFab` for an action with a visible label.
 
 ## Icon and extended actions
 
-Give an icon-only FAB a clear `aria-label` or `aria-labelledby`. An extended FAB normally takes its name from its visible text. Supply an icon through `#leading` when a compact presentation is useful.
+Give icon-only FABs an accessible name. For an Extended FAB, put the label in the default slot and the icon in `#leading`.
 
 <DemoBlock>
   <FabBasicDemo />
@@ -80,11 +76,9 @@ const notes = ref(0)
   </template>
 </DemoBlock>
 
-The icon slots are decorative. Do not place another button, input, or link inside either FAB. Clicking an extended FAB performs its business action; it does not toggle expansion automatically.
-
 ## Sizes
 
-The icon FAB supports four sizes. Extended FAB has three heights and no `regular` value.
+Set `size` for the button height. Extended FAB has no `regular` size.
 
 <DemoBlock>
   <FabSizeDemo />
@@ -121,25 +115,9 @@ const extendedSizes: MdvExtendedFabSize[] = ['small', 'medium', 'large']
   </template>
 </DemoBlock>
 
-<DocsTable label="FAB dimensions" min-width="33rem">
-
-| Component and size | Surface | Corner radius | Icon |
-| --- | --- | --- | --- |
-| Fab small | 40 × 40px; 48px interaction target | 12px | 24px |
-| Fab regular | 56 × 56px | 16px | 24px |
-| Fab medium | 80 × 80px | 20px | 28px |
-| Fab large | 96 × 96px | 28px | 36px |
-| ExtendedFab small | 56px high | 16px | 24px |
-| ExtendedFab medium | 80px high | 20px | 28px |
-| ExtendedFab large | 96px high | 28px | 36px |
-
-</DocsTable>
-
-Extended FAB horizontal padding is 16/26/28px and icon-to-label spacing is 8/12/16px. Without an icon it does not reserve an empty icon gap. Labels stay on one line without truncation or text scaling; use concise text and check narrow containers instead of relying on wrapping.
-
 ## Colors and elevation
 
-Use a container color for the usual tonal surface, a solid primary/secondary/tertiary color for stronger emphasis, or `surface` when that role fits the composition. `elevated` controls shadow, not the color family.
+Use `color` to choose a tonal or solid surface. Set `elevated` for a shadow.
 
 <DemoBlock>
   <FabColorDemo />
@@ -172,114 +150,13 @@ const colors: MdvFabColor[] = ['primary-container', 'secondary-container', 'tert
   </template>
 </DemoBlock>
 
-The `surface` option uses `surface-container-high` with primary content. Enabled elevation uses level 3 and rises to level 4 on hover. The inherited theme supplies light/dark colors, an 8% hover state layer, 10% focus/pressed layers, and the focus-visible outline.
+## Placement
 
-## Controlled expansion
+`position="static"` stays in normal flow. Use `absolute` within a positioned parent or `fixed` relative to the viewport. `placement` follows the text direction.
 
-Omit `expanded` to let ExtendedFab manage its own label state, use `v-model:expanded` to accept requests, or bind `:expanded` and decide whether to accept `update:expanded`.
+## Collapse on scroll
 
-<DemoBlock>
-  <FabExtendedDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvExtendedFab, MdvIcon } from '@mdv-ui/mdv'
-import editIcon from '@iconify-icons/material-symbols/edit-outline'
-
-const fab = useTemplateRef<InstanceType<typeof MdvExtendedFab>>('fab')
-const expanded = ref(true)
-const accept = ref(false)
-const withIcon = ref(true)
-const message = ref('Requests are rejected until you allow them.')
-const notes = ref(0)
-
-function update(value: boolean) {
-  message.value = `Requested ${value ? 'expanded' : 'collapsed'}: ${accept.value ? 'accepted' : 'rejected'}.`
-  if (accept.value) expanded.value = value
-}
-
-async function request(action: 'expand' | 'collapse' | 'toggle') {
-  const accepted = await fab.value?.[action]()
-  message.value = `${action}() ${accepted ? 'accepted' : 'not accepted'}.`
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-5">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="accept" label="Accept expansion requests" />
-      <MdvCheckbox v-model="withIcon" label="Include a leading icon" />
-    </div>
-    <MdvExtendedFab ref="fab" :expanded="expanded" @update:expanded="update" @click="notes++">
-      <template v-if="withIcon" #leading><MdvIcon :icon="editIcon" /></template>
-      Write note
-    </MdvExtendedFab>
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" @click="request('expand')">Request expand</MdvButton>
-      <MdvButton variant="tonal" @click="request('collapse')">Request collapse</MdvButton>
-      <MdvButton variant="outlined" @click="request('toggle')">Request toggle</MdvButton>
-      <MdvButton variant="text" @click="fab?.focus()">Focus action</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }} · Notes: {{ notes }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Try requesting collapse before and after enabling acceptance. `expand()`, `collapse()`, and `toggle()` resolve to whether the requested state was accepted; they do not wait for the visual transition. Without a leading icon the component keeps its label visible, even when a parent asks for a collapsed presentation.
-
-Expansion changes the presentation of the same action. The label stays available to assistive technology when hidden visually, and the button does not receive `aria-expanded` because it is not disclosing a panel. The stable DOM and width transition support rapid reversals without shrinking the text.
-
-## Placement and reading direction
-
-The default `position="static"` participates in normal layout. Use `absolute` inside an intentional positioned container, or `fixed` for a viewport action. Logical `placement` follows `dir`.
-
-<DemoBlock>
-  <FabPlacementDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvFab, MdvIcon, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvFabPlacement } from '@mdv-ui/mdv'
-import addIcon from '@iconify-icons/material-symbols/add'
-
-const placement = ref<MdvFabPlacement>('bottom-end')
-const rtl = ref(false)
-const count = ref(0)
-const placements = ['bottom-start', 'bottom-center', 'bottom-end'].map(value => ({ value, label: value }))
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap items-center gap-4">
-      <MdvSelect :model-value="placement" :options="placements" label="Action placement" @update:model-value="placement = $event as MdvFabPlacement" />
-      <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-    </div>
-    <div :dir="rtl ? 'rtl' : 'ltr'" class="relative min-h-60 rounded-xl bg-mdv-surface-container-low p-5 pb-28">
-      <p class="font-medium">An action anchored to this preview</p>
-      <p class="mt-3 text-sm text-mdv-on-surface-variant" role="status">Items created: {{ count }}</p>
-      <MdvFab position="absolute" :placement="placement" :offset="20" aria-label="Create in preview" @click="count++"><MdvIcon :icon="addIcon" /></MdvFab>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`offset` adds an edge distance, with safe-area insets applied separately. Reserve room for the action so it cannot cover the last content or important controls. Navigation bars, toolbars, snackbars, and other floating layers need deliberate spacing in the host layout; the FAB does not detect those collisions.
-
-When an icon FAB is placed in the `fab` slot of a floating `MdvToolbar`, that toolbar manages its placement and adapts it from 56px to 80px as the toolbar collapses. Its default color becomes secondary-container in the standard toolbar and tertiary-container in the vibrant toolbar. ExtendedFab does not use that special toolbar context.
-
-## Collapse on a real scroll container
-
-Set `scroll-behavior="collapse"` and point `scroll-target` at the element that actually scrolls. This example explicitly uses the preview scaffold's `contentElement`, independently of the documentation page's scroll position.
+Use `scroll-behavior="collapse"` to collapse the Extended FAB’s label on scroll. Set `scroll-target` to the actual scroll area, or use `v-model:expanded` to control the state yourself.
 
 <DemoBlock>
   <FabScrollDemo />
@@ -320,58 +197,7 @@ const notes = ref(0)
   </template>
 </DemoBlock>
 
-Scroll inside the preview: downward scrolling accumulates toward collapse and upward scrolling toward expansion. The default threshold is 40px in the same direction. The label expands at the top and bottom boundaries. Auto-collapse pauses while the action has focus, is being pressed, or has an associated active menu.
-
-Omitting the target follows `window`. An explicitly supplied selector/getter that does not resolve does not silently follow another scroll area. Use `refresh()` after a target becomes available or when an external layout/font change needs remeasurement. MDV also responds to its observed content changes and cleans up on deactivation/unmount. Reduced motion removes the expansion animation.
-
-## Native forms and links
-
-FABs default to `type="button"`. Choose `submit` or `reset` explicitly for native form actions; normal required-field validation still applies. Supplying `href` renders an actual anchor, including native target and download behavior.
-
-<DemoBlock>
-  <FabFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvExtendedFab, MdvFab, MdvIcon, MdvTextField } from '@mdv-ui/mdv'
-import saveIcon from '@iconify-icons/material-symbols/save-outline'
-import resetIcon from '@iconify-icons/material-symbols/restart-alt'
-
-const title = ref('')
-const result = ref('Enter a title before saving.')
-</script>
-
-<template>
-  <div class="grid gap-5">
-    <form class="grid gap-4" @submit.prevent="result = `Saved: ${title}`" @reset="title = ''; result = 'Draft reset.'">
-      <MdvTextField v-model="title" label="Note title" name="title" required full-width />
-      <div class="flex flex-wrap items-center gap-5">
-        <MdvExtendedFab type="submit"><template #leading><MdvIcon :icon="saveIcon" /></template>Save note</MdvExtendedFab>
-        <MdvFab type="reset" color="secondary-container" aria-label="Reset draft"><MdvIcon :icon="resetIcon" /></MdvFab>
-      </div>
-    </form>
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">{{ result }}</p>
-    <MdvExtendedFab class="justify-self-start" href="https://m3.material.io/components/floating-action-button/overview" target="_blank" rel="noopener noreferrer">Design guide</MdvExtendedFab>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Try saving an empty title, then entering a title and saving or resetting. The Design guide is a real external link. Link FABs follow native Enter activation and do not acquire button-style Space activation.
-
-There is no dedicated disabled or loading design variant in this API. Prefer hiding an unavailable primary action when appropriate. A native `disabled` attribute can still disable a button, but `aria-disabled` alone does not prevent an anchor from navigating; implement any link restriction explicitly.
-
-## Accessibility and motion
-
-- Provide an accessible action name, especially for icon-only FABs. Avoid an ARIA name that contradicts the visible extended label.
-- Use native button/link semantics, preserve focus-visible feedback, and keep interactive children out of the icon/label slots.
-- Check short labels at all intended sizes and widths. Positioning and safe areas do not automatically prevent content overlap.
-- Expansion preserves the action's identity and label while animating its width. Focus, press, scroll direction, and reduced-motion preferences affect automatic collapse as described above.
-- The examples inherit the page's MDV theme. Use local `data-mdv-theme` or theme tokens when a specific preview needs a different appearance.
+---
 
 ## MdvFab API
 

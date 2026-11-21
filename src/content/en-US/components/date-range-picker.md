@@ -9,7 +9,6 @@ import DateRangePickerLayoutDemo from '@/components/docs/demos/dateRangePicker/l
 import DateRangePickerConstraintsDemo from '@/components/docs/demos/dateRangePicker/constraints.vue'
 import DateRangePickerInputDemo from '@/components/docs/demos/dateRangePicker/input.vue'
 import DateRangePickerFormDemo from '@/components/docs/demos/dateRangePicker/form.vue'
-import DateRangePickerControlledDemo from '@/components/docs/demos/dateRangePicker/controlled.vue'
 
 const rangeProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'MdvDateRangeValue', default: 'null', description: 'Accepted { start, end } ISO date pair, or null. Only complete valid ranges are committed. Unbound models are managed internally.' },
@@ -39,14 +38,13 @@ const rangeSlots: SlotTableItem[] = [
   { name: 'title', description: 'Replaces the panel title while preserving its heading and accessible naming. No parameters.' },
 ]
 </script>
-
 # Date Range Picker
 
-`MdvDateRangePicker` chooses a complete pair of Gregorian dates. Use two entry fields and a modal or fullscreen calendar for intervals such as bookings and reporting periods. For a single date, use [Date Picker](./date-picker).
+Use `MdvDateRangePicker` to choose an inclusive start and end date. Use `{ start, end }` with `YYYY-MM-DD` strings, or `null` when no range is selected.
 
 ## Basic usage
 
-The model is `{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' } | null`. Both endpoints are inclusive, same-day ranges are valid, and a half-complete range is never committed. Dates contain no time or time zone and support years `0001`–`9999`.
+Bind `v-model` and label both fields. Choose both endpoints before confirming; a same-day range is valid.
 
 <DemoBlock>
   <DateRangePickerBasicDemo />
@@ -115,17 +113,9 @@ const labels: MdvDatePickerLabels = {
   </template>
 </DemoBlock>
 
-### Selecting endpoints
-
-Open with the calendar button in the end field. Choose a start and then an end; Save commits only a valid, parent-accepted pair. Selecting an earlier second endpoint starts a new range instead of swapping the dates. After a complete draft, the next calendar selection also begins a new range.
-
-The accepted model remains unchanged until confirmation. Cancel, Escape, scrim dismissal, or external closing discards the panel draft. Clearing the entry requests `null` for the entire range. Focusing an entry does not automatically open the panel.
-
----
-
 ## Modal and fullscreen layouts
 
-`auto` uses fullscreen below a 600px viewport width and modal otherwise. Range selection does not support `docked`; use one of the supported layouts explicitly when needed.
+Set `layout` to `modal` or `fullscreen`. `auto` uses fullscreen below a 600px viewport width and modal otherwise.
 
 <DemoBlock>
   <DateRangePickerLayoutDemo />
@@ -200,13 +190,9 @@ const labels: MdvDatePickerLabels = {
   </template>
 </DemoBlock>
 
-The range calendar scrolls through months vertically with a fixed weekday row and Close/Save controls. Earlier/later month controls allow continued browsing without rendering every supported year at once. Input view uses two fields that wrap when space is limited.
+## Date limits
 
-Changing layout or view preserves drafts and calendar browsing state without committing. `initial-view` applies when opening; the panel's view-switch action changes the current view. External model changes resynchronize the draft to the accepted range.
-
-## Limits apply to the complete interval
-
-Set inclusive ISO `min`/`max` values and a synchronous `disabled-date` predicate. Even if both endpoints are available, a blocked day between them makes the entire range invalid.
+Set inclusive `min` and `max` bounds and use `disabled-date` to exclude unavailable dates. Any excluded date inside the interval makes the range invalid.
 
 <DemoBlock>
   <DateRangePickerConstraintsDemo />
@@ -289,15 +275,9 @@ const labels: MdvDatePickerLabels = {
   </template>
 </DemoBlock>
 
-Try November 19–23: November 20 blocks the range. November 19–19 is valid. Text entry does not bypass this rule. Invalid/reversed bounds prevent committing; changing constraints revalidates accepted values and drafts without changing the model automatically.
-
-Keep the predicate fast and free of side effects. Checking a long interval may call it once per day until the first unavailable day. Without a predicate, validation only needs endpoint and bound checks. Disabled/read-only states prevent editing and opening and release an open layer; read-only accepted values can still be submitted.
-
----
-
 ## Text input and validation
 
-With the panel closed, Enter or leaving the entry pair validates a complete range. Moving from start to end lets the reader finish an incomplete pair. Invalid text stays available for correction, and reversed text dates show an error without being silently swapped.
+With the panel closed, Enter or leaving both fields validates the typed range. Reversed dates are not swapped. Use `locale` for date format and see the [Date Picker label reference](./date-picker#locale-and-interface-labels) to translate the controls.
 
 <DemoBlock>
   <DateRangePickerInputDemo />
@@ -365,102 +345,9 @@ const labels: MdvDatePickerLabels = {
   </template>
 </DemoBlock>
 
-The example uses `en-GB`: enter `19/11/2026` and `23/11/2026`, or explicit ISO dates. Locale-order dates accept slash, hyphen, dot, or space separators and one-digit month/day. Undelimited dates require eight digits; two-digit years are not guessed. IME Enter does not submit.
+## Forms and reset
 
-An incomplete or invalid panel draft cannot be saved. Calendar view provides validation status to assistive technology; input view also displays the error. The picker preserves unresolved text across view switching so users can correct the original input.
-
-### Locale and labels
-
-`locale` changes date display, input order, month/weekday names, and the default week start, while models remain ISO. `first-day-of-week` overrides the week start with Sunday=`0` through Saturday=`6`.
-
-Operation/error labels are independent of locale and default to Chinese. Pass `labels` for the application's language. The examples supply the complete English object; see [Date Picker's label groups](./date-picker#locale-and-interface-labels) for all keys. Range-specific headings/descriptions include `rangeTitle`, `chooseRange`, `rangeStart`, `rangeEnd`, `inRange`, `incompleteRange`, `reversedRange`, and `blockedRange`.
-
-## Controlled range acceptance
-
-The parent owns whether to accept a requested range. Rejection leaves the accepted model unchanged and does not emit `confirm` or automatically close the panel.
-
-<DemoBlock>
-  <DateRangePickerControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvDateRangePicker } from '@mdv-ui/mdv'
-import type { MdvDatePickerLabels, MdvDateRangeValue } from '@mdv-ui/mdv'
-
-const range = ref<MdvDateRangeValue>({ start: '2026-11-19', end: '2026-11-23' })
-const reject = ref(true)
-const confirmations = ref(0)
-const request = ref('No range request yet.')
-
-function update(value: MdvDateRangeValue) {
-  request.value = `${JSON.stringify(value)}: ${reject.value ? 'rejected' : 'accepted'}.`
-  if (!reject.value) range.value = value
-}
-const labels: MdvDatePickerLabels = {
-  title: "Select date",
-  rangeTitle: "Select date range",
-  chooseDate: "Choose a date",
-  chooseRange: "Choose start and end dates",
-  open: "Open date picker",
-  calendar: "Switch to calendar",
-  input: "Enter date",
-  cancel: "Cancel",
-  confirm: "Confirm",
-  save: "Save",
-  clear: "Clear date",
-  previousMonth: "Previous month",
-  nextMonth: "Next month",
-  previousYear: "Previous year",
-  nextYear: "Next year",
-  month: "Select month",
-  year: "Select year",
-  previousYears: "Earlier years",
-  nextYears: "Later years",
-  earlierMonths: "Earlier months",
-  laterMonths: "Later months",
-  today: "Today",
-  selected: "Selected",
-  rangeStart: "Range start",
-  rangeEnd: "Range end",
-  inRange: "In selected range",
-  unavailable: "Unavailable",
-  startLabel: "Start date",
-  endLabel: "End date",
-  dateLabel: "Date",
-  formatHint: "Date format",
-  keyboardHint: "Arrow keys move by day or week; Home/End move within the week. PageUp/PageDown change month; hold Shift to change year. Space selects. Single-date Enter selects and confirms. Shift+M/Shift+Y focus month or year.",
-  invalidDate: "Enter a valid Gregorian date with a four-digit year.",
-  required: "Choose a date.",
-  incompleteRange: "Enter both start and end dates.",
-  reversedRange: "End must not precede start.",
-  outOfBounds: "Date is outside the allowed range.",
-  disabledDate: "This date is unavailable.",
-  blockedRange: "The range contains an unavailable date.",
-  invalidBounds: "Date bounds are invalid.",
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="reject" label="Reject range updates" />
-    <MdvDateRangePicker :model-value="range" start-label="Controlled start" end-label="Controlled end" locale="en-US" :labels="labels" @update:model-value="update" @confirm="confirmations++" />
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">Committed: {{ JSON.stringify(range) }} · Confirmations: {{ confirmations }} · {{ request }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Try changing and saving a draft while updates are rejected. Cancel, disable rejection, and reopen to accept another range. A valid unchanged range can still be confirmed because it already matches the accepted model. `v-model:open` can control opening separately; keep an available dismissal path when rejecting close requests.
-
----
-
-## Native form submission and reset
-
-Use `start-name` and `end-name` for separate ISO form fields. The visible localized text and the panel's draft inputs are not submitted as duplicate values. Native `required`, fieldset disabling, reset, and external `form` associations remain supported.
+Set `start-name` and `end-name` to submit the two accepted ISO dates as separate fields. Native reset restores the initial model.
 
 <DemoBlock>
   <DateRangePickerFormDemo />
@@ -542,18 +429,6 @@ const labels: MdvDatePickerLabels = {
 
   </template>
 </DemoBlock>
-
-A disabled fieldset omits its entries from FormData. Read-only entries retain accepted values; a cleared optional range submits empty strings under its configured names. Reset requests the initial pair, clears editing/custom validity feedback, and respects a cancelled reset or a parent refusing the model update.
-
-Commit text with Enter or blur before submitting; Enter is handled as an entry commit rather than an automatic form submit. For additional business constraints, use `checkValidity()`, `reportValidity()`, and `setCustomValidity(message)`; clear a custom error with `''` when resolved.
-
-## Accessibility, themes, and motion
-
-- Both fields need clear labels; do not identify the range only by placeholders. `start-label` and `end-label` also name the panel inputs.
-- The calendar has one Tab stop. Arrows move by day/week; Home/End move within the week; PageUp/PageDown change month, with Shift changing year. Horizontal navigation mirrors in RTL. Unavailable days remain readable through grid navigation.
-- Space or Enter selects a range endpoint; Enter does not confirm the complete range automatically. Use Save. Modal/fullscreen constrain focus to their native dialog and coordinate with other MDV overlays.
-- Escape and explicit dismissal restore the opener; closing because of a model/disabled-state change preserves application focus decisions. The original DOM position retains local theme inheritance, with `primary` endpoints and a `secondary-container` interval.
-- The layers honor reduced motion, retain drafts during responsive migration, and finish cleanup after their exit animation. Server output stays closed until mounting/hydration establishes opening. Real touch keyboards and assistive-technology combinations need separate validation.
 
 ---
 

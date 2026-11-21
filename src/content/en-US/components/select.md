@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import BasicDemo from '@/components/docs/demos/select/basic.vue'
 import MenusDemo from '@/components/docs/demos/select/menus.vue'
 import StateDemo from '@/components/docs/demos/select/state.vue'
-import ControlledDemo from '@/components/docs/demos/select/controlled.vue'
-import AsyncDemo from '@/components/docs/demos/select/async.vue'
 import FormDemo from '@/components/docs/demos/select/form.vue'
 
 const props: ApiTableItem[] = [
@@ -30,14 +28,13 @@ const props: ApiTableItem[] = [
 ]
 const slots: SlotTableItem[] = [{ name: 'option', description: 'Replaces the content of each option; receives { option: MdvSelectOption, selected: boolean, active: boolean }. The component retains the option role and interaction wrapper. Keep content noninteractive.' }]
 </script>
-
 # Select
 
-`MdvSelect` chooses one value from predefined options using an outlined or filled field and a listbox popup. This page describes **MDV 0.1.5**. Use [Autocomplete](./autocomplete) when readers need editable queries or free-text values.
+Use `MdvSelect` to choose one value from predefined options. For search or free text, use [Autocomplete](./autocomplete).
 
-## Fields, options, and typed values
+## Fields and options
 
-Each option has a unique `value` and `label`, with optional `supportingText` and `disabled`. The model stores the value, while the field displays the label. The number `1` and string `'1'` are distinct; disabled options stay visible but cannot be activated. The field itself is readonly because selection comes from the listbox.
+Bind `v-model` and supply `options` with a `value` and `label` for each choice. Use `null` for no selection; numeric and string values are distinct.
 
 <DemoBlock>
   <BasicDemo />
@@ -75,11 +72,9 @@ const typed = ref<MdvSelectValue | null>(1)
   </template>
 </DemoBlock>
 
-## Menu appearances and custom options
+## Menu and custom options
 
-`variant` controls the field; `menu-variant` independently controls the listbox. Expressive is the default. The `option` slot receives the original option and separate selected/active states. `active` tracks keyboard or pointer navigation; it does not mean the model has accepted a selection.
-
-Long lists scroll inside the popup. Modern browsers use the Popover top layer, with viewport flipping and shifting from Floating UI. The popup stays in the component's DOM and inherits local themes and direction. There is no virtual scrolling; keep option counts appropriate for a simple select.
+Set `variant` for the field and `menu-variant` for the popup. Use the `option` slot for custom content; `active` is the highlighted option, while `selected` reflects the model.
 
 <DemoBlock>
   <MenusDemo />
@@ -132,11 +127,9 @@ const options: MdvSelectOption[] = [
   </template>
 </DemoBlock>
 
-## Disabled, errors, and clearing
+## Field states and clearing
 
-Use `disabled` for unavailable fields and option-level `disabled` for unavailable choices. `error`/`error-text` present application feedback; use native constraints or `setCustomValidity()` when submission must also fail.
-
-Clear the selection by assigning `null`. Select has no public `clearable` prop or clear slot. The separate action below respects the same disabled state. Clearing programmatically does not emit `select`; that event describes an activated option.
+Set `disabled` on the field or on individual options. Assign `null` to clear a selection. Use `error` and `error-text` for messages; use native validation when the error must also block submission.
 
 <DemoBlock>
   <StateDemo />
@@ -171,126 +164,9 @@ const options: MdvSelectOption[] = [{ value: 'email', label: 'Email' }, { value:
   </template>
 </DemoBlock>
 
-## Controlled selection and opening
+## Forms and validation
 
-The value and open state are independent. Bind `v-model`/`v-model:open` for ordinary acceptance, or handle the update events explicitly to reject requests. Even when the parent rejects a chosen value, the component emits `select(option)` and requests popup closure. Do not treat `select` as confirmation that the parent stored the new value.
-
-Instance `open()`/`close()` methods use the same controlled request path. Set the parent open state directly when the application owns an unconditional state change. `focus()` and `open()` are separate methods.
-
-<DemoBlock>
-  <ControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvSelectOption, MdvSelectValue } from '@mdv-ui/mdv'
-
-const field = useTemplateRef<InstanceType<typeof MdvSelect>>('field')
-const value = ref<MdvSelectValue | null>('basic')
-const open = ref(false)
-const acceptValue = ref(false)
-const acceptOpen = ref(true)
-const requested = ref('none')
-const options: MdvSelectOption[] = [{ value: 'basic', label: 'Basic' }, { value: 'pro', label: 'Pro' }]
-function updateValue(next: MdvSelectValue | null) {
-  requested.value = `value=${JSON.stringify(next)}`
-  if (acceptValue.value) value.value = next
-}
-function updateOpen(next: boolean) {
-  requested.value = `open=${next}`
-  if (acceptOpen.value) open.value = next
-}
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="acceptValue" label="Accept value requests" />
-      <MdvCheckbox v-model="acceptOpen" label="Accept open requests" />
-    </div>
-    <MdvSelect ref="field" :model-value="value" :open="open" label="Controlled plan" :options="options" full-width @update:model-value="updateValue" @update:open="updateOpen" />
-    <div class="flex flex-wrap gap-2">
-      <MdvButton variant="outlined" @click="field?.focus(); field?.open()">Request open</MdvButton>
-      <MdvButton variant="text" @click="field?.close()">Request close</MdvButton>
-      <MdvButton variant="text" @click="open = false">Close directly</MdvButton>
-    </div>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Open: {{ open }} · Last request: {{ requested }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Application-managed option loading
-
-The public Select API in 0.1.5 has no `loading`, `loadingText`, or `noOptionsText` props. Own loading, errors, cancellation, and retry outside the field. This simulated request disables selection until options are available, announces status, and cancels pending timers on restart, cancellation, or unmount. For query-driven remote suggestions, use Autocomplete.
-
-<DemoBlock>
-  <AsyncDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvLinearProgress, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvSelectOption, MdvSelectValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvSelectValue | null>(null)
-const options = ref<MdvSelectOption[]>([])
-const loading = ref(false)
-const failNext = ref(false)
-const message = ref('Load projects to enable the field.')
-let timer: ReturnType<typeof setTimeout> | undefined
-function cancel() {
-  clearTimeout(timer)
-  loading.value = false
-  message.value = 'Request cancelled.'
-}
-function load() {
-  clearTimeout(timer)
-  loading.value = true
-  message.value = 'Loading projects…'
-  const fail = failNext.value
-  failNext.value = false
-  timer = setTimeout(() => {
-    loading.value = false
-    if (fail) { message.value = 'The simulated service is unavailable. Try again.'; return }
-    options.value = [{ value: 'design', label: 'Design system' }, { value: 'website', label: 'Documentation website' }]
-    message.value = 'Projects loaded.'
-  }, 450)
-}
-onBeforeUnmount(() => clearTimeout(timer))
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3" :aria-busy="loading">
-    <MdvCheckbox v-model="failNext" label="Fail the next simulated request" />
-    <div class="flex flex-wrap gap-2">
-      <MdvButton @click="load">{{ loading ? 'Restart request' : 'Load projects' }}</MdvButton>
-      <MdvButton variant="text" :disabled="!loading" @click="cancel">Cancel request</MdvButton>
-    </div>
-    <MdvLinearProgress v-if="loading" indeterminate aria-label="Loading project options" />
-    <MdvSelect v-model="value" label="Project" placeholder="Choose a project" :options="options" :disabled="loading || options.length === 0" :supporting-text="message" full-width />
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }} Model: {{ JSON.stringify(value) }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-If an empty Select listbox is opened, its current internal fallback message is Chinese. Localizing that message requires a library API review; it is not covered by the public Select props above. This demo uses explicit English application status instead of relying on the empty-popup fallback.
-
-## Native forms, validation, and reset
-
-The visible input displays the label and has no submitted name. A hidden input submits the actual selected value once; a separate unnamed native select provides required validation. `null` omits the named field, while `''` submits an empty value and fails `required`. Disabled fields are excluded. Numbers serialize as strings in FormData.
-
-`required` checks emptiness, not membership in the current options. Removing or disabling an option does not clear an existing model; the parent owns that policy. An unknown model value is displayed as its string representation, so keep options and model consistent.
-
-Native reset requests the model's initial value and closes the popup. Application custom errors need explicit cleanup with `setCustomValidity('')`, as shown below. `checkValidity()` can dispatch native invalid events; it is not a silent visual check.
+Set `name` to submit the selected value. `required` checks for a nonempty value, not whether it still exists in `options`. Clear a stale model yourself when replacing options.
 
 <DemoBlock>
   <FormDemo />
@@ -338,24 +214,9 @@ function reset() {
   </template>
 </DemoBlock>
 
-## Accessibility and keyboard interaction
+If options load asynchronously, show loading, errors, or retry outside the field. The popup’s built-in empty message is fixed Chinese.
 
-The input exposes combobox semantics with `aria-expanded`, `aria-controls`, and `aria-activedescendant`. Focus stays on the field while navigating; selected options expose `aria-selected`. Supply a visible label or an accessible name. Do not put links, inputs, or buttons in the option slot.
-
-<DocsTable label="Select keyboard interaction">
-
-| Key | Behavior |
-| --- | --- |
-| Enter / Space | Opens a closed listbox; commits the active enabled option when open. |
-| Arrow Down / Arrow Up | Opens the listbox, then moves through enabled options without wrapping. |
-| Home / End | Moves to the first/last enabled option; use while the listbox is open. |
-| Printable characters | Searches option-label prefixes; a match is committed immediately. The typeahead buffer resets after 600ms. |
-| Escape | Requests listbox closure. |
-| Tab / blur / outside pointer | Normal focus movement; losing field focus or pressing outside requests closure. |
-
-</DocsTable>
-
-IME composition is not interpreted as selection shortcuts. Selection does not provide text editing or arbitrary free-text input. Verify screen readers, touch, native validation presentation, reduced motion, and popup placement in the final application.
+---
 
 ## API
 

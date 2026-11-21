@@ -5,9 +5,7 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import BottomSheetBasicDemo from '@/components/docs/demos/bottomSheet/basic.vue'
-import BottomSheetStateDemo from '@/components/docs/demos/bottomSheet/state.vue'
 import BottomSheetClosePolicyDemo from '@/components/docs/demos/bottomSheet/closePolicy.vue'
-import BottomSheetFormDemo from '@/components/docs/demos/bottomSheet/form.vue'
 import BottomSheetScaffoldDemo from '@/components/docs/demos/bottomSheet/scaffold.vue'
 import BottomSheetAppearanceDemo from '@/components/docs/demos/bottomSheet/appearance.vue'
 
@@ -50,14 +48,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'actions', description: '公共滚动区中位于正文之后的操作；接收公共面板插槽参数。' },
 ]
 </script>
-
 # 底部面板
 
-底部面板从表面下方展示相关操作或辅助内容。`MdvBottomSheet` 是阻止背景交互的模态面板；`MdvBottomSheetScaffold` 将标准面板放在页面内部，主页面仍可操作。
+底部面板从屏幕底边显示内容或操作。模态面板用 `MdvBottomSheet`，页面内的面板用 `MdvBottomSheetScaffold`。
 
 ## 模态面板
 
-使用 `v-model` 绑定显示状态，提供标题，在 `actions` 插槽中关闭并返回可选结果。短内容按自然高度展示，不会为了半展开而强制占满半屏。
+用 `v-model` 控制显示，并为面板设置标题。在 `#actions` 中可提供关闭操作，并按需返回结果。
 
 <DemoBlock>
   <BottomSheetBasicDemo />
@@ -102,76 +99,9 @@ function onClose(detail: MdvBottomSheetCloseDetail) {
   </template>
 </DemoBlock>
 
-模态面板使用浏览器顶层的原生 `<dialog>`，保留原始 DOM 位置以继承局部主题。它会管理焦点限制、关闭后焦点恢复及背景滚动锁。
-
-### 高度状态与滚动
-
-通过 `partial` 设置半展开高度；需要在应用中控制展开时，绑定 `v-model:expanded`。可以拖动手柄，也可以使用示例中的按钮。标题、正文和操作共用手柄下方的滚动区，长内容需要向下滚动才能到达底部操作。
-
-<DemoBlock>
-  <BottomSheetStateDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBottomSheet, MdvButton, MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvBottomSheetChangeDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const expanded = ref(false)
-const status = ref('Open the sheet to inspect its height states.')
-
-function onChange(detail: MdvBottomSheetChangeDetail) {
-  status.value = `${detail.previousState} → ${detail.state} (${detail.reason})`
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvCheckbox v-model="expanded" label="Start expanded" />
-    <MdvButton @click="open = true">Browse destinations</MdvButton>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ status }}</p>
-    <MdvBottomSheet
-      v-model="open"
-      v-model:expanded="expanded"
-      :partial="0.45"
-      title="Plan your next trip"
-      expand-label="Expand sheet"
-      collapse-label="Collapse sheet"
-      close-label="Close sheet"
-      @change="onChange"
-    >
-      <div class="grid gap-5">
-        <p>Drag the handle upward, or use the buttons below. The list scrolls inside the sheet.</p>
-        <div v-for="city in ['London', 'Paris', 'Tokyo', 'Seoul', 'Singapore', 'Sydney', 'Lisbon', 'Oslo', 'Rome', 'Helsinki', 'Vienna', 'Prague']" :key="city">
-          <p class="font-medium">{{ city }}</p>
-          <p class="text-sm text-mdv-on-surface-variant">Explore local museums, parks, and independent cafés.</p>
-        </div>
-      </div>
-      <template #actions="{ expand, collapse, close, expanded: isExpanded }">
-        <MdvButton variant="text" @click="isExpanded ? collapse() : expand()">
-          {{ isExpanded ? 'Collapse' : 'Expand' }}
-        </MdvButton>
-        <MdvButton @click="close()">Done</MdvButton>
-      </template>
-    </MdvBottomSheet>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`partial` 表示可见视口高度的 50%，其他比例请绑定数字，例如 `:partial="0.45"`。设置 `:partial="false"` 会移除半展开锚点，直接展开。展开仍受顶部留白和 `max-height` 限制，不等同于全屏。
-
-内容过短而无法形成两个不同高度时，半展开与展开会合并。通过 `change` 或插槽的 `state` 读取实际状态。省略 `expanded` 时由内部管理，每次重新打开重置；传入后，父级必须接受 `update:expanded` 才会改变。
-
----
-
 ## 关闭策略
 
-`close-on-esc`、`close-on-scrim`、`close-on-swipe` 分别控制关闭入口。守卫接收 `{ reason, returnValue }`，返回 `false` 或抛出异常/拒绝 Promise 会保留面板；也支持等待异步确认，例如确认对话框的结果。
+用 `before-close` 确认是否关闭。可以返回 `false` 阻止关闭，或返回 Promise 等待决定。直接修改模型关闭会绕过此拦截。
 
 <DemoBlock>
   <BottomSheetClosePolicyDemo />
@@ -221,68 +151,9 @@ const beforeClose: MdvBottomSheetBeforeClose = (detail) => {
   </template>
 </DemoBlock>
 
-Escape、遮罩、手柄、滑动、显式操作及 `method="dialog"` 表单关闭都会经过 `before-close`。直接设置 `open = false` 会绕过守卫。并发关闭请求复用等待中的结果，旧异步请求不会关闭重新打开的面板。
-
-模态手柄在半展开时点击会展开，已经展开时再次点击会请求**关闭**。`:close-on-swipe="false"` 仅禁止滑动隐藏。限制手势或隐藏手柄时，应保留显式关闭按钮。
-
-### 表单与状态保留
-
-原生 `method="dialog"` 表单将提交按钮的 `value` 作为 `returnValue` 返回，关闭原因为 `form`。必填字段照常校验。本例把草稿模型放在面板外部，关闭后重新打开仍保留内容。
-
-<DemoBlock>
-  <BottomSheetFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBottomSheet, MdvButton, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvBottomSheetCloseDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const draft = ref('Weekend reading')
-const result = ref('The draft is preserved when the sheet closes.')
-
-function onClose(detail: MdvBottomSheetCloseDetail) {
-  result.value = detail.returnValue === 'save' ? `Saved: ${draft.value}` : 'Closed without saving.'
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvButton @click="open = true">Edit collection</MdvButton>
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">{{ result }}</p>
-    <MdvBottomSheet
-      v-model="open"
-      title="Collection details"
-      :partial="false"
-      expand-label="Expand sheet"
-      collapse-label="Collapse sheet"
-      close-label="Close sheet"
-      @close="onClose"
-    >
-      <form method="dialog" class="grid gap-5">
-        <MdvTextField v-model="draft" label="Collection name" name="collection" required full-width />
-        <div class="flex flex-wrap justify-end gap-3">
-          <MdvButton type="submit" value="cancel" variant="text" formnovalidate>Cancel</MdvButton>
-          <MdvButton type="submit" value="save">Save</MdvButton>
-        </div>
-      </form>
-    </MdvBottomSheet>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`destroy-on-close` 默认是 `false`，保留已挂载控件；开启后会在关闭动画结束时卸载内容，但不会清空外部 ref。需要向服务端提交时，使用普通提交处理，成功后再调用插槽的 `close()`。
-
----
-
 ## Scaffold 标准面板
 
-为父容器设置明确高度，默认插槽放主页面，`#sheet` 放面板内容。半展开时主区预留 `peek-height`，展开时覆盖更多主页面区域，但不会变成模态。
+给 Scaffold 设置明确的高度。页面放在默认插槽，面板放在 `#sheet`；收起时会为其保留 `peek-height` 高度。
 
 <DemoBlock>
   <BottomSheetScaffoldDemo />
@@ -337,15 +208,9 @@ const visits = ref(0)
   </template>
 </DemoBlock>
 
-Scaffold 使用有名称的 region，不限制焦点、不锁页面滚动，也不全局拦截 Escape。主页面控件保持可用。面板隐藏后需要由应用提供重新打开入口，例如上面的 Show places。
-
-`hideable` 默认是 `false`，只限制用户通过拖动/手柄隐藏；设置模型为 `'hidden'` 或调用 `close()` 始终有效。未开启时，展开手柄会收起；开启后手柄可以隐藏面板。露出高度过小时，正文/操作可能暂时设为 inert，展开后恢复，手柄仍可使用。
-
----
-
 ## 手柄与尺寸
 
-使用 `:show-handle="false"` 隐藏拖动手柄，通过 `:draggable="false"` 独立关闭拖动。两个高度锚点可用时会显示替代的展开/收起按钮；它不是自动添加的关闭按钮。
+用 `show-handle` 控制拖动手柄的显示，用 `draggable` 单独控制是否可拖动。对不应触发拖动的自定义控件，可添加 `data-mdv-sheet-no-drag`。
 
 <DemoBlock>
   <BottomSheetAppearanceDemo />
@@ -389,16 +254,6 @@ const showHandle = ref(false)
 
   </template>
 </DemoBlock>
-
-默认面板使用 `surface-container-low`、1 级阴影、28px 顶部圆角和 640px 最大宽度。模态的响应式顶部/侧边留白与安全区跟随视口，Scaffold 跟随容器。主题颜色及减少动态效果支持由 MDV 提供，文档站不覆盖面板样式。
-
-## 手势与无障碍
-
-- 鼠标从手柄发起拖动；触摸可从非交互正文发起。横向手势、文本选择和交互控件保留自身行为。
-- 对不应触发面板拖动的自定义交互区域添加 `data-mdv-sheet-no-drag`。
-- 手柄是原生按钮，支持 Enter 和 Space。显式展开/收起/关闭按钮可作为手势的替代入口。
-- 提供可见 `title`，或为自定义模态内容设置可访问名称。三个操作标签都应按应用语言配置，组件默认值为中文。
-- 模态负责焦点与嵌套浮层管理；Scaffold 由应用决定何时移动焦点，需要时再调用 `focus()`。
 
 ---
 

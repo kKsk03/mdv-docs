@@ -9,7 +9,6 @@ import ButtonGroupSingleDemo from '@/components/docs/demos/buttonGroup/single.vu
 import ButtonGroupMultipleDemo from '@/components/docs/demos/buttonGroup/multiple.vue'
 import ButtonGroupIndependentDemo from '@/components/docs/demos/buttonGroup/independent.vue'
 import ButtonGroupSizeDemo from '@/components/docs/demos/buttonGroup/size.vue'
-import ButtonGroupStatesDemo from '@/components/docs/demos/buttonGroup/states.vue'
 import ButtonGroupFormDemo from '@/components/docs/demos/buttonGroup/form.vue'
 
 const groupProps: ApiTableItem[] = [
@@ -50,14 +49,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'selected', description: '选中图标，替代 leading 或纯图标项的 default；接收 { selected }。不会自动插入勾选符号。' },
 ]
 </script>
-
 # 按钮组
 
-`MdvButtonGroup` 将相关的 `MdvButtonGroupItem` 排成单行。Standard 适合组合相关操作，Connected 将选项在视觉上连接起来。选择模式与布局外观分别配置。
+用 `MdvButtonGroup` 组织相关操作或选项，每个控件使用一个 `MdvButtonGroupItem`。
 
 ## Standard 普通操作
 
-默认 `standard` 布局使用 `selection="none"`，每项负责自己的原生操作，并可使用不同外观。按下时，当前按钮向直接邻项借用安全空间来扩宽，整组总宽度保持稳定。
+标准操作保留 `selection="none"`，分别处理各按钮的点击。
 
 <DemoBlock>
   <ButtonGroupActionsDemo />
@@ -86,11 +84,9 @@ const message = ref('Choose a document action.')
   </template>
 </DemoBlock>
 
-子项应使用 `MdvButtonGroupItem`，而非直接把普通 `MdvButton` 放入组中。普通操作可以通过 `href` 渲染为原生链接；切换项始终为按钮，并忽略 `href`。
+## 连接式选项
 
-### Connected 单选
-
-Connected 默认开启单选并填满可用宽度。使用 `v-model` 绑定已接受值，并为每项提供唯一 `value`。
+相关选项可使用 `layout="connected"`，并设置 `selection="single"` 或 `multiple`。单选绑定单个值，多选绑定数组。
 
 <DemoBlock>
   <ButtonGroupSingleDemo />
@@ -122,12 +118,6 @@ const required = ref(true)
   </template>
 </DemoBlock>
 
-未开启 `selection-required` 时，再次点击已选项会清空为 `null`。该属性只阻止取消最后一项，不自动选中、不使空初始值有效，也不是 HTML `required` 校验。需要默认有值时，应自行初始化模型。
-
-### 多选
-
-设置 `selection="multiple"` 并使用数组模型。需要勾选图标时添加 `selected` 插槽，MDV 不会自动插入。
-
 <DemoBlock>
   <ButtonGroupMultipleDemo />
   <template #source>
@@ -158,13 +148,9 @@ const filters = ref<MdvButtonGroupModelValue>(['photos'])
   </template>
 </DemoBlock>
 
-值可以是字符串或数字，`0` 与 `'0'` 是不同选项。更新会创建新数组，不会直接修改传入数组。Standard 布局也能通过显式 `selection` 开启选择。
+## 独立切换
 
----
-
-## 独立切换与图标
-
-每项需要独立布尔模型时，保持 `selection="none"`，分别绑定 `v-model:selected`。纯图标按钮必须提供可访问名称。不要同时使用独立 `selected` 与组的单选/多选模型。
+在 `selection="none"` 下，用各项的 `v-model:selected` 控制独立的切换按钮。只有图标的选项需要提供无障碍名称。
 
 <DemoBlock>
   <ButtonGroupIndependentDemo />
@@ -204,13 +190,9 @@ const underline = ref(false)
   </template>
 </DemoBlock>
 
-纯图标项支持 `width="narrow"`、`"default"`、`"wide"`。`default`、`leading`、`trailing`、`selected` 插槽均接收 `{ selected }`。插槽只放装饰内容，不在按钮内部再放交互控件。
+## 尺寸与形状
 
----
-
-## 尺寸、形状与密度
-
-五档尺寸沿用 Button 的规格。Standard 可在子项覆盖组的 `size`、`shape`，Connected 则统一继承，以保持连接处的形状一致。可切换 Square shape 与 Density -2 比较效果。
+在组上设置 `size` 和 `shape` 可统一外观。标准按钮可单独覆盖，连接式按钮沿用组设置。
 
 <DemoBlock>
   <ButtonGroupSizeDemo />
@@ -249,68 +231,9 @@ const message = ref('Choose a size example.')
   </template>
 </DemoBlock>
 
-<DocsTable label="按钮组尺寸与间距">
-
-| 尺寸 | 默认视觉高度 | Standard 间距 |
-| --- | --- | --- |
-| `xs` | 32px | 18px |
-| `s` | 40px | 12px |
-| `m` | 56px | 8px |
-| `l` | 96px | 8px |
-| `xl` | 136px | 8px |
-
-</DocsTable>
-
-Connected 间距固定为 2px。密度支持 `0`、`-1`、`-2`、`-3`，每档减少 4px 视觉高度，交互目标仍至少为 48px。字体放大时表面允许自然增高。
-
-按钮组保持单行，空间不足时在内部横向滚动。长操作列表优先缩短标签或显式组合菜单。`full-width` 在 Standard 中默认为 `false`，Connected 中默认为 `true`，可以自行覆盖。
-
-## 禁用、加载与颜色
-
-组的 `disabled` 禁用全部子项，子项自己的 `disabled` 只禁用该项。加载仅改变视觉，本例同时绑定 `disabled`，避免显示加载指示器时重复发布。
-
-<DemoBlock>
-  <ButtonGroupStatesDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButtonGroup, MdvButtonGroupItem, MdvCheckbox } from '@mdv-ui/mdv'
-
-const loading = ref(false)
-const disabled = ref(false)
-const message = ref('Toggle the states, then try the available actions.')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="loading" label="Show loading" />
-      <MdvCheckbox v-model="disabled" label="Disable group" />
-    </div>
-    <MdvButtonGroup :disabled="disabled" aria-label="Publishing actions">
-      <MdvButtonGroupItem :loading="loading" :disabled="loading" loading-text="Publishing…" @click="message = 'Published.'">
-        Publish
-      </MdvButtonGroupItem>
-      <MdvButtonGroupItem variant="elevated" color="tertiary" @click="message = 'Preview opened.'">Preview</MdvButtonGroupItem>
-      <MdvButtonGroupItem disabled variant="outlined">Unavailable</MdvButtonGroupItem>
-    </MdvButtonGroup>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-子项 `color` 沿用 Button 的七套预设颜色及十六进制局部种子色，省略时使用变体默认角色。选中颜色/形状、状态层、焦点框、弹簧动效、主题继承、RTL 和减少动态效果均由 MDV 处理。
-
----
-
 ## 原生表单
 
-为组设置 `name` 后，会提交已经接受的组选值。多选生成同名的重复隐藏字段，通过 `FormData.getAll()` 读取。
+在组上设置 `name` 可提交所选值。多选会以同名字段提交多条值。
 
 <DemoBlock>
   <ButtonGroupFormDemo />
@@ -349,15 +272,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-Vue 模型保留数字/字符串类型，原生表单值按 HTML 规则转为字符串。`selection="none"` 不提交组选值。`form` 可以关联外部表单。Reset 请求恢复创建时捕获的初始模型，受控父级仍需要接受更新；取消原生 reset 会保留当前状态。禁用组/fieldset 遵循原生表单禁用规则。
-
-## 键盘与受控状态
-
-- 容器是有名称的 `role="group"`，不使用 tablist 或 radio group 语义。通过 `aria-label` 或 `aria-labelledby` 说明用途。
-- Tab / Shift+Tab 逐项经过可用原生控件；方向键移焦，Home/End 到首尾；导航可循环，跳过禁用、隐藏及 inert 项。水平移动随 RTL 镜像。
-- 移动焦点不会修改选择。Enter/Space 激活按钮，链接保持原生 Enter 行为。切换按钮通过 `aria-pressed` 暴露状态。
-- 绑定模型后，父级接受值为最终状态。父级可拒绝 `update:modelValue`，视觉和 `aria-pressed` 维持已接受值。子项原生 click 调用 `preventDefault()` 可取消此次选择变化。
 
 ---
 

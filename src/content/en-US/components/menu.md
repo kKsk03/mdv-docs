@@ -8,10 +8,7 @@ import MenuAppearanceDemo from '@/components/docs/demos/menu/appearance.vue'
 import MenuSelectionDemo from '@/components/docs/demos/menu/selection.vue'
 import MenuActionsDemo from '@/components/docs/demos/menu/actions.vue'
 import MenuNestedDemo from '@/components/docs/demos/menu/nested.vue'
-import MenuControlledDemo from '@/components/docs/demos/menu/controlled.vue'
 import MenuContextDemo from '@/components/docs/demos/menu/context.vue'
-import MenuBoundaryDemo from '@/components/docs/demos/menu/boundary.vue'
-import MenuDialogDemo from '@/components/docs/demos/menu/dialog.vue'
 
 const menuProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'undefined', description: 'Open state. Omit for internal state, initially closed. When bound, the parent must accept each update request.' },
@@ -54,14 +51,13 @@ const groupSlots: SlotTableItem[] = [
   { name: 'label', description: 'Replaces the visible heading and retains the group naming association. No parameters.' },
 ]
 </script>
-
 # Menu
 
-`MdvMenu` presents temporary actions and small sets of choices. `MdvContextMenu` provides a context-menu trigger; both use `MdvMenuItem` and `MdvMenuGroup`. Use a Select or Autocomplete for a form field, and navigation components for persistent destinations.
+Use `MdvMenu` for actions or choices attached to a control. Use `MdvContextMenu` for context-specific actions such as right-click commands.
 
-## Appearances and trigger binding
+## Menu trigger
 
-Bind the complete `triggerProps` object, including its ref, ID, ARIA attributes, and listeners. The trigger slot's `open` is a boolean, not an opening function. MDV Button and IconButton can receive the object directly; name an icon-only trigger with `aria-label`.
+Bind the complete `triggerProps` from `#trigger` to one button. Give an icon-only trigger an accessible name.
 
 <DemoBlock>
   <MenuAppearanceDemo />
@@ -103,11 +99,9 @@ const message = ref('Choose a document action.')
   </template>
 </DemoBlock>
 
-Expressive uses a 16px container radius and 20px icons; Baseline uses 4px and 24px. Both retain elevation and at least a 48px action height. Supporting text and long labels can increase the height. Baseline ignores `vibrant` and `grouped`.
+## Selection groups
 
-## Groups, single choice, and multiple choices
-
-Root `v-model` controls opening. Each group's separate `v-model` controls its choices. Values retain their string/number types. A single choice closes the menu by default; a multiple choice stays open.
+Use `MdvMenuGroup` for related options. Bind the group’s selection separately from the menu’s open state. Single choice closes by default; multiple choice stays open.
 
 <DemoBlock>
   <MenuSelectionDemo />
@@ -146,13 +140,9 @@ const styles = ref<MdvMenuModelValue>(['bold'])
   </template>
 </DemoBlock>
 
-Use unique values inside each group. Links and submenu triggers remain actions even inside a selection group. Each submenu starts a new group scope: put a `MdvMenuGroup` inside its `#children` when that level needs selection.
+## Actions and links
 
-`layout="grouped"` expects direct `MdvMenuGroup` children. Short Expressive menus use 2px gaps and 8px group corners; when height constraints require scrolling, MDV switches to a continuous surface with separators.
-
-## Actions, cancellation, and native links
-
-`@select` receives a cancelable `MdvMenuSelectEvent`. Call `event.preventDefault()` synchronously to cancel selection, native navigation, and automatic dismissal together. For asynchronous permission checks, cancel first and then manage the result and open model in the application.
+Use `href` for link items. Call `preventDefault()` in `select` to cancel the selection and its navigation or dismissal. For async decisions, cancel before awaiting.
 
 <DemoBlock>
   <MenuActionsDemo />
@@ -193,13 +183,9 @@ function cancel(event: MdvMenuSelectEvent) {
   </template>
 </DemoBlock>
 
-`event.detail` contains `{ value, selected, originalEvent }`. `selected` is the proposed choice state, not confirmation that a controlled parent accepted it; ordinary actions report `false`. Native `@click.prevent` also cancels built-in activation.
+## Submenus
 
-Trailing labels, icons, and badges are decorative. The notification example includes its count in the action label. Shortcut text such as `Ctrl+Z` does not install a keyboard shortcut. Keep independent buttons and form controls outside menu-item slots.
-
-## Nested panels and compact navigation
-
-Place the next level in `#children`. `flyout` supports mouse hover, click, and logical forward/backward arrow keys; `push` places the child at the same position and adds a focusable return row. The return row uses the parent label, falling back to `返回` when empty.
+Place a submenu in the item’s `#children` slot. Use `submenu-mode="push"` for compact layouts that need a Back row in place of a side panel.
 
 <DemoBlock>
   <MenuNestedDemo />
@@ -249,76 +235,9 @@ const modes = [{ value: 'flyout', label: 'flyout' }, { value: 'push', label: 'pu
   </template>
 </DemoBlock>
 
-Choose compact behavior in application code; MDV does not automatically switch submenu mode at a breakpoint. Under RTL, left/right navigation and chevrons reverse. A submenu inherits the tree's appearance and theme, but has its own group context.
+## Context menu
 
-## Controlled requests and lifecycle
-
-An explicit boolean model is authoritative. Rejecting an open/close request leaves the state unchanged. Group update events are independent: rejecting a choice does not automatically prevent normal item dismissal, so this example uses `keep-open` for its choices.
-
-<DemoBlock>
-  <MenuControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvMenu, MdvMenuGroup, MdvMenuItem } from '@mdv-ui/mdv'
-import type { MdvMenuModelValue } from '@mdv-ui/mdv'
-
-const menu = useTemplateRef<InstanceType<typeof MdvMenu>>('menu')
-const open = ref(false)
-const acceptOpen = ref(true)
-const acceptClose = ref(true)
-const acceptChoice = ref(false)
-const choice = ref<MdvMenuModelValue>('draft')
-const message = ref('Choice changes are initially rejected.')
-const lifecycle = ref<string[]>([])
-function requestOpen(value: boolean) {
-  const accepted = value ? acceptOpen.value : acceptClose.value
-  if (accepted) open.value = value
-  message.value = `Open ${value}: ${accepted ? 'accepted' : 'rejected'}.`
-}
-function requestChoice(value: MdvMenuModelValue) {
-  if (acceptChoice.value) choice.value = value
-  message.value = `Choice ${value}: ${acceptChoice.value ? 'accepted' : 'rejected'}.`
-}
-function record(event: string) {
-  lifecycle.value = [...lifecycle.value, event].slice(-6)
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="acceptOpen" label="Accept open requests" />
-      <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-      <MdvCheckbox v-model="acceptChoice" label="Accept choice requests" />
-    </div>
-    <div class="flex flex-wrap gap-3">
-      <MdvMenu ref="menu" :model-value="open" @update:model-value="requestOpen" @open="record('open')" @opened="record('opened')" @close="record(`close: ${$event.reason}`)" @closed="record(`closed: ${$event.reason}`)">
-        <template #trigger="{ triggerProps }"><MdvButton v-bind="triggerProps">Controlled menu</MdvButton></template>
-        <MdvMenuGroup :model-value="choice" selection-mode="single" label="Document stage" @update:model-value="requestChoice">
-          <MdvMenuItem value="draft" label="Draft" keep-open />
-          <MdvMenuItem value="review" label="Review" keep-open />
-        </MdvMenuGroup>
-        <MdvMenuItem label="Close controlled menu" />
-      </MdvMenu>
-      <MdvButton variant="outlined" @click="menu?.open('last')">Open at last item</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Open: {{ open }} · Stage: {{ choice }} · {{ message }}</p>
-    <p class="break-words text-xs text-mdv-on-surface-variant">Lifecycle: {{ lifecycle.join(' → ') || 'none' }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`MdvMenuGroup` emits both `update:modelValue` and `change` with the requested next value, including when a parent rejects that proposal. It does not wait for acceptance. An accepted root transition emits `open`/`close`; `opened`/`closed` wait for the corresponding motion to finish. Interrupted transitions do not emit their completion event.
-
-## Context-menu access
-
-The context trigger opens at a mouse right-click position, or below the focused trigger for Shift+F10 and the ContextMenu key. Make a noninteractive trigger focusable yourself. A normal click does not open `MdvContextMenu`.
+Open a context menu with right-click or Shift+F10 on its focusable trigger. Provide a visible alternative for actions that need to be discoverable.
 
 <DemoBlock>
   <MenuContextDemo />
@@ -356,111 +275,7 @@ const message = ref('No context action selected.')
   </template>
 </DemoBlock>
 
-There is no touch long-press implementation or automatic sheet fallback. Keep a visible ordinary menu entry for touch users and other users who cannot invoke a context menu. Both entries above perform the same local actions.
-
-## Available space, scrolling, and local themes
-
-Set `width`, `max-width`, or `--mdv-menu-max-height` on the root. Floating UI keeps placement within available viewport space, flips/shifts when needed, and updates on scrolling/resizing. An overflowing menu scrolls internally and keeps the focused row visible.
-
-<DemoBlock>
-  <MenuBoundaryDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvMenu, MdvMenuGroup, MdvMenuItem } from '@mdv-ui/mdv'
-
-const selected = ref('No recent document selected.')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" class="min-w-0 rounded-xl bg-mdv-surface-container p-5 text-mdv-on-surface">
-        <MdvMenu layout="grouped" placement="bottom-end" :offset="8" style="width: 260px; --mdv-menu-max-height: 220px">
-          <template #trigger="{ triggerProps }"><MdvButton v-bind="triggerProps" variant="tonal">{{ theme }} recent files</MdvButton></template>
-          <MdvMenuGroup label="Recent documents">
-            <MdvMenuItem v-for="number in 8" :key="number" :label="`Document ${number}: a longer project description`" supporting-text="ArchiveExportWithALongUnbrokenSupportingValue" @select="selected = `Document ${number} selected.`" />
-          </MdvMenuGroup>
-          <MdvMenuGroup label="Workspace"><MdvMenuItem label="Create a document" @select="selected = 'New document requested.'" /></MdvMenuGroup>
-        </MdvMenu>
-      </div>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ selected }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Panels use the native manual Popover top layer at their existing DOM location, preserving local MDV themes and direction. They are not teleported to `body`, and do not lock page scrolling. A browser with the Popover API is required. Theme roles supply colors; there is no general `color` prop.
-
-## Dialog composition and focus
-
-A menu can open a dialog, and a menu can live inside a dialog. Keep the owner in charge of focus and avoid manually focusing its trigger after opening a new modal.
-
-<DemoBlock>
-  <MenuDialogDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvDialog, MdvMenu, MdvMenuItem } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const message = ref('No workspace action selected.')
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvMenu>
-      <template #trigger="{ triggerProps }"><MdvButton v-bind="triggerProps">Workspace menu</MdvButton></template>
-      <MdvMenuItem label="Open workspace dialog" @select="open = true" />
-    </MdvMenu>
-    <MdvDialog v-model="open" title="Workspace settings" role="dialog" description="Escape closes the topmost menu before closing this dialog.">
-      <div class="flex flex-wrap gap-3">
-        <MdvMenu>
-          <template #trigger="{ triggerProps }"><MdvButton v-bind="triggerProps" variant="tonal">Settings actions</MdvButton></template>
-          <MdvMenuItem label="Reset workspace" @select="message = 'Workspace reset locally.'" />
-          <MdvMenuItem label="Preview changes" keep-open @select="message = 'Preview requested.'" />
-        </MdvMenu>
-        <MdvButton variant="text" @click="message = 'Focus continued after the menu.'">After the menu</MdvButton>
-      </div>
-      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
-    </MdvDialog>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Escape closes the deepest menu level first; a menu inside a dialog handles Escape before that dialog. Tab leaves the menu and continues from its trigger's position, staying within the current dialog when applicable. Selecting an action that opens a dialog does not steal focus from the new modal.
-
-## Keyboard and accessibility
-
-<DocsTable label="Menu keyboard behavior" min-width="32rem">
-
-| Input | Behavior |
-| --- | --- |
-| Trigger click, Enter, Space, ArrowDown | Opens the ordinary menu at its first item |
-| Trigger ArrowUp | Opens at its last item |
-| ArrowUp / ArrowDown | Cycles through visible items; disabled actions remain focusable but cannot run |
-| Home / End | First / last item; headings and separators are excluded |
-| Printable prefix | Typeahead over action labels; repeated letters cycle matches |
-| Logical forward / backward | Enters / leaves a submenu; directions reverse in RTL |
-| Escape | Closes the deepest submenu, then the root |
-| Tab / Shift+Tab | Closes the tree and continues outside it; no menu Tab loop |
-
-</DocsTable>
-
-The panel is `role="menu"`; choices are `menuitemradio` or `menuitemcheckbox` with `aria-checked`, while ordinary actions and submenu entries are `menuitem`. Groups have accessible heading associations. Supporting text contributes a description. Disabled items expose `aria-disabled`, rather than losing keyboard discoverability.
-
-Selection, Escape, and programmatic dismissal restore a usable trigger when appropriate. Outside pointer/focus movement and business code that moved focus retain their new target. Reduced motion shortens/removes menu motion. Unmounting and KeepAlive deactivation dispose panels, positioning, timers, and listeners. SSR renders closed panels; an initially true model opens after client mounting.
+---
 
 ## API
 

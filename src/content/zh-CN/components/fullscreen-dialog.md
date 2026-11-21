@@ -6,9 +6,7 @@ import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import FullscreenBasicDemo from '@/components/docs/demos/fullscreenDialog/basic.vue'
 import FullscreenFormDemo from '@/components/docs/demos/fullscreenDialog/form.vue'
-import FullscreenPolicyDemo from '@/components/docs/demos/fullscreenDialog/policy.vue'
 import FullscreenAsyncDemo from '@/components/docs/demos/fullscreenDialog/async.vue'
-import FullscreenScrollDemo from '@/components/docs/demos/fullscreenDialog/scroll.vue'
 import FullscreenGuardDemo from '@/components/docs/demos/fullscreenDialog/guard.vue'
 
 const dialogProps: ApiTableItem[] = [
@@ -28,14 +26,13 @@ const dialogSlots: SlotTableItem[] = [
   { name: 'footer', description: '独立于滚动正文的可选底部操作栏，接收相同的 { close } 回调。' },
 ]
 </script>
-
 # 全屏对话框
 
-`MdvFullscreenDialog` 为表单或较长任务提供独立的模态工作区。它在桌面和手机上都占满视口，需要按任务明确选择，不会在宽屏自动切换为普通[对话框](/zh-CN/components/dialog)。
+用 `MdvFullscreenDialog` 承载需要整个屏幕的任务，例如编辑表单。
 
-## 顶栏、底栏与关闭结果
+## 页头与页尾
 
-绑定 `v-model`，提供标题，将主要操作放在 `#actions`。可选的 `#footer` 位于滚动正文之外，两个操作插槽都能使用 `close()`。
+绑定 `v-model`，设置标题，将主操作放在 `#actions`。需要固定在滚动正文之外的控件放在 `#footer`。
 
 <DemoBlock>
   <FullscreenBasicDemo />
@@ -65,13 +62,9 @@ const result = ref('No result yet.')
   </template>
 </DemoBlock>
 
-组件提供顶栏 X，批准、保存等业务逻辑仍由应用处理。传给 `close('approved')` 的结果会出现在关闭事件的 `returnValue` 中；X 和 Escape 各有对应的关闭原因。
+## 提交表单
 
-表面使用 `surface-container-high`，没有圆角和阴影。顶栏、底栏最小高度均为 56px，正文内边距为 24px，并兼顾设备安全区。手机上应保持操作文字简短，为标题留出空间。
-
-## 原生表单与顶栏提交
-
-顶栏按钮可以通过原生 `form` 属性提交正文中的表单。为每个表单生成唯一 ID，并明确设置 `type="submit"`，必填校验仍正常生效。
+为正文表单设置 ID。页头的提交操作设置 `type="submit"` 和 `form`，即可提交表单并进行原生校验。
 
 <DemoBlock>
   <FullscreenFormDemo />
@@ -112,65 +105,9 @@ async function save() {
   </template>
 </DemoBlock>
 
-可以先尝试保存空名称，再输入内容重试。`autofocus` 会将初始焦点放到输入框。示例使用 `@submit.prevent` 执行本地保存后，通过组件实例请求关闭；组件不会将所有 Enter 都解释为确认。
+## 异步保存
 
-也支持原生 `method="dialog"` 与提交按钮的 `formmethod="dialog"`：提交经过关闭拦截和退出动画，提交按钮的 `value` 成为 `returnValue`。表单上的 `@submit.prevent` 会取消这条原生关闭路径。程序化提交应使用 `requestSubmit()`，不要通过 `form.submit()` 绕过校验。
-
-## 关闭策略与内容生命周期
-
-`closable` 控制顶栏 X，`close-on-esc` 控制 Escape。全屏表面覆盖视口，因此没有 `close-on-scrim` 属性。隐藏 X 或禁用 Escape 时，仍需保留明确的退出操作。
-
-<DemoBlock>
-  <FullscreenPolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvFullscreenDialog, MdvTextField } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const closable = ref(true)
-const escape = ref(true)
-const destroy = ref(false)
-const reject = ref(false)
-const message = ref('Closing requests are accepted.')
-
-function update(value: boolean) {
-  message.value = reject.value ? 'The parent rejected closing.' : 'The parent accepted closing.'
-  if (!reject.value) open.value = value
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="closable" label="Show the close action" />
-      <MdvCheckbox v-model="escape" label="Close on Escape" />
-      <MdvCheckbox v-model="destroy" label="Destroy content after closing" />
-    </div>
-    <MdvButton variant="tonal" @click="open = true">Try fullscreen policy</MdvButton>
-    <MdvFullscreenDialog :model-value="open" title="Close policy" close-label="Close policy preview" :closable="closable" :close-on-esc="escape" :destroy-on-close="destroy" @update:model-value="update">
-      <div class="mx-auto grid max-w-2xl gap-5">
-        <MdvTextField label="Temporary note" full-width autofocus />
-        <MdvCheckbox v-model="reject" label="Reject closing requests" />
-        <p class="text-sm" role="status">{{ message }}</p>
-      </div>
-      <template #footer="{ close }"><MdvButton variant="text" @click="close('done')">Done</MdvButton></template>
-    </MdvFullscreenDialog>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-拒绝关闭的开关位于对话框内，方便重新允许退出。受控父级不接受 `update:modelValue=false` 时，模态会继续保持打开。可以编辑 Temporary note 后关闭、重开：默认保留内部状态；启用 `destroy-on-close` 后，在退出结束时卸载内容，内部输入框随之重置，但父级绑定状态不会被清空。
-
-## 异步保存与失败处理
-
-保存失败时保留草稿，成功后再关闭。加载指示器不会自动阻止重复操作，示例明确禁用提交，并在保存期间拒绝关闭请求。
+保存失败时保留草稿并显示错误。保存期间禁用提交操作，成功后再关闭。
 
 <DemoBlock>
   <FullscreenAsyncDemo />
@@ -226,55 +163,9 @@ onBeforeUnmount(() => clearTimeout(timer))
   </template>
 </DemoBlock>
 
-先在启用失败模拟时发布，再取消失败模拟后重试。定时器仅模拟本地请求，卸载时会清理；真实应用同样需要自行处理请求取消、错误和成功结果。父级直接将模型设为 `false` 会跳过 `before-close`，应只用于明确的父级决策。
+## 关闭前确认
 
-## 长内容、主题与方向
-
-正文独立滚动，顶栏和底栏持续可用。长正文可以获得用于键盘滚动的 Tab 停靠点。对话框从原 DOM 位置进入原生顶层，因此仍能继承局部 MDV 主题。
-
-<DemoBlock>
-  <FullscreenScrollDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvFullscreenDialog } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const dark = ref(true)
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="dark" label="Local dark theme" />
-      <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-    </div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'">
-      <MdvButton @click="open = true">Read long content</MdvButton>
-      <MdvFullscreenDialog v-model="open" close-label="Close reading view" :dir="rtl ? 'rtl' : 'ltr'">
-        <template #title>Workspace review and reading notes</template>
-        <div class="mx-auto grid max-w-3xl gap-6">
-          <p v-for="index in 30" :key="index">Section {{ index }}: the body scrolls independently while the header and footer remain available. Keep real content structured with useful headings and concise paragraphs.</p>
-        </div>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close('finished')">Finish</MdvButton></template>
-        <template #footer="{ close }"><MdvButton variant="text" @click="close('back')">Back</MdvButton></template>
-      </MdvFullscreenDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-示例默认使用局部深色主题，即使页面为浅色也保留深色，同时展示标题插槽和 RTL 布局。标题插槽保留已有标题的可访问关联，无需为了命名再套一个外部标题。
-
-## 未保存内容确认
-
-`before-close` 收到只读的 `{ reason, returnValue }`。返回 `false` 拒绝，正常返回允许，也可以返回 Promise，等待普通 Dialog 的确认结果。
+`before-close` 返回 `false` 可阻止关闭，也可返回 Promise 等待确认。若隐藏页头关闭按钮，请保留明确的退出操作。
 
 <DemoBlock>
   <FullscreenGuardDemo />
@@ -336,18 +227,7 @@ onBeforeUnmount(() => answer?.(false))
   </template>
 </DemoBlock>
 
-修改名称后尝试 X、Escape 或 Cancel。Keep editing 和确认框中的 Escape 都会保留草稿；Discard 则允许正在等待的外层关闭。示例在确认框 `closed` 后才返回决定，先完成其模态资源清理。Save changes 直接接受本地草稿，不再询问是否放弃。
-
-重复关闭会共用正在等待的拦截结果。拦截器抛错或 Promise 拒绝时保留对话框并记录错误；父级关闭、重开或卸载会使旧请求失效，应用自身持有的待确认状态也需要清理。
-
-## 无障碍与动效
-
-- 默认角色为 `dialog`，带有 `aria-modal="true"`。可见标题自动关联；没有自定义默认插槽时，简单 `description` 自动关联。显式 ARIA 名称优先；没有可见标题时提供 `aria-label` 或 `aria-labelledby`。
-- 初始焦点优先内部 `autofocus`，其次为可操作控件，最后回退到对话框或正文。Tab/Shift+Tab 在最上层模态内循环。嵌套对话框协调焦点和滚动锁，关闭后恢复到适当的可用入口。
-- 内置关闭名称默认为中文，英文演示明确传入 `close-label`。隐藏关闭操作后，仍需要可用的退出路径。
-- 进入从底部滑入，持续 300ms；退出为 200ms，遮罩独立渐变，不缩放文字。MDV 处理快速反向和减少动态效果偏好。
-- `close()` 返回状态接受情况，不代表动画完成。需要等待退出与清理时使用 `closed`；KeepAlive 停用和卸载会释放模态资源。
-- 需要支持原生 dialog 的现代浏览器。SSR 输出关闭节点，初始模型为 true 时在 hydration 后建立模态。`open`、`closedby`、`tabindex` 由 MDV 管理。
+---
 
 ## API
 

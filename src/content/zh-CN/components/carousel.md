@@ -7,9 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import CarouselBasicDemo from '@/components/docs/demos/carousel/basic.vue'
 import CarouselVariantDemo from '@/components/docs/demos/carousel/variant.vue'
 import CarouselFullScreenDemo from '@/components/docs/demos/carousel/fullScreen.vue'
-import CarouselControlledDemo from '@/components/docs/demos/carousel/controlled.vue'
 import CarouselContentDemo from '@/components/docs/demos/carousel/content.vue'
-import CarouselItemsDemo from '@/components/docs/demos/carousel/items.vue'
 
 const carouselProps: ApiTableItem[] = [
   { name: 'items', type: 'readonly T[]', description: '必填的条目数组，T extends object；每项必须具有有效、唯一且稳定的 key。' },
@@ -32,14 +30,13 @@ const carouselSlots: SlotTableItem[] = [
   { name: 'empty', description: 'items 为空数组时的内容，无插槽参数。' },
 ]
 </script>
-
 # 轮播
 
-`MdvCarousel` 通过响应式条目遮罩及媒体展示可浏览集合，支持横向 Multi-browse、Uncontained、Hero，以及竖向 Full-screen。浏览位置通过稳定条目 key 管理。
+用 `MdvCarousel` 浏览一组图像或相关内容。
 
 ## 基本用法
 
-为 `items` 提供唯一 `key`，使用 `v-model` 绑定当前浏览锚点。本例使用内嵌 SVG 插画、默认图片条目及英文界面标签。
+为每项设置唯一、稳定的 `key`，用 `v-model` 绑定当前项。用 `aria-label` 为轮播命名，用 `labels` 本地化控件文案。
 
 <DemoBlock>
   <CarouselBasicDemo />
@@ -86,17 +83,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-模型表示浏览位置，不是表单选中值或 DOM 焦点。默认条目激活时发出 `item-click`，实际业务操作由应用处理。提供 `href` 时默认条目是原生链接，否则是原生按钮。可在 `item-click` 中同步调用 `originalEvent.preventDefault()`，取消链接导航与自动定位。
-
-### 稳定 key
-
-Key 必须是唯一字符串或有限数字。默认字段是 `key`；其他数据结构可以指定 `item-key="id"` 或 `:item-key="item => item.id"`。缺失、重复 key 会直接抛出错误，不会悄悄使用数组索引。字符串与数字 key 严格区分。
-
----
-
 ## 横向布局
 
-Multi-browse 同时展示较大条目与较小预览；Hero 默认强调居中的大条目；Uncontained 使用公共媒体高度，允许条目经过视口边缘，并通过 `aspectRatio` 改变宽度。
+需要同时展示大项目与预览时用 Multi-browse，突出单个大项目时用 Hero，卡片宽度不同时用 Uncontained。
 
 <DemoBlock>
   <CarouselVariantDemo />
@@ -145,28 +134,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-<DocsTable label="轮播布局默认配置" min-width="32rem">
+## 纵向轮播
 
-| 布局 | 默认对齐 | 默认手势停靠 |
-| --- | --- | --- |
-| `multi-browse` | `start` | `single-advance` |
-| `uncontained` | `start` | `no-snap` |
-| `hero` | `center` | `single-advance` |
-| `full-screen` | 竖向整页 | 始终 `single-advance` |
-
-</DocsTable>
-
-### 尺寸与手势
-
-`item-size` 是 Multi-browse/Hero 的首选大项宽度，或 Uncontained 的基础项宽。默认 186px，Hero 省略时尽量填满可用宽度。普通视口默认高 205px、间距 8px。这些是 MDV 默认值，并非 Material 强制尺寸。窄容器及少量条目会自动调整排列。
-
-通过 `alignment="start"` 或 `"center"` 设置横向对齐。`fling-behavior="single-advance"` 将快速甩动限制到相邻锚点，低速长拖动仍按距离定位；`multi-browse` 可以跨越更多项。`no-snap` 仅 Uncontained 可用，接受的自由滚动位置不会再次被强制吸附。
-
-横向布局可使用鼠标/触摸拖动、横向触控板或 Shift+滚轮，普通竖向滚轮保留给页面滚动。应保留无需横向手势的替代入口：默认控制在媒体下方，自定义控件也应放在那里。
-
-## 竖向全屏布局
-
-`variant="full-screen"` 填充明确高度的宿主，并按竖向整页浏览。本例主动显示控制，因此不用滑动或滚轮也能操作。
+使用 `variant="full-screen"` 纵向浏览。给父容器设置明确的高度，并提供控件，让用户不必依赖滑动手势。
 
 <DemoBlock>
   <CarouselFullScreenDemo />
@@ -208,75 +178,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-这里的全屏指宿主内部的沉浸式区域，不调用浏览器 Fullscreen API、不创建浮层，也不锁定周围页面。默认页间距 16px、外部直角，控制默认隐藏，需要时显式开启。应用转为不适合的横屏布局时，应选择其他布局。
-
-组件没有自动播放、无限循环、视频播放管理或自动数据加载。这些由应用负责，不应假定组件已经提供。
-
----
-
-## 受控导航
-
-受控模式由父级决定是否接受请求的 key。可以先在拒绝状态尝试 Next，再解锁导航。关闭拖动/滚轮不会关闭其他导航方式。
-
-<DemoBlock>
-  <CarouselControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCarousel, MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvCarouselExpose, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
-
-const carousel = useTemplateRef<MdvCarouselExpose>('carousel')
-const current = ref<MdvCarouselKey | null>('first')
-const locked = ref(true)
-const gestures = ref(true)
-const result = ref('Unlock navigation to accept a different key.')
-const items = ['first', 'second', 'third', 'fourth'].map((key, index) => ({ key, label: `Chapter ${index + 1}` }))
-const labels: MdvCarouselLabels = {
-  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
-  skip: 'Skip carousel', empty: 'No chapters.',
-  item: (index, count) => `Chapter ${index + 1} of ${count}`,
-}
-
-function update(key: MdvCarouselKey | null) {
-  result.value = `Requested ${key}: ${locked.value ? 'rejected' : 'accepted'}.`
-  if (!locked.value) current.value = key
-}
-
-async function jump() {
-  const accepted = await carousel.value?.scrollTo('fourth', { animate: false, focus: true })
-  result.value = accepted ? 'Jump accepted and the chapter was focused.' : 'Jump rejected; the accepted chapter is unchanged.'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="locked" label="Reject navigation requests" />
-      <MdvCheckbox v-model="gestures" label="Enable dragging and wheel" />
-    </div>
-    <MdvCarousel ref="carousel" :model-value="current" :items="items" :labels="labels" :height="140" :user-scroll-enabled="gestures" aria-label="Controlled chapters" @update:model-value="update" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" @click="jump">Jump to chapter 4</MdvButton>
-      <MdvButton variant="outlined" @click="carousel?.focus()">Focus current chapter</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current }} · {{ result }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-拒绝请求后会恢复已接受锚点，不触发成功的 `change`。程序方法返回 `Promise<boolean>` 表示请求是否接受，不等待动画完成。`{ focus: true }` 会直接显露并聚焦目标，避免焦点留在被裁切的条目里。
-
-`null` 明确表示无锚点。无效的受控 key 不会伪造替代 active 值。父级直接修改模型时，不再发出一次更新请求。
-
 ## 自定义内容与控制
 
-条目插槽接收原始数据、从零开始的索引和 key 是否为当前 active。Uncontained 适合包含文字及独立控件的丰富内容；头部与控制位于条目遮罩之外。
+用 `item` 插槽展示更丰富的内容。插槽提供当前条目、索引和激活状态。操作控件应可在不拖动的情况下使用。
 
 <DemoBlock>
   <CarouselContentDemo />
@@ -330,80 +234,7 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-自定义插槽自行负责操作、可访问名称、链接和禁用状态。输入框及媒体保留自身编辑/播放手势。`data-mdv-carousel-no-drag` 可将自定义区域的拖动、滚轮及方向键行为留给该区域。浏览和尺寸重算会保留条目状态，轮播不接管或重置业务输入值。
-
-`header`、`controls` 接收 `{ key, index, count, canPrevious, canNext, previous, next }`。`previous()`、`next()` 发起控制导航并返回 `Promise<boolean>`，应将可用标志绑定到实际控件的 disabled。Full-screen 使用控制插槽时还需设置 `show-controls`。
-
-## 修改集合
-
-稳定 key 在重排时保留条目身份。删除当前项会请求相邻 key，清空集合会请求 `null`。禁用的默认条目仍保留在可浏览集合中，但不能激活操作。
-
-<DemoBlock>
-  <CarouselItemsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCarousel } from '@mdv-ui/mdv'
-import type { MdvCarouselItem, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
-
-const initial: MdvCarouselItem[] = [
-  { key: 'design', label: 'Design' },
-  { key: 'research', label: 'Research' },
-  { key: 'drafts', label: 'Drafts', disabled: true },
-  { key: 'archive', label: 'Archive' },
-]
-const items = ref([...initial])
-const current = ref<MdvCarouselKey | null>('design')
-const labels: MdvCarouselLabels = {
-  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
-  skip: 'Skip carousel', empty: 'No collections.',
-  item: (index, count) => `Collection ${index + 1} of ${count}`,
-}
-
-function rotate() {
-  if (items.value.length) items.value = [...items.value.slice(1), items.value[0]!]
-}
-
-function reset() {
-  items.value = [...initial]
-  current.value = 'design'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCarousel v-model="current" :items="items" :labels="labels" :height="150" aria-label="Dynamic collections">
-      <template #empty><p>No collections left. Restore them to continue.</p></template>
-    </MdvCarousel>
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" :disabled="!items.length" @click="rotate">Move first to end</MdvButton>
-      <MdvButton variant="outlined" :disabled="current === null" @click="items = items.filter(item => item.key !== current)">Remove current</MdvButton>
-      <MdvButton variant="text" :disabled="!items.length" @click="items = []">Clear</MdvButton>
-      <MdvButton variant="text" @click="reset">Restore</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current ?? '(none)' }} · {{ items.length }} collections</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-受控集合删除条目时，请接受对应的模型请求；如果父级拒绝替代目标，轮播不会伪造活动项。可以用 `#empty` 提供业务恢复入口或提示。
-
 ---
-
-## 无障碍、主题与动效
-
-- 使用 `aria-label` 或 `aria-labelledby` 命名区域。`labels` 本地化条目说明、控制、跳过链接、空状态及从零开始的 `item(index, count)` 序号文案，默认值为中文。
-- 焦点位于条目内时，方向键与 Home/End 浏览；水平键随 RTL 镜像，Full-screen 使用上/下键。此导航会同步浏览锚点与焦点，输入框保留编辑按键。
-- Tab 按原生顺序经过控件；离开一项的最后控件时会显露下一项，最后一项可正常离开。不可见项退出 Tab 及无障碍树，聚焦目标前先显露它。
-- 键盘可见的跳过链接可直接越过轮播。挂载和尺寸变化不会主动抢焦点。
-- 减少动态效果时移除视差及动态宽度展开，使用稳定项宽；Full-screen 仍保持整页定位。局部主题与强制颜色使用 MDV 令牌。
-
-支持 `--mdv-carousel-radius`、`--mdv-carousel-background`、`--mdv-carousel-foreground` 覆盖。条目内容可读取 `--mdv-carousel-mask-start`、`--mdv-carousel-mask-size`、`--mdv-carousel-label-opacity` 来适配遮罩，无需每个动画帧重新渲染。不要在文档站 CSS 中重新实现组件遮罩几何。
 
 ## API
 

@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import BasicDemo from '@/components/docs/demos/segmentedButton/basic.vue'
-import SelectionDemo from '@/components/docs/demos/segmentedButton/selection.vue'
 import AppearanceDemo from '@/components/docs/demos/segmentedButton/appearance.vue'
 import IconsDemo from '@/components/docs/demos/segmentedButton/icons.vue'
-import ControlledDemo from '@/components/docs/demos/segmentedButton/controlled.vue'
 import FormDemo from '@/components/docs/demos/segmentedButton/form.vue'
 
 const groupProps: ApiTableItem[] = [
@@ -34,14 +31,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'selected-icon', description: 'Replaces the built-in check; receives { selected: boolean }. Hidden when showSelectedIcon is false.' },
 ]
 </script>
-
 # Segmented Button
 
-`MdvSegmentedButton` groups a small set of related choices using the classic Material Design 3 segmented treatment. `MdvSegmentedButtonItem` represents each choice. This page describes **MDV 0.1.5**. For the Expressive connected-button treatment, see [Button Group](./button-group).
+Use `MdvSegmentedButton` for a short set of related choices, with one `MdvSegmentedButtonItem` per option. For the Expressive connected style, see [Button Group](./button-group).
 
-## Single and multiple selection
+## Selecting options
 
-Put the model on the group and give each item a unique string or numeric `value`. Single selection replaces the current value; multiple selection creates a new array. Items do not have independent models. Two to five short related options work best; use Select or Autocomplete for longer lists.
+Bind a single value for `selection="single"` or an array for `selection="multiple"`. Give each item a distinct `value`. In single mode, set `:selection-required="false"` to let users deselect the active item.
 
 <DemoBlock>
   <BasicDemo />
@@ -77,62 +73,9 @@ const details = ref<MdvSegmentedButtonModelValue>(['summary'])
   </template>
 </DemoBlock>
 
-## Optional selection and value types
+## Density and width
 
-Single selection defaults to `selectionRequired=true`. Set it to `false` to clear the value to `null` by activating the selected segment again. Multiple selection allows an empty array by default; `selection-required` prevents removing its last selected value.
-
-This is an interaction rule, not HTML `required`. An empty external model stays empty, even when selection is required. Changing selection mode, removing options, and cleaning up stale values remain application responsibilities. A numeric value and its string representation are distinct in the model.
-
-<DemoBlock>
-  <SelectionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvSegmentedButton, MdvSegmentedButtonItem } from '@mdv-ui/mdv'
-import type { MdvSegmentedButtonModelValue } from '@mdv-ui/mdv'
-
-const optional = ref<MdvSegmentedButtonModelValue>(null)
-const required = ref<MdvSegmentedButtonModelValue>(['email'])
-const typed = ref<MdvSegmentedButtonModelValue>(1)
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-4">
-    <div class="grid gap-1">
-      <p class="text-sm text-mdv-on-surface-variant">Optional single selection: activate again to clear.</p>
-      <MdvSegmentedButton v-model="optional" :selection-required="false" aria-label="Optional alignment">
-        <MdvSegmentedButtonItem value="left" label="Left" />
-        <MdvSegmentedButtonItem value="center" label="Center" />
-        <MdvSegmentedButtonItem value="right" label="Right" />
-      </MdvSegmentedButton>
-    </div>
-    <div class="grid gap-1">
-      <p class="text-sm text-mdv-on-surface-variant">Keep at least one channel selected.</p>
-      <MdvSegmentedButton v-model="required" selection="multiple" selection-required aria-label="Notification channels">
-        <MdvSegmentedButtonItem value="email" label="Email" />
-        <MdvSegmentedButtonItem value="push" label="Push" />
-        <MdvSegmentedButtonItem value="sms" label="SMS" disabled />
-      </MdvSegmentedButton>
-    </div>
-    <MdvSegmentedButton v-model="typed" aria-label="Strict value types">
-      <MdvSegmentedButtonItem :value="1" label="Number 1" />
-      <MdvSegmentedButtonItem value="1" label="String 1" />
-    </MdvSegmentedButton>
-    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">Optional: {{ JSON.stringify(optional) }} · Channels: {{ JSON.stringify(required) }} · Typed: {{ typeof typed }} {{ JSON.stringify(typed) }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Density, full width, and overflow
-
-Density changes the visible surface while preserving the interaction area. `full-width` makes equal segments fill their container. Long labels remain on one line and scroll within the group rather than squeezing into several lines. Keep the surrounding layout flexible with `min-width: 0`.
-
-Colors follow the current MDV theme: selected segments use `secondary-container` and `on-secondary-container`; outlines use `outline`. This component has no `color`, `variant`, `size`, or vertical-orientation prop. Local theme scopes, RTL, reduced motion, and forced-color styles come from MDV.
+Use `density` to adjust height and `full-width` to fill the container. Keep labels short; use a different control when choices no longer fit comfortably.
 
 <DemoBlock>
   <AppearanceDemo />
@@ -182,11 +125,9 @@ const rtl = ref(false)
   </template>
 </DemoBlock>
 
-## Leading and selected icons
+## Icons
 
-Text-only segments reveal a check when selected. With a leading icon and text, the check replaces the icon in the same area. Icon-only segments retain the original icon and add the check beside it. The slot receives `selected` for content that needs to reflect state.
-
-Use individual icon-data imports for custom icons; the built-in check needs no consumer icon-data package. Name icon-only inputs with `aria-label` or `aria-labelledby`. Keep slot content noninteractive because the whole segment is a native input label.
+Use the `leading` and `selected-icon` slots to customize item icons. Give icon-only items an accessible name.
 
 <DemoBlock>
   <IconsDemo />
@@ -230,50 +171,9 @@ const showSelectedIcon = ref(true)
   </template>
 </DemoBlock>
 
-## Controlled requests and cancellation
+## Forms and reset
 
-`update:modelValue` requests a change; the parent decides whether to accept it. If rejected, native checked state returns to the accepted model. Programmatic model changes do not synthesize native input/change events. A native `click.prevent` cancels activation, as shown by Cancelled below.
-
-<DemoBlock>
-  <ControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvSegmentedButton, MdvSegmentedButtonItem } from '@mdv-ui/mdv'
-import type { MdvSegmentedButtonModelValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvSegmentedButtonModelValue>('draft')
-const requested = ref<MdvSegmentedButtonModelValue>(null)
-const accept = ref(false)
-function update(next: MdvSegmentedButtonModelValue) {
-  requested.value = next
-  if (accept.value) value.value = next
-}
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3">
-    <MdvCheckbox v-model="accept" label="Accept selection requests" />
-    <MdvSegmentedButton :model-value="value" aria-label="Controlled publication state" @update:model-value="update">
-      <MdvSegmentedButtonItem value="draft" label="Draft" />
-      <MdvSegmentedButtonItem value="published" label="Published" />
-      <MdvSegmentedButtonItem value="blocked" label="Cancelled" @click.prevent />
-    </MdvSegmentedButton>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Requested: {{ requested ?? 'none' }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Native forms and reset
-
-The group passes `name` and `form` to its actual radio/checkbox inputs. FormData contains only selected enabled inputs and serializes values to strings. Multiple selection submits repeated names; the application model keeps its original number/string types. Omitting `name` produces no generated form entry.
-
-Native reset restores the model snapshot captured when the component was created. Array snapshots are independent copies. Reset does not emit input/change, and cancelling the reset event preserves the selection. `selectionRequired` does not make an empty group invalid; implement any submission validation explicitly.
+Set `name` to submit the selected values; multiple selections use repeated entries. Use `form` for an external form. Native reset restores the initial selection.
 
 <DemoBlock>
   <FormDemo />
@@ -324,23 +224,7 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## Accessibility and keyboard interaction
-
-Single selection uses `role="radiogroup"` with native radio inputs; multiple selection uses `role="group"` with native checkboxes. Supply an accessible group name. MDV's Tab behavior deliberately visits individual segments rather than treating the whole group as one tab stop.
-
-<DocsTable label="Segmented Button keyboard interaction">
-
-| Key | Behavior |
-| --- | --- |
-| Tab / Shift+Tab | Initially enters the first available item, then moves through available items in DOM order; exits normally at the boundary. Does not select. |
-| Arrow Right / Arrow Left | Moves focus, wrapping and reversing direction in RTL. Single selection also selects; multiple selection only moves focus. |
-| Arrow Down / Arrow Up | Moves forward/backward with the same selection rules. |
-| Home / End | Focuses the first/last available item, selecting it in single mode. |
-| Space / Enter | Activates the focused item, respecting disabled and selection-required rules. |
-
-</DocsTable>
-
-Navigation skips disabled, hidden, and inert items and scrolls the target into view. Removing the focused item prefers the next available item, then the preceding one, while respecting focus already moved by the application. Check real touch, screen readers, and your final container's focus-ring clipping in the browser.
+---
 
 ## API
 
@@ -377,4 +261,4 @@ import type {
 } from '@mdv-ui/mdv'
 ```
 
-MDV 0.1.5 does not export separate SegmentedButton/Item props interfaces. Type template refs with `InstanceType<typeof MdvSegmentedButton>` or the Item component.
+Type template refs with `InstanceType<typeof MdvSegmentedButton>` or the corresponding item component type.

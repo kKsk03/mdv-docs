@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import BasicDemo from '@/components/docs/demos/segmentedButton/basic.vue'
-import SelectionDemo from '@/components/docs/demos/segmentedButton/selection.vue'
 import AppearanceDemo from '@/components/docs/demos/segmentedButton/appearance.vue'
 import IconsDemo from '@/components/docs/demos/segmentedButton/icons.vue'
-import ControlledDemo from '@/components/docs/demos/segmentedButton/controlled.vue'
 import FormDemo from '@/components/docs/demos/segmentedButton/form.vue'
 
 const groupProps: ApiTableItem[] = [
@@ -34,14 +31,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'selected-icon', description: '替换内置勾，接收 { selected: boolean }。showSelectedIcon 为 false 时隐藏。' },
 ]
 </script>
-
 # 分段按钮
 
-`MdvSegmentedButton` 使用传统 Material Design 3 分段样式呈现少量相关选项，`MdvSegmentedButtonItem` 表示其中一项。本文对应 **MDV 0.1.5**。Expressive 的连接按钮样式请参阅[按钮组](./button-group)。
+用 `MdvSegmentedButton` 展示少量相关选项，每项使用一个 `MdvSegmentedButtonItem`。需要 Expressive 的连接式样式时，请参阅[按钮组](./button-group)。
 
-## 单选与多选
+## 选择选项
 
-模型绑定在组上，每项提供唯一的字符串或数字 `value`。单选替换当前值，多选产生新数组；子项没有独立模型。建议每组使用 2～5 个简短相关选项，更长的列表适合 Select 或 Autocomplete。
+单选模式绑定单个值，多选模式（`selection="multiple"`）绑定数组。为每项提供不同的 `value`。如果单选时允许取消已选项，设置 `:selection-required="false"`。
 
 <DemoBlock>
   <BasicDemo />
@@ -77,62 +73,9 @@ const details = ref<MdvSegmentedButtonModelValue>(['summary'])
   </template>
 </DemoBlock>
 
-## 允许清空与值类型
+## 密度与宽度
 
-单选默认 `selectionRequired=true`。设置为 `false` 后，再次激活已选项会清空为 `null`。多选默认允许空数组，添加 `selection-required` 可以阻止移除最后一个选中值。
-
-这只是交互约束，不等于 HTML `required`。即使要求选择，外部空模型也会保持为空。切换选择模式、删除选项和清理失效值由应用负责；模型中的数字和对应字符串严格区分。
-
-<DemoBlock>
-  <SelectionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvSegmentedButton, MdvSegmentedButtonItem } from '@mdv-ui/mdv'
-import type { MdvSegmentedButtonModelValue } from '@mdv-ui/mdv'
-
-const optional = ref<MdvSegmentedButtonModelValue>(null)
-const required = ref<MdvSegmentedButtonModelValue>(['email'])
-const typed = ref<MdvSegmentedButtonModelValue>(1)
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-4">
-    <div class="grid gap-1">
-      <p class="text-sm text-mdv-on-surface-variant">Optional single selection: activate again to clear.</p>
-      <MdvSegmentedButton v-model="optional" :selection-required="false" aria-label="Optional alignment">
-        <MdvSegmentedButtonItem value="left" label="Left" />
-        <MdvSegmentedButtonItem value="center" label="Center" />
-        <MdvSegmentedButtonItem value="right" label="Right" />
-      </MdvSegmentedButton>
-    </div>
-    <div class="grid gap-1">
-      <p class="text-sm text-mdv-on-surface-variant">Keep at least one channel selected.</p>
-      <MdvSegmentedButton v-model="required" selection="multiple" selection-required aria-label="Notification channels">
-        <MdvSegmentedButtonItem value="email" label="Email" />
-        <MdvSegmentedButtonItem value="push" label="Push" />
-        <MdvSegmentedButtonItem value="sms" label="SMS" disabled />
-      </MdvSegmentedButton>
-    </div>
-    <MdvSegmentedButton v-model="typed" aria-label="Strict value types">
-      <MdvSegmentedButtonItem :value="1" label="Number 1" />
-      <MdvSegmentedButtonItem value="1" label="String 1" />
-    </MdvSegmentedButton>
-    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">Optional: {{ JSON.stringify(optional) }} · Channels: {{ JSON.stringify(required) }} · Typed: {{ typeof typed }} {{ JSON.stringify(typed) }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 密度、全宽与溢出
-
-密度只改变可见表面，仍保留完整交互区域。`full-width` 使各项等宽填满容器。长标签保持单行，在组内滚动，不会被挤成多行；外层布局应允许收缩，例如设置 `min-width: 0`。
-
-颜色跟随 MDV 主题：选中项使用 `secondary-container` 和 `on-secondary-container`，描边使用 `outline`。组件没有 `color`、`variant`、`size` 或垂直方向属性。局部主题、RTL、减少动态效果和强制颜色样式由 MDV 提供。
+用 `density` 调整高度，用 `full-width` 填满容器。选项标签宜简短；空间不足时可以换用其他控件。
 
 <DemoBlock>
   <AppearanceDemo />
@@ -182,11 +125,9 @@ const rtl = ref(false)
   </template>
 </DemoBlock>
 
-## 前置与选中图标
+## 图标
 
-纯文字项选中后显示勾；图文项的勾在同一区域替换前置图标；纯图标项保留原图标，并在旁边增加勾。插槽接收 `selected`，可以按状态调整内容。
-
-自定义图标使用单图标数据导入，内置勾无需使用方安装图标数据包。纯图标项通过 `aria-label` 或 `aria-labelledby` 命名。整个分段是原生输入的标签，插槽中不要放嵌套交互控件。
+通过 `leading` 和 `selected-icon` 插槽自定义选项图标。只有图标的选项需要单独提供无障碍名称。
 
 <DemoBlock>
   <IconsDemo />
@@ -230,50 +171,9 @@ const showSelectedIcon = ref(true)
   </template>
 </DemoBlock>
 
-## 受控请求与取消
+## 表单与重置
 
-`update:modelValue` 请求更新，由父级决定是否接受。拒绝更新后，原生 checked 会恢复为已接受的模型。程序修改模型不会伪造原生 input/change。`click.prevent` 可取消激活，下面的 Cancelled 项演示这一点。
-
-<DemoBlock>
-  <ControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvSegmentedButton, MdvSegmentedButtonItem } from '@mdv-ui/mdv'
-import type { MdvSegmentedButtonModelValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvSegmentedButtonModelValue>('draft')
-const requested = ref<MdvSegmentedButtonModelValue>(null)
-const accept = ref(false)
-function update(next: MdvSegmentedButtonModelValue) {
-  requested.value = next
-  if (accept.value) value.value = next
-}
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3">
-    <MdvCheckbox v-model="accept" label="Accept selection requests" />
-    <MdvSegmentedButton :model-value="value" aria-label="Controlled publication state" @update:model-value="update">
-      <MdvSegmentedButtonItem value="draft" label="Draft" />
-      <MdvSegmentedButtonItem value="published" label="Published" />
-      <MdvSegmentedButtonItem value="blocked" label="Cancelled" @click.prevent />
-    </MdvSegmentedButton>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Requested: {{ requested ?? 'none' }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 原生表单与重置
-
-组把 `name`、`form` 传给实际的 radio/checkbox 输入。FormData 仅包含已选且可提交的输入，并将值序列化为字符串。多选提交同名多条记录，应用模型仍保留数字或字符串类型；省略 `name` 时不会生成内部字段名。
-
-原生 reset 恢复组件创建时的模型快照，多选数组使用独立副本。reset 不派发 input/change，取消 reset 事件会保留当前选择。`selectionRequired` 不会让空组原生校验失败，提交校验应由应用明确实现。
+设置 `name` 后，表单会提交选中的值；多选会以同名字段提交多条值。用 `form` 关联外部表单，原生重置会恢复初始选择。
 
 <DemoBlock>
   <FormDemo />
@@ -324,23 +224,7 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## 无障碍与键盘交互
-
-单选使用 `role="radiogroup"` 和原生 radio，多选使用 `role="group"` 和原生 checkbox。请提供组名称。MDV 的 Tab 规则会逐项访问组内分段。
-
-<DocsTable label="分段按钮键盘交互">
-
-| 按键 | 行为 |
-| --- | --- |
-| Tab / Shift+Tab | 初次进入第一个可用项，之后按 DOM 顺序移动；到边界时正常离开，不改变选择。 |
-| 右 / 左方向键 | 循环移动焦点，RTL 时方向反转；单选同时选中，多选只移动焦点。 |
-| 下 / 上方向键 | 向后或向前移动，选择规则相同。 |
-| Home / End | 聚焦第一个或最后一个可用项，单选同时选中。 |
-| Space / Enter | 激活当前项，遵循禁用与至少保留一项的规则。 |
-
-</DocsTable>
-
-导航跳过禁用、hidden 和 inert 项，并将目标滚入视野。移除聚焦项后优先聚焦下一项，其次是前一项；应用已转移的焦点会被尊重。实际触摸、读屏和最终布局中的焦点环裁切需要在浏览器中检查。
+---
 
 ## API
 
@@ -377,4 +261,4 @@ import type {
 } from '@mdv-ui/mdv'
 ```
 
-MDV 0.1.5 没有单独导出 SegmentedButton/Item 的 props 接口。模板 ref 可使用 `InstanceType<typeof MdvSegmentedButton>` 或对应 Item 组件类型。
+模板 ref 可用 `InstanceType<typeof MdvSegmentedButton>` 或相应的条目组件类型。

@@ -37,6 +37,12 @@ import sideSheetIcon from '@iconify-icons/material-symbols/dock-to-right-outline
 import sliderIcon from '@iconify-icons/material-symbols/tune'
 import snackbarIcon from '@iconify-icons/material-symbols/notifications-active'
 import splitButtonIcon from '@iconify-icons/material-symbols/arrow-split'
+import switchIcon from '@iconify-icons/material-symbols/toggle-on-outline'
+import tabsIcon from '@iconify-icons/material-symbols/tab'
+import textFieldIcon from '@iconify-icons/material-symbols/text-fields'
+import timePickerIcon from '@iconify-icons/material-symbols/schedule-outline'
+import toolbarIcon from '@iconify-icons/material-symbols/construction-outline'
+import tooltipIcon from '@iconify-icons/material-symbols/info-outline'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -162,6 +168,72 @@ export const navigationItems: NavigationItem[] = [
         documents: {
           'en-US': () => import('./en-US/components/split-button.md'),
           'zh-CN': () => import('./zh-CN/components/split-button.md'),
+        },
+      },
+      {
+        id: 'switch',
+        slug: 'components/switch',
+        title: { 'en-US': 'Switch', 'zh-CN': '开关' },
+        navigationLabel: { 'en-US': 'Switch', 'zh-CN': 'Switch' },
+        icon: switchIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/switch.md'),
+          'zh-CN': () => import('./zh-CN/components/switch.md'),
+        },
+      },
+      {
+        id: 'tabs',
+        slug: 'components/tabs',
+        title: { 'en-US': 'Tabs', 'zh-CN': '标签页' },
+        navigationLabel: { 'en-US': 'Tabs', 'zh-CN': 'Tabs' },
+        icon: tabsIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/tabs.md'),
+          'zh-CN': () => import('./zh-CN/components/tabs.md'),
+        },
+      },
+      {
+        id: 'text-field',
+        slug: 'components/text-field',
+        title: { 'en-US': 'Text Field', 'zh-CN': '文本框' },
+        navigationLabel: { 'en-US': 'TextField', 'zh-CN': 'TextField' },
+        icon: textFieldIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/text-field.md'),
+          'zh-CN': () => import('./zh-CN/components/text-field.md'),
+        },
+      },
+      {
+        id: 'time-picker',
+        slug: 'components/time-picker',
+        title: { 'en-US': 'Time Picker', 'zh-CN': '时间选择器' },
+        navigationLabel: { 'en-US': 'TimePicker', 'zh-CN': 'TimePicker' },
+        icon: timePickerIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/time-picker.md'),
+          'zh-CN': () => import('./zh-CN/components/time-picker.md'),
+        },
+      },
+      {
+        id: 'toolbar',
+        slug: 'components/toolbar',
+        title: { 'en-US': 'Toolbar', 'zh-CN': '工具栏' },
+        navigationLabel: { 'en-US': 'Toolbar', 'zh-CN': 'Toolbar' },
+        icon: toolbarIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/toolbar.md'),
+          'zh-CN': () => import('./zh-CN/components/toolbar.md'),
+        },
+      },
+      {
+        id: 'tooltip',
+        slug: 'components/tooltip',
+        title: { 'en-US': 'Tooltip', 'zh-CN': '提示气泡' },
+        navigationLabel: { 'en-US': 'Tooltip', 'zh-CN': 'Tooltip' },
+        icon: tooltipIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/tooltip.md'),
+          'zh-CN': () => import('./zh-CN/components/tooltip.md'),
         },
       },
       {

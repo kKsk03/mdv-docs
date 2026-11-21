@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import type { ApiTableItem } from '@/components/docs/api-table.types'
 import IconBasicDemo from '@/components/docs/demos/icon/basic.vue'
 import IconStyleDemo from '@/components/docs/demos/icon/style.vue'
 import IconSizeColorDemo from '@/components/docs/demos/icon/sizeColor.vue'
 import IconSemanticsDemo from '@/components/docs/demos/icon/semantics.vue'
-import IconCustomDemo from '@/components/docs/demos/icon/custom.vue'
 
 const iconProps: ApiTableItem[] = [
   { name: 'icon', type: 'MdvIconData (required)', description: 'Local Iconify SVG data containing a string body. Pass the imported data object, not a string icon name.' },
@@ -15,20 +13,17 @@ const iconProps: ApiTableItem[] = [
   { name: 'color', type: 'string', default: 'currentColor', description: 'Direct CSS color, including an MDV color variable. This prop does not derive a color scheme from a seed.' },
 ]
 </script>
-
 # Icon
 
-`MdvIcon` renders local SVG data through `@iconify/vue/offline`, which is included with MDV. The icon is available synchronously without an icon API request or font CDN. Use it for decorative or meaningful imagery; an icon-only action belongs in [IconButton](/en-US/components/icon-button).
+Use `MdvIcon` to render Iconify icon data. Import only the artwork you use.
 
-## Install icon data and import individual icons
+## Material Symbols
 
-To use Material Symbols, add its data package to your application:
+Install the optional icon data package if you want to use Material Symbols. Then import each icon and pass it to `icon`.
 
 ```sh
 pnpm add @iconify-icons/material-symbols
 ```
-
-Import each icon from its own subpath, as in the example below. Installing the data package adds it to your local dependencies; it does not by itself bundle the whole collection into the site. The application bundler includes the modules you actually import. MDV does not import or register the full collection for `MdvIcon`.
 
 <DemoBlock>
   <IconBasicDemo />
@@ -61,13 +56,9 @@ const icons = [
   </template>
 </DemoBlock>
 
-Keep static individual imports. Importing an entire collection, registering all its data, or dynamically matching every icon file can make that data reachable by the build and increase the output. The built-in icons of other MDV components are already provided by those components; this package is needed when your application imports its own Material Symbols data.
+## Icon styles
 
-`icon` expects an object such as `homeIcon`, not a name like `'material-symbols:home'`. Invalid input renders an empty icon box and warns in development, without attempting a network fallback.
-
-## Styles and filled artwork
-
-Material Symbols style and fill are determined by the imported SVG data. MDV recommends the Outlined 400 baseline; Rounded and Sharp artwork are available through their own subpaths.
+Choose the outline, fill, or style in the imported artwork. It is not a runtime property of `MdvIcon`.
 
 <DemoBlock>
   <IconStyleDemo />
@@ -108,21 +99,9 @@ const styles = [
   </template>
 </DemoBlock>
 
-<DocsTable label="Material Symbols individual import names" min-width="29rem">
+## Size and color
 
-| Style | Outline artwork | Filled artwork |
-| --- | --- | --- |
-| Outlined | `favorite-outline` | `favorite` |
-| Rounded | `favorite-outline-rounded` | `favorite-rounded` |
-| Sharp | `favorite-outline-sharp` | `favorite-sharp` |
-
-</DocsTable>
-
-Each name follows `@iconify-icons/material-symbols/`. Switching the data changes the glyph; there is no variable-font `FILL`, `wght`, `GRAD`, or `opsz` prop, and changing size does not automatically select another optical drawing.
-
-## Size, color, and button composition
-
-Standalone icons default to 24 × 24px. Numbers use pixels, while CSS strings can follow font size or a local variable. Color inherits `currentColor` unless explicitly supplied.
+Icons inherit `currentColor` by default. Set `size` to a CSS length or a number in pixels. In a button, give the button itself its accessible name.
 
 <DemoBlock>
   <IconSizeColorDemo />
@@ -166,13 +145,9 @@ const sizes = [
   </template>
 </DemoBlock>
 
-The first icon inherits primary text color, the second uses the error token, and the third uses a literal CSS color. `MdvIcon` does not interpret `success` as an MDV semantic role or a hexadecimal value as a theme seed: use `var(--mdv-sys-color-success)` for a theme-aware semantic color.
-
-Inside Button or IconButton, omit `size` so the icon follows the button's dimensions. Explicit size overrides the SVG, but does not enlarge the enclosing button or reserve more space. `style` takes precedence over the size/color props and accepts the normal Vue object, string, or array forms.
-
 ## Decorative and meaningful icons
 
-The default icon has `aria-hidden="true"` and `focusable="false"`. If adjacent text already conveys the same information, leave it decorative. A standalone status can receive `aria-label` or reference existing text with `aria-labelledby`.
+Leave the icon decorative when nearby text already gives its meaning. For a meaningful standalone icon, supply `aria-label` or `aria-labelledby`.
 
 <DemoBlock>
   <IconSemanticsDemo />
@@ -208,43 +183,11 @@ const expose = ref(true)
   </template>
 </DemoBlock>
 
-A non-empty name removes the default hiding and keeps image semantics. Explicit `aria-hidden` takes priority; the application must ensure referenced label elements exist. Naming an icon does not put it in the Tab order or make it an action. A native `title` is not a substitute for an accessible name or an MDV Tooltip.
-
-Put an action name on the button and keep its inner icon decorative. Avoid adding click behavior to a standalone SVG when the interaction needs button keyboard, focus, disabled, or form behavior.
-
 ## Other local artwork
 
-The data type also accepts other icon collections or trusted local artwork in Iconify format. A string `body` is required; supply the original width/height to retain the intended coordinate system.
+You can also pass trusted local artwork in Iconify format. `MdvIcon` does not sanitize SVG data.
 
-<DemoBlock>
-  <IconCustomDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvButton, MdvIcon } from '@mdv-ui/mdv'
-import type { MdvIconData } from '@mdv-ui/mdv'
-
-// Trusted local artwork in Iconify's data format; no icon-data package is needed.
-const diamond: MdvIconData = {
-  width: 24,
-  height: 24,
-  body: '<path fill="currentColor" d="M12 2 22 12 12 22 2 12Z"/>',
-}
-</script>
-
-<template>
-  <div class="flex flex-wrap items-center gap-6">
-    <span class="inline-flex items-center gap-2 text-mdv-primary"><MdvIcon :icon="diamond" :size="32" />Local artwork</span>
-    <MdvButton variant="tonal"><template #leading><MdvIcon :icon="diamond" /></template>Explore collection</MdvButton>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-This example does not need an external icon-data package. MDV renders the supplied SVG data and does not sanitize it. Pure-path Material Symbols render synchronously in SSR; custom gradients, clip paths, and internal IDs need their own SSR/hydration checks.
+---
 
 ## API
 

@@ -28,14 +28,13 @@ const snackbarSlots: SlotTableItem[] = [
   { name: 'action', description: 'Replaces the built-in action control; receives { close, pending } and should disable itself while pending.' },
 ]
 </script>
-
 # Snackbar
 
-`MdvSnackbar` announces a brief, non-modal message and can provide one related action. This page describes **MDV 0.1.5**. Use a Snackbar for feedback rather than a decision; use a Dialog when the user must respond before continuing.
+Use `MdvSnackbar` for brief feedback, such as confirming a save or offering Undo. Use a [Dialog](./dialog) when the user must respond before continuing.
 
-## Controlled messages and close reasons
+## Show a message
 
-Mount the component near the application shell and control visibility with `v-model`. A close button, action, Escape, or timeout requests `false`; the parent can accept or reject that request. The event detail identifies why an accepted close began and when its exit completed.
+Bind visibility with `v-model` and provide a message. Use `close` for the reason the dismissal began, or `closed` to wait for the exit transition.
 
 <DemoBlock>
   <DirectDemo />
@@ -72,11 +71,9 @@ function closed(detail: MdvSnackbarCloseDetail) { result.value = `Closed: ${deta
   </template>
 </DemoBlock>
 
-Messages without an action default to four seconds. A message with an action defaults to persistent so the user has time to act. Set `duration` and `closable` deliberately, and localize `closeLabel`.
+## Async actions
 
-## Async actions and timing
-
-An action may return a Promise. While it is pending, MDV disables the built-in action and pauses its timer. Success requests close unless the `action` event was synchronously canceled with `preventDefault()`; rejection emits `actionError` and leaves the message open. Catch application-level failures inside the callback when using the Provider API, which does not forward `actionError`.
+An action can return a promise. The timer pauses while it runs. Success closes the Snackbar unless the action event is canceled; rejection emits `actionError` and leaves the message open.
 
 <DemoBlock>
   <ActionDemo />
@@ -118,11 +115,9 @@ function actionError(error: unknown) { result.value = error instanceof Error ? e
   </template>
 </DemoBlock>
 
-The timer starts after the message enters. Hover, focus within the message, a hidden page, explicit pause, a visible MDV Dialog, and pending built-in actions suspend the countdown and retain remaining time. Changing the message, action label, or duration resets it.
+## Queue messages
 
-## Provider queue and composable
-
-Use one `MdvSnackbarProvider` around a stable part of the application, then call `useSnackbar()` from a descendant component's `setup`. The Provider maintains an independent FIFO queue; queued messages do not start their timer until displayed. Avoid overlapping separate Providers or standalone Snackbars unless the application intentionally coordinates them.
+Wrap the relevant part of the app in `MdvSnackbarProvider` and call `useSnackbar()` from a descendant. Messages are queued and their timers start when shown. Handle action failures in the callback when using the provider.
 
 <DemoBlock>
   <ProviderDemo />
@@ -184,13 +179,7 @@ const ProviderControls = defineComponent({
   </template>
 </DemoBlock>
 
-`show()` accepts a string or options and returns an ID. `update()` changes the active or queued entry; `close()` closes the active item or removes a queued one; `clear()` removes queued items and requests closure of the active message. A `key` reuses and updates a matching active or queued entry instead of adding another. Unmounting the Provider clears its queue.
-
-## Accessibility, placement, and themes
-
-The message uses a polite `role="status"` live region and does not move focus on open or trap Tab. The default `Alt+G` shortcut focuses its first available control (or the message container); Escape is handled only while focus is inside this Snackbar, so it does not close a parent Dialog from elsewhere. Focus is restored on close only when the message owned focus. Timed announcements should also be reflected in context at the point where the action occurred; actual screen-reader announcements depend on the browser/assistive-technology combination.
-
-Placement follows logical direction, respects bottom safe areas, and supports reduced motion. `offset` can keep the message clear of application-owned navigation or floating controls. Default colors use inverse-surface roles; a supplied theme or seed color is local to the Snackbar. Browsers with the Popover API place it in the top layer at its original DOM location so local theme inheritance is retained; the fallback is fixed positioning and may remain subject to ancestor stacking contexts.
+---
 
 ## API
 

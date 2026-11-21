@@ -5,8 +5,6 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import type { ApiTableItem } from '@/components/docs/api-table.types'
 import DividerBasicDemo from '@/components/docs/demos/divider/basic.vue'
 import DividerVerticalDemo from '@/components/docs/demos/divider/vertical.vue'
-import DividerSemanticsDemo from '@/components/docs/demos/divider/semantics.vue'
-import DividerThemeDemo from '@/components/docs/demos/divider/theme.vue'
 
 const dividerProps: ApiTableItem[] = [
   { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'", description: 'Direction of the line. A vertical divider stretches across its flex or grid cross-axis unless given an explicit height.' },
@@ -14,14 +12,13 @@ const dividerProps: ApiTableItem[] = [
   { name: 'decorative', type: 'boolean', default: 'true', description: 'Hides the line from assistive technology. Set false to expose a separator with its orientation.' },
 ]
 </script>
-
 # Divider
 
-`MdvDivider` separates related content or actions with a thin line. Use spacing first, then add a divider where readers need a clearer boundary. It has no interaction or built-in surrounding padding.
+Use `MdvDivider` to separate groups of content or controls.
 
 ## Horizontal dividers
 
-The default line fills the available width. `inset` leaves 16px at the logical start; `middle-inset` leaves 16px at both ends. Place it between sections rather than adding a line after every short item.
+A horizontal divider fills the available width. Use `inset` at the logical start or `middle-inset` at both ends.
 
 <DemoBlock>
   <DividerBasicDemo />
@@ -51,7 +48,7 @@ const variants: MdvDividerVariant[] = ['full-width', 'inset', 'middle-inset']
 
 ## Vertical dividers
 
-Use `orientation="vertical"` between adjacent actions or columns. In a horizontal flex layout it stretches to the available height; an explicit height works for a shorter line. A plain block container may need an explicit height to establish its length.
+Set `orientation="vertical"` between adjacent items. Give the line or its layout a height.
 
 <DemoBlock>
   <DividerVerticalDemo />
@@ -92,81 +89,13 @@ const underline = ref(false)
   </template>
 </DemoBlock>
 
-The second toolbar line has `h-8 self-center`; the first stretches naturally. Container `gap` controls the space around each line. MDV does not add a minimum touch target because a divider is not an action.
+## Separator semantics
 
-## Decorative and semantic separators
+A divider is decorative by default. Set `:decorative="false"` to expose it as a semantic separator.
 
-Dividers are decorative by default: the root has `aria-hidden="true"` and no separator role. Set `:decorative="false"` when the boundary conveys useful structure between groups of controls or content.
+## Line styles
 
-<DemoBlock>
-  <DividerSemanticsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDivider } from '@mdv-ui/mdv'
-
-const semantic = ref(true)
-const message = ref('Tab moves between the actions, skipping the divider.')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="semantic" label="Expose a semantic separator" />
-    <div class="grid justify-items-start gap-4 rounded-xl bg-mdv-surface-container-low p-4">
-      <MdvButton variant="outlined" @click="message = 'Previous action selected.'">Previous action</MdvButton>
-      <MdvDivider class="w-full" :decorative="!semantic" aria-label="Reading and actions" />
-      <MdvButton variant="outlined" @click="message = 'Next action selected.'">Next action</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-A semantic divider receives `role="separator"` and `aria-orientation`. It remains outside the Tab sequence. Do not use this component as a draggable splitter; it has no resize behavior, focus handling, or value attributes.
-
-## Theme, dimensions, and RTL
-
-The line uses the inherited `outline-variant` color, a 1px thickness, and square ends. The examples below compare local light/dark themes, logical insets, and an explicit token/thickness override.
-
-<DemoBlock>
-  <DividerThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvDivider } from '@mdv-ui/mdv'
-
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-    <div class="grid gap-4 sm:grid-cols-2" :dir="rtl ? 'rtl' : 'ltr'">
-      <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" class="grid gap-4 rounded-xl bg-mdv-surface-container-low py-4 text-mdv-on-surface">
-        <p class="px-4 font-medium">{{ theme }} · logical start inset</p>
-        <MdvDivider variant="inset" />
-        <p class="px-4 text-sm">The 16px inset follows the text direction.</p>
-      </div>
-    </div>
-    <div class="grid gap-4 rounded-xl bg-mdv-surface-container-low py-4" style="--mdv-sys-color-outline-variant: var(--mdv-sys-color-primary)">
-      <p class="px-4 text-sm">A local color role and a 2px line</p>
-      <MdvDivider variant="middle-inset" style="height: 2px" />
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Horizontal `inset` follows the writing direction: left in LTR and right in RTL. For a vertical line, MDV maps the single inset to the top and the double inset to both top and bottom. Those vertical insets are an MDV API convention.
+Use these CSS variables to customize the line. Insets follow the text direction.
 
 <DocsTable label="Divider layout and customization" min-width="31rem">
 
@@ -181,7 +110,7 @@ Horizontal `inset` follows the writing direction: left in LTR and right in RTL. 
 
 </DocsTable>
 
-Keep overrides intentional: a thicker line can work as a visual section boundary, but does not make the component interactive. Utility classes may override ordinary component styles through the configured Tailwind layers.
+---
 
 ## API
 

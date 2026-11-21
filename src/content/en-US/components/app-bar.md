@@ -8,7 +8,6 @@ import AppBarBasicDemo from '@/components/docs/demos/appBar/basic.vue'
 import AppBarVariantDemo from '@/components/docs/demos/appBar/variant.vue'
 import AppBarAppearanceDemo from '@/components/docs/demos/appBar/appearance.vue'
 import AppBarAlignmentDemo from '@/components/docs/demos/appBar/alignment.vue'
-import AppBarImageDemo from '@/components/docs/demos/appBar/image.vue'
 import AppBarScrollDemo from '@/components/docs/demos/appBar/scroll.vue'
 
 const appBarProps: ApiTableItem[] = [
@@ -39,14 +38,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'default', description: 'Content. Does not automatically add a main landmark or content padding.' },
 ]
 </script>
-
 # App Bar
 
-App Bars display a page title, navigation entry, and common actions. `MdvAppBar` provides Small, Medium flexible, and Large flexible layouts. Pair it with `MdvAppBarScaffold` for a separate scrolling content area.
+Use `MdvAppBar` for a page title, navigation control, and common actions.
 
 ## Basic usage
 
-Set `title` and compose actions through the `leading` and `actions` slots. Supply navigation buttons and their routing or click handlers in your application.
+Set `title` and put navigation in `#leading` and other actions in `#actions`. Name any icon-only buttons.
 
 <DemoBlock>
   <AppBarBasicDemo />
@@ -84,11 +82,9 @@ const message = ref('Choose an action.')
   </template>
 </DemoBlock>
 
----
-
 ## Sizes
 
-`variant` accepts `small`, `medium`, and `large`. Medium and large can collapse to Small on scroll. Small also supports a centered title through `title-alignment="center"`.
+Use `variant` to choose `small`, `medium`, or `large`. Medium and large can collapse to the small height on scroll.
 
 <DemoBlock>
   <AppBarVariantDemo />
@@ -125,13 +121,9 @@ const variants: MdvAppBarVariant[] = ['small', 'medium', 'large']
 
 </DocsTable>
 
-These are the default heights for a standard single-line title. Medium and large remeasure long titles, images, and fonts; keep titles within two lines where possible. Small and collapsed titles use single-line truncation. Supply a shorter `collapsed-title` when needed.
-
----
-
 ## Appearance
 
-`default` has no shadow or border, `elevated` gradually shows a shadow on scroll, and `bordered` adds a bottom divider. These examples use `scrolled` to display the ending color and shadow.
+Use `appearance="elevated"` for a scroll shadow or `bordered` for a divider. The `scrolled` prop changes appearance only, not layout or scroll position.
 
 <DemoBlock>
   <AppBarAppearanceDemo />
@@ -158,13 +150,9 @@ const appearances: MdvAppBarAppearance[] = ['default', 'elevated', 'bordered']
   </template>
 </DemoBlock>
 
-`scrolled` overrides appearance only. It does not collapse the bar or change the content scroll position. When omitted, colors follow actual scroll progress continuously.
-
----
-
 ## Title alignment
 
-Use `title-alignment` for start or center alignment. Centering uses the entire bar, so a leading button alone does not offset the title.
+Use `title-alignment="center"` to center the title across the whole bar.
 
 <DemoBlock>
   <AppBarAlignmentDemo />
@@ -198,45 +186,13 @@ const alignments: MdvAppBarTitleAlignment[] = ['start', 'center']
   </template>
 </DemoBlock>
 
-The `title` and `subtitle` slots replace their default text. Every App Bar slot receives `{ scrolled, collapsed }`: `scrolled` indicates the target has left the top, while `collapsed` indicates medium or large has reached Small.
-
----
-
 ## Brand image
 
-Use the `image` slot to place branding above a medium or large title. For Small, put branding in the `title` slot and provide an appropriate accessible name.
-
-<DemoBlock>
-  <AppBarImageDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvAppBar } from '@mdv-ui/mdv'
-</script>
-
-<template>
-  <MdvAppBar variant="large" title="Explore new places" subtitle="A little inspiration for your next trip" :heading-level="3">
-    <template #image>
-      <svg width="96" height="32" viewBox="0 0 96 32" role="img" aria-label="Explore brand">
-        <path d="M16 0 32 16 16 32 0 16Z" fill="currentColor" />
-        <text x="40" y="23" font-size="20" fill="currentColor">MDV</text>
-      </svg>
-    </template>
-  </MdvAppBar>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
----
+Use `#image` for branding above a medium or large title. For a small bar, use `#title`.
 
 ## Scrolling and Scaffold
 
-For application layouts, place the App Bar in the `appbar` slot of `MdvAppBarScaffold` and content in its default slot. The Scaffold associates the scroll target automatically and gives content its own scrollbar.
-
-Scroll the independent area below and change `scroll-behavior`. It also demonstrates a short collapsed title, custom actions, and transparency.
+Place the bar in `MdvAppBarScaffold`’s `#appbar` slot and the page in its default slot. Give the scaffold a definite height so the bar can follow its content scroll area.
 
 <DemoBlock>
   <AppBarScrollDemo />
@@ -321,38 +277,7 @@ function backToTop() {
 
 </DocsTable>
 
-### Layout requirements
-
-Provide a definite available height, such as `h-80` in the example, or use `h-full` or `flex-1 min-h-0` inside an already sized layout. The default slot adds neither a `main` landmark nor padding; supply the semantics and spacing your page needs.
-
-The Scaffold content background is transparent. Set `bg-mdv-surface-container-low` on the shared layout wrapper when desired; navigation and the App Bar retain their own surface colors.
-
-For a standard drawer composition, place `MdvNavigationDrawer` immediately before the Scaffold as its sibling inside the same layout wrapper. The Scaffold extends the App Bar background behind the drawer corners. Modal drawers use a separate overlay.
-
-Place Vue `Transition` or a router view inside the default slot to animate content changes while preserving the App Bar and content scroll element.
-
-### Standalone scroll target
-
-A standalone App Bar follows `window` by default. For a local scroll container, provide `scroll-target`, for example a getter returning a template ref:
-
-```vue
-<MdvAppBar
-  title="My library"
-  scroll-behavior="pinned"
-  :scroll-target="() => scrollContainer"
-/>
-```
-
-Keep the bar inside the corresponding scroll container so its sticky boundary matches the target. An unresolved explicit selector or getter has no fallback. Call `refresh()` if external code creates the target later. This prop is usually unnecessary with a Scaffold.
-
----
-
-## Keyboard and accessibility
-
-- Choose `heading-level` to match the page structure. Examples use 3 to avoid competing with the article title.
-- Supply `aria-label` or `aria-labelledby` for icon buttons; the App Bar does not name them automatically.
-- Tab and Shift+Tab follow native action order. Keyboard focus entering the bar restores the complete action area and keeps it visible while focus remains inside.
-- Collapse reuses the original slot nodes. Reduced motion disables snap interpolation while retaining direct scroll tracking.
+For a standalone bar that follows a local scroll area, set `scroll-target`.
 
 ---
 

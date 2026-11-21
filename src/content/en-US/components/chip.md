@@ -10,7 +10,6 @@ import ChipIndependentDemo from '@/components/docs/demos/chip/independent.vue'
 import ChipRemovalDemo from '@/components/docs/demos/chip/removal.vue'
 import ChipAppearanceDemo from '@/components/docs/demos/chip/appearance.vue'
 import ChipLayoutDemo from '@/components/docs/demos/chip/layout.vue'
-import ChipFormDemo from '@/components/docs/demos/chip/form.vue'
 
 const chipProps: ApiTableItem[] = [
   { name: 'variant', type: "'assist' | 'filter' | 'input' | 'suggestion'", default: "'assist'", description: 'Chip purpose. Filter selects by default; Input represents entered content and is removable by default.' },
@@ -44,14 +43,13 @@ const setSlots: SlotTableItem[] = [
   { name: 'label', description: 'Replaces the visible group label; no slot parameters.' },
 ]
 </script>
-
 # Chip
 
-`MdvChip` presents compact contextual actions, suggestions, filters, or entered content. `MdvChipSet` arranges related chips, manages their keyboard focus, and optionally manages Filter selection.
+Use `MdvChip` for compact actions, filters, suggestions, or tags. Use `MdvChipSet` to group related chips.
 
 ## Variants
 
-Assist performs a contextual action; Suggestion proposes a response or action; Filter toggles a criterion; Input represents content such as an attachment, tag, or person. The Input primary action is independent of its removal action.
+Use Assist for an action, Filter for a criterion, Input for entered content, or Suggestion for a proposed response.
 
 <DemoBlock>
   <ChipVariantDemo />
@@ -87,24 +85,9 @@ const message = ref('Try an action, a filter, or a removable input chip.')
   </template>
 </DemoBlock>
 
-<DocsTable label="Chip variant behavior" min-width="32rem">
-
-| Variant | Default primary action | Default removal | Link support |
-| --- | --- | --- | --- |
-| `assist` | Application action | No | Yes |
-| `suggestion` | Application action | No | Yes |
-| `filter` | Toggle selection, with built-in selected checkmark | No; can enable | No |
-| `input` | Application action; selection can be enabled | Yes | No |
-
-</DocsTable>
-
-Only Assist/Suggestion accept `href`; native `target`, `rel`, and `download` are forwarded. Button chips always use `type="button"`. Do not use a Filter/Input chip as a disguised link.
-
----
-
 ## Group selection
 
-Set ChipSet's `selection` to `single` or `multiple` and bind `v-model`. Each selectable Filter needs a unique `value`. Single selection can be cleared by clicking its selected chip again; multiple selection uses an array.
+Set the ChipSet’s `selection` to `single` or `multiple`, bind `v-model`, and give each selectable Filter a unique `value`. Supply a label for the group.
 
 <DemoBlock>
   <ChipSelectionDemo />
@@ -144,14 +127,6 @@ const multiple = ref<MdvChipSetModelValue>(['images'])
   </template>
 </DemoBlock>
 
-Group selection applies only to selectable Filter chips. Input, Assist, Suggestion, and `:selectable="false"` chips do not join the group model. Do not also bind `selected` on a Filter managed by the group. Numbers and strings are distinct, and multiple-selection updates create new arrays rather than modifying the supplied array.
-
-The accepted parent model controls `aria-pressed` and appearance. Rejecting an update preserves the accepted state. Native click listeners run before selection; `event.preventDefault()` cancels the toggle request. There is no `selection-required` prop.
-
-### Independent selection and avatars
-
-With ChipSet's default `selection="none"`, each chip can use its own boolean `v-model:selected`. Unbound chips manage their own state. An Input chip needs `selectable` to toggle; selection alone does not add a Filter checkmark.
-
 <DemoBlock>
   <ChipIndependentDemo />
   <template #source>
@@ -184,13 +159,9 @@ const person = ref(false)
   </template>
 </DemoBlock>
 
-Use `#avatar` for Input content such as a contact's initials. It takes precedence over `#leading`. The default label and decorative slots receive `{ selected }`. Avatar/icon slots are hidden from assistive technology and inert, so the chip's text must identify the action. Do not put buttons, inputs, or links inside chip slots.
-
----
-
 ## Removing entered content
 
-The `remove` event is a request. Update the data array to remove a chip; the component does not delete its own node. Use a stable Vue `:key` so ChipSet can move focus to an available neighbor after actual removal.
+Handle `remove` by removing the item from your data. Use stable Vue keys so the group can move focus to another item.
 
 <DemoBlock>
   <ChipRemovalDemo />
@@ -231,15 +202,9 @@ function remove(tag: string) {
   </template>
 </DemoBlock>
 
-The separate remove button does not fire the primary click or change selection. Focus an Input chip or its remove button and press Delete/Backspace to request removal. Repeated keydown events and modified Ctrl/Alt/Meta shortcuts do not repeat the request. The trailing slot above changes the removal icon while preserving the component's button and name.
-
-Enable `remove-only` when the whole Input chip should only remove content. It combines the operations into one named focus target and ignores selection. It requires removal to be enabled and applies only to Input.
-
-Always provide a localized `remove-label` when needed. Fallback names are Chinese (`删除` plus label/text, or `删除此项`). For complex custom label content, supply an accurate `label` or explicit removal name so server-rendered output is already named.
-
 ## Appearance and colors
 
-Assist, Filter, and Suggestion support `elevated`; Input keeps its ordinary appearance. Chip `color` accepts the same named roles and local hexadecimal seeds as Button, leaving the surrounding theme intact.
+Use `elevated` where the variant supports it, or set `color` to a theme role or a hexadecimal seed.
 
 <DemoBlock>
   <ChipAppearanceDemo />
@@ -273,11 +238,9 @@ const message = ref('Try the elevated actions or toggle a color filter.')
   </template>
 </DemoBlock>
 
-Default chips have a 32px visible height, 8px corners, and 18px icons, with at least 48px interaction targets. A chip with primary and removal actions reserves separate targets; do not compress that space with local CSS. Default selected Filter/Input surfaces use `secondary-container` and `on-secondary-container`. Light/dark themes, local tokens, focus outlines, state layers, and reduced motion are provided by MDV.
+## Wrapping and scrolling
 
-## Wrapping, scrolling, and disabling
-
-ChipSet wraps by default. Enable `scrollable` for a single horizontal row. Try keyboard navigation in the narrow row, or disable the whole set.
+ChipSet wraps by default. Set `scrollable` to keep a single horizontal row.
 
 <DemoBlock>
   <ChipLayoutDemo />
@@ -312,69 +275,9 @@ const topics = ['Design', 'Research', 'Engineering', 'Accessibility', 'Typograph
   </template>
 </DemoBlock>
 
-`disabled` on the set disables all primary/removal actions; a chip's own `disabled` affects only that chip. Disabled links remove `href`, expose `aria-disabled`, leave the Tab order, and block activation. Keep labels short; narrow chips truncate visually while retaining the complete text in the DOM.
-
----
-
 ## Form composition
 
-Chip and ChipSet do not create hidden form fields, native required validation, or form-reset behavior. Use the model directly in your request, or add explicit fields and an application reset handler for a native form.
-
-<DemoBlock>
-  <ChipFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { MdvButton, MdvChip, MdvChipSet } from '@mdv-ui/mdv'
-import type { MdvChipSetModelValue } from '@mdv-ui/mdv'
-
-const topics = ref<MdvChipSetModelValue>(['design'])
-const values = computed(() => Array.isArray(topics.value) ? topics.value : [])
-const result = ref('Selected chips are submitted through explicit hidden inputs.')
-
-function submit(event: Event) {
-  const data = new FormData(event.currentTarget as HTMLFormElement)
-  result.value = JSON.stringify({ topic: data.getAll('topic') })
-}
-
-function reset() {
-  topics.value = ['design']
-  result.value = 'Form reset by the application.'
-}
-</script>
-
-<template>
-  <form class="grid gap-4" @submit.prevent="submit" @reset="reset">
-    <MdvChipSet v-model="topics" selection="multiple" label="Newsletter topics">
-      <MdvChip variant="filter" value="design" label="Design" />
-      <MdvChip variant="filter" value="engineering" label="Engineering" />
-      <MdvChip variant="filter" value="research" label="Research" />
-    </MdvChipSet>
-    <input v-for="value in values" :key="value" type="hidden" name="topic" :value="value" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton type="submit">Submit</MdvButton>
-      <MdvButton type="reset" variant="outlined">Reset</MdvButton>
-    </div>
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">{{ result }}</p>
-  </form>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-This example submits repeated `topic` fields and resets the model explicitly. If the set can be disabled, also disable your submitted fields when that matches the form's policy. ChipSet's `name` attribute alone does not serialize its model.
-
-## Keyboard and accessibility
-
-- ChipSet is a horizontal `toolbar`, not a listbox or radio group. Give it a `label`, `#label`, `aria-label`, or `aria-labelledby`.
-- Tab enters one remembered action, initially preferring a selected chip. Left/Right move through primary and removal actions in DOM order, skipping unavailable targets; navigation wraps and mirrors in RTL. Home/End go to the first/last available action. Moving focus does not change selection.
-- Enter/Space activate native buttons; links retain native Enter behavior. Standalone chips use ordinary native Tab order for their separate actions. Selected toggles expose `aria-pressed`.
-- After removal, the group focuses a following available chip, or a preceding one at the end; an empty group receives focus. If application code already moved focus elsewhere, that decision is respected.
-
-Chips do not implement text entry, a tag editor, menus, loading, error validation, or drag sorting. Compose those application behaviors explicitly.
+ChipSet does not submit a form value automatically. Submit its model yourself or add named form inputs.
 
 ---
 

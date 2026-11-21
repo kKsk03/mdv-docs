@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import BasicDemo from '@/components/docs/demos/select/basic.vue'
 import MenusDemo from '@/components/docs/demos/select/menus.vue'
 import StateDemo from '@/components/docs/demos/select/state.vue'
-import ControlledDemo from '@/components/docs/demos/select/controlled.vue'
-import AsyncDemo from '@/components/docs/demos/select/async.vue'
 import FormDemo from '@/components/docs/demos/select/form.vue'
 
 const props: ApiTableItem[] = [
@@ -30,14 +28,13 @@ const props: ApiTableItem[] = [
 ]
 const slots: SlotTableItem[] = [{ name: 'option', description: '替换选项内容，接收 { option: MdvSelectOption, selected: boolean, active: boolean }。组件保留 option 角色和交互外壳，插槽中不要放交互控件。' }]
 </script>
-
 # 选择器
 
-`MdvSelect` 通过描边或填充字段及列表框弹层，从预定义选项中选择一个值。本文对应 **MDV 0.1.5**。需要输入查询或自由文本时，请使用[自动补全](./autocomplete)。
+用 `MdvSelect` 从预设选项中选择一个值。需要搜索或输入自由文本时，请用[自动补全](./autocomplete)。
 
-## 字段、选项与值类型
+## 字段与选项
 
-每项需要唯一的 `value` 和 `label`，可额外提供 `supportingText`、`disabled`。模型保存值，字段显示标签。数字 `1` 和字符串 `'1'` 是不同选项；禁用项仍显示，但不能激活。由于值来自列表框选择，可见字段本身只读。
+绑定 `v-model`，并在 `options` 中为每项提供 `value` 和 `label`。用 `null` 表示未选择，数字值与字符串值不会互相转换。
 
 <DemoBlock>
   <BasicDemo />
@@ -75,11 +72,9 @@ const typed = ref<MdvSelectValue | null>(1)
   </template>
 </DemoBlock>
 
-## 菜单外观与自定义选项
+## 菜单与自定义选项
 
-`variant` 控制字段，`menu-variant` 独立控制列表框，默认 Expressive。`option` 插槽接收原始选项及独立的选中、活动状态；`active` 表示键盘或指针正在浏览，不代表模型已接受选择。
-
-长列表在弹层内滚动。现代浏览器使用 Popover 顶层，并通过 Floating UI 翻转和避让视口。弹层保留在组件 DOM 中，继承局部主题与方向。组件没有虚拟滚动，选项数量应适合简单选择器。
+用 `variant` 设置字段外观，用 `menu-variant` 设置弹层外观。通过 `option` 插槽自定义内容：`active` 代表当前高亮项，`selected` 反映模型中的选中项。
 
 <DemoBlock>
   <MenusDemo />
@@ -132,11 +127,9 @@ const options: MdvSelectOption[] = [
   </template>
 </DemoBlock>
 
-## 禁用、错误与清空
+## 字段状态与清除
 
-字段不可用时使用 `disabled`，个别选项不可用时在选项上禁用。`error`、`error-text` 展示应用反馈；需要阻止提交时，还需原生约束或 `setCustomValidity()`。
-
-将模型赋为 `null` 即可清空。Select 没有公开 `clearable` 属性或清空插槽，下面使用独立操作，并遵循字段禁用状态。程序清空不会发出 `select`，该事件用于描述激活的选项。
+通过 `disabled` 禁用字段或单个选项。将模型设为 `null` 可清除选择。用 `error` 和 `error-text` 显示错误；需要阻止提交时，请使用原生校验。
 
 <DemoBlock>
   <StateDemo />
@@ -171,126 +164,9 @@ const options: MdvSelectOption[] = [{ value: 'email', label: 'Email' }, { value:
   </template>
 </DemoBlock>
 
-## 受控选择与开关
+## 表单与校验
 
-值和开关是独立状态。常规用法绑定 `v-model`、`v-model:open`；需要拒绝请求时，显式处理更新事件。即使父级拒绝选中值，组件仍会发出 `select(option)` 并请求关闭弹层，所以不能把 `select` 当作父级已经保存新值。
-
-实例 `open()`、`close()` 走相同的受控请求流程。应用需要无条件改变状态时，直接设置父级开关。`focus()` 和 `open()` 是不同方法。
-
-<DemoBlock>
-  <ControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvSelectOption, MdvSelectValue } from '@mdv-ui/mdv'
-
-const field = useTemplateRef<InstanceType<typeof MdvSelect>>('field')
-const value = ref<MdvSelectValue | null>('basic')
-const open = ref(false)
-const acceptValue = ref(false)
-const acceptOpen = ref(true)
-const requested = ref('none')
-const options: MdvSelectOption[] = [{ value: 'basic', label: 'Basic' }, { value: 'pro', label: 'Pro' }]
-function updateValue(next: MdvSelectValue | null) {
-  requested.value = `value=${JSON.stringify(next)}`
-  if (acceptValue.value) value.value = next
-}
-function updateOpen(next: boolean) {
-  requested.value = `open=${next}`
-  if (acceptOpen.value) open.value = next
-}
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="acceptValue" label="Accept value requests" />
-      <MdvCheckbox v-model="acceptOpen" label="Accept open requests" />
-    </div>
-    <MdvSelect ref="field" :model-value="value" :open="open" label="Controlled plan" :options="options" full-width @update:model-value="updateValue" @update:open="updateOpen" />
-    <div class="flex flex-wrap gap-2">
-      <MdvButton variant="outlined" @click="field?.focus(); field?.open()">Request open</MdvButton>
-      <MdvButton variant="text" @click="field?.close()">Request close</MdvButton>
-      <MdvButton variant="text" @click="open = false">Close directly</MdvButton>
-    </div>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Open: {{ open }} · Last request: {{ requested }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 应用管理选项加载
-
-0.1.5 的 Select 公开 API 没有 `loading`、`loadingText`、`noOptionsText` 属性。加载、失败、取消和重试由应用在字段外管理。下面的模拟请求在选项可用前禁用字段、播报状态，并在重新请求、取消或卸载时清理计时器。需要按输入查询远程建议时使用 Autocomplete。
-
-<DemoBlock>
-  <AsyncDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvLinearProgress, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvSelectOption, MdvSelectValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvSelectValue | null>(null)
-const options = ref<MdvSelectOption[]>([])
-const loading = ref(false)
-const failNext = ref(false)
-const message = ref('Load projects to enable the field.')
-let timer: ReturnType<typeof setTimeout> | undefined
-function cancel() {
-  clearTimeout(timer)
-  loading.value = false
-  message.value = 'Request cancelled.'
-}
-function load() {
-  clearTimeout(timer)
-  loading.value = true
-  message.value = 'Loading projects…'
-  const fail = failNext.value
-  failNext.value = false
-  timer = setTimeout(() => {
-    loading.value = false
-    if (fail) { message.value = 'The simulated service is unavailable. Try again.'; return }
-    options.value = [{ value: 'design', label: 'Design system' }, { value: 'website', label: 'Documentation website' }]
-    message.value = 'Projects loaded.'
-  }, 450)
-}
-onBeforeUnmount(() => clearTimeout(timer))
-</script>
-
-<template>
-  <div class="grid min-w-0 gap-3" :aria-busy="loading">
-    <MdvCheckbox v-model="failNext" label="Fail the next simulated request" />
-    <div class="flex flex-wrap gap-2">
-      <MdvButton @click="load">{{ loading ? 'Restart request' : 'Load projects' }}</MdvButton>
-      <MdvButton variant="text" :disabled="!loading" @click="cancel">Cancel request</MdvButton>
-    </div>
-    <MdvLinearProgress v-if="loading" indeterminate aria-label="Loading project options" />
-    <MdvSelect v-model="value" label="Project" placeholder="Choose a project" :options="options" :disabled="loading || options.length === 0" :supporting-text="message" full-width />
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }} Model: {{ JSON.stringify(value) }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-空 Select 列表框打开时，当前内部兜底文案是中文。其本地化需要在组件库中评估公开 API，不能视为上方 Select 已支持的属性。示例使用明确的英文应用状态，不依赖空弹层文案。
-
-## 原生表单、校验与重置
-
-可见输入只显示标签，不带提交名称；隐藏输入只提交一次实际值，另一个无名称的原生 select 提供必填校验。`null` 不生成具名提交字段，`''` 提交空值且不满足 `required`；禁用字段被排除，数字在 FormData 中序列化为字符串。
-
-`required` 只检查是否为空，不检查是否仍属于选项。移除或禁用选项不会自动清空已有模型，相关策略由父级决定；未知值会显示为对应字符串，应保持选项与模型一致。
-
-原生 reset 请求恢复初始值并关闭弹层。应用设置的自定义错误需明确调用 `setCustomValidity('')` 清理，下面给出了用法。`checkValidity()` 也可能触发原生 invalid，不是无副作用的视觉检查。
+设置 `name` 后，表单会提交所选值。`required` 只检查是否为空，不检查值是否仍在 `options` 中。替换选项时，请由应用清除已失效的值。
 
 <DemoBlock>
   <FormDemo />
@@ -338,24 +214,9 @@ function reset() {
   </template>
 </DemoBlock>
 
-## 无障碍与键盘交互
+异步加载选项时，请在字段外显示加载、失败或重试状态。弹层的内置空列表文案固定为中文。
 
-输入使用 combobox 语义，以及 `aria-expanded`、`aria-controls`、`aria-activedescendant`。浏览选项时焦点留在字段上，选中项通过 `aria-selected` 表达。请提供可见标签或无障碍名称；选项插槽中不要嵌套链接、输入或按钮。
-
-<DocsTable label="选择器键盘交互">
-
-| 按键 | 行为 |
-| --- | --- |
-| Enter / Space | 关闭时打开；已打开时提交当前可用项。 |
-| 下 / 上方向键 | 打开列表，随后在可用项间移动，不循环。 |
-| Home / End | 移到首个或末个可用项，适合列表打开后使用。 |
-| 可打印字符 | 按标签前缀查找，匹配项会立即提交；连续输入缓冲在 600ms 后清空。 |
-| Escape | 请求关闭列表框。 |
-| Tab / 失焦 / 外部指针 | 保留正常焦点移动；字段失焦或外部按下会请求关闭。 |
-
-</DocsTable>
-
-输入法组合输入不会被当作选择快捷键。该字段不提供自由编辑或任意文本值。最终应用仍需验证读屏、触摸、原生校验展示、减少动态效果和弹层位置。
+---
 
 ## API
 

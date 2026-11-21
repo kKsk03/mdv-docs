@@ -7,10 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import DrawerBasicDemo from '@/components/docs/demos/navigationDrawer/basic.vue'
 import DrawerGroupsDemo from '@/components/docs/demos/navigationDrawer/groups.vue'
 import DrawerModalDemo from '@/components/docs/demos/navigationDrawer/modal.vue'
-import DrawerPolicyDemo from '@/components/docs/demos/navigationDrawer/policy.vue'
-import DrawerGuardDemo from '@/components/docs/demos/navigationDrawer/guard.vue'
 import DrawerResponsiveDemo from '@/components/docs/demos/navigationDrawer/responsive.vue'
-import DrawerCompositionDemo from '@/components/docs/demos/navigationDrawer/composition.vue'
 
 const drawerProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'true / false', description: 'Open state. Standard defaults to true; Modal defaults to false. Bind a model to accept update requests; omitting it does not create internally managed open state.' },
@@ -54,16 +51,13 @@ const groupSlots: SlotTableItem[] = [
   { name: 'icon', description: 'Decorative icon for the section heading or disclosure. Receives { expanded }.' },
 ]
 </script>
-
 # Navigation Drawer
 
-`MdvNavigationDrawer` reserves space beside application content. `MdvModalNavigationDrawer` overlays content with a scrim and modal focus management. Both share `MdvNavigationDrawerItem` and `MdvNavigationDrawerGroup`.
+Use a Navigation Drawer for a larger set of destinations. `MdvNavigationDrawer` reserves space beside the page; `MdvModalNavigationDrawer` overlays it. Both share `MdvNavigationDrawerItem` and `MdvNavigationDrawerGroup`.
 
-These are the classic Material Design 3 drawers. Use them for destinations in a larger hierarchy; an expanded Navigation Rail is another option for an Expressive application. Choosing the navigation pattern and its responsive breakpoints belongs to the application.
+## Standard drawer
 
-## Standard layout and width
-
-Place the standard drawer before a `min-width: 0` content sibling in a flex layout with a defined height. It contributes its panel width while open and zero width after closing, without locking background scrolling or taking focus on opening.
+Place the standard drawer before the main content in a flex layout with a definite height. Use `min-width: 0` on the content so it can shrink, and mark the current destination with `active`.
 
 <DemoBlock>
   <DrawerBasicDemo />
@@ -111,13 +105,9 @@ const destinations = [{ label: 'Inbox', icon: inboxIcon }, { label: 'Saved', ico
   </template>
 </DemoBlock>
 
-The default width is `360px`, constrained by the parent's available space. Pass another CSS length with `width`. Ordinary destination activation keeps a standard drawer open. `active` is presentation and current-page state; the application owns destination changes.
+## Groups and badges
 
-Root open state is controlled: bind `v-model` to support closing and reopening. Without a binding, Standard remains at its default open state and Modal remains closed. This differs from a group's optional internally managed expansion.
-
-## Section headings, disclosures, and badges
-
-A group with `collapsible` omitted is a static section heading. Add `collapsible` for an expandable submenu; `divider` adds a separator before the group. Use the item's `badge` slot for a visual badge or localized trailing text.
+Use a group for a section heading. Add `collapsible` for an expandable group, `divider` for a separator, or an item’s `badge` slot for a count or short status.
 
 <DemoBlock>
   <DrawerGroupsDemo />
@@ -172,13 +162,9 @@ function requestExpanded(value: boolean) {
   </template>
 </DemoBlock>
 
-Toggle acceptance to distinguish an expansion request from an accepted state change. Collapsed descendants remain mounted but become inert and hidden from accessibility APIs. If focus was inside a collapsing group, MDV returns it to the disclosure button. Nested collapsible groups add 12px of logical indentation per level; static sections do not add another depth.
+## Modal drawer
 
-Disabling a group disables its disclosure, not its children. The enabled audit-log destination above remains available. Disable individual items when their actions must be unavailable. Numeric `badge="0"` is not discarded. Important counts need an accessible name, such as `aria-label="Design, 3 updates"`, in addition to their visual badge.
-
-## Modal navigation
-
-Open the modal drawer with a named button. There is no built-in close icon; provide one in a slot when needed. The native dialog enters the top layer, locks document scrolling, and keeps focus within the topmost modal. An `autofocus` control is preferred; otherwise the first available control receives focus.
+Open the modal drawer with a named button. Provide a close action if readers need one inside the drawer, and give the drawer an accessible name. Bind the model so dismissal requests can close it.
 
 <DemoBlock>
   <DrawerModalDemo />
@@ -223,151 +209,9 @@ const lastClose = ref('none')
   </template>
 </DemoBlock>
 
-An ordinary destination selection requests closing with reason `select`. A group disclosure only expands or collapses. Disabled items, `@click.prevent`, modified clicks, links with a new-window target, and downloads do not cause normal automatic dismissal. Cancelling a click also cancels native navigation; it does not undo state changes your own handler already made.
+## Responsive layout
 
-Supply a distinct title, `aria-label`, or `aria-labelledby`. If none is provided, the fallback navigation name is `主导航`; name English instances explicitly. After closing, focus returns to a usable opening control when appropriate, without overriding a newer modal or an intentional external focus destination.
-
-## Closing policy, state retention, and parent acceptance
-
-Modal closing controls are independent and enabled by default. The slot/exposed `close()` returns a promise telling you whether the parent accepted closing; `true` does not mean the exit animation has finished. Listen to `closed` for that point.
-
-<DemoBlock>
-  <DrawerPolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId } from 'vue'
-import { MdvButton, MdvCheckbox, MdvModalNavigationDrawer, MdvNavigationDrawerItem, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvNavigationDrawerCloseDetail } from '@mdv-ui/mdv'
-
-const id = `policy-example-${useId()}`
-const open = ref(false)
-const closeOnEsc = ref(true)
-const closeOnScrim = ref(true)
-const closeOnSelect = ref(true)
-const closeOnSwipe = ref(true)
-const destroy = ref(false)
-const blockClose = ref(false)
-const acceptClose = ref(true)
-const message = ref('No close requested.')
-function beforeClose(detail: Readonly<MdvNavigationDrawerCloseDetail>) {
-  message.value = `Guard ${detail.reason}: ${blockClose.value ? 'blocked' : 'allowed'}.`
-  return !blockClose.value
-}
-function update(value: boolean) {
-  if (value || acceptClose.value) open.value = value
-  else message.value = 'The parent rejected the close request.'
-}
-async function closeDrawer(close: () => Promise<boolean>) {
-  message.value = `Close accepted: ${await close()}.`
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="closeOnEsc" label="Close on Escape" />
-      <MdvCheckbox v-model="closeOnScrim" label="Close on scrim" />
-      <MdvCheckbox v-model="closeOnSelect" label="Close on selection" />
-      <MdvCheckbox v-model="closeOnSwipe" label="Close on swipe" />
-      <MdvCheckbox v-model="destroy" label="Destroy closed content" />
-      <MdvCheckbox v-model="blockClose" label="Block guarded closes" />
-      <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-    </div>
-    <div><MdvButton :aria-controls="id" :aria-expanded="open" @click="open = true">Open policy drawer</MdvButton></div>
-    <MdvModalNavigationDrawer :id="id" :model-value="open" title="Drawer close policy" :close-on-esc="closeOnEsc" :close-on-scrim="closeOnScrim" :close-on-select="closeOnSelect" :close-on-swipe="closeOnSwipe" :destroy-on-close="destroy" :before-close="beforeClose" @update:model-value="update">
-      <MdvNavigationDrawerItem label="Choose this destination" />
-      <template #footer="{ close }">
-        <div class="grid gap-3">
-          <MdvTextField label="Retained navigation note" placeholder="Type, close, and reopen" full-width />
-          <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-          <div class="flex flex-wrap gap-2">
-            <MdvButton variant="text" @click="closeDrawer(close)">Request guarded close</MdvButton>
-            <MdvButton variant="text" @click="open = false">Close by model</MdvButton>
-          </div>
-        </div>
-      </template>
-    </MdvModalNavigationDrawer>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Try blocking guarded closes, then rejecting model requests. Both keep the drawer open. Assigning the model to `false` directly closes with reason `model`, bypassing `beforeClose`. Concurrent close requests are coalesced, and an obsolete asynchronous result cannot close a newer drawer session.
-
-Content is retained by default. Type into the uncontrolled note field, close, and reopen to compare it with `destroy-on-close`. Destroying content occurs after exit and resets that field's internal state, while application-owned models remain the application's responsibility.
-
-Swipe dismissal starts on eligible drawer content and moves toward the logical starting edge, reversing in RTL. Passing half the panel width or exceeding a closing velocity of 400px/s can commit the gesture. Incomplete, cancelled, guarded, or parent-rejected swipes return to the open position. Vertical scrolling and editable controls retain their native interactions. Use real touch input to validate your application's gesture composition.
-
-## Asynchronous unsaved-content confirmation
-
-Return a promise from `beforeClose` when leaving requires confirmation. Keep the confirmation dialog as a sibling rather than mounting it inside content that is about to disappear. Resolve the promise on every decision and on teardown.
-
-<DemoBlock>
-  <DrawerGuardDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { onBeforeUnmount, ref, useId } from 'vue'
-import { MdvButton, MdvDialog, MdvModalNavigationDrawer, MdvNavigationDrawerItem, MdvTextField } from '@mdv-ui/mdv'
-
-const id = `guard-example-${useId()}`
-const open = ref(false)
-const confirming = ref(false)
-const note = ref('')
-const message = ref('Type a note in the drawer, then try closing it.')
-let resolveClose: ((allowed: boolean) => void) | undefined
-function beforeClose() {
-  if (!note.value.trim()) return true
-  confirming.value = true
-  return new Promise<boolean>(resolve => { resolveClose = resolve })
-}
-function answer(allowed: boolean) {
-  confirming.value = false
-  if (allowed) note.value = ''
-  message.value = allowed ? 'The note was discarded.' : 'Keep editing the note.'
-  resolveClose?.(allowed)
-  resolveClose = undefined
-}
-onBeforeUnmount(() => resolveClose?.(false))
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvButton :aria-controls="id" :aria-expanded="open" @click="open = true">Open guarded drawer</MdvButton>
-    <MdvModalNavigationDrawer :id="id" v-model="open" title="Draft workspace" :before-close="beforeClose">
-      <MdvNavigationDrawerItem label="Draft destination" active />
-      <template #footer="{ close }">
-        <div class="grid gap-3">
-          <MdvTextField v-model="note" label="Unsaved navigation note" full-width />
-          <MdvButton variant="text" @click="close()">Leave draft workspace</MdvButton>
-        </div>
-      </template>
-    </MdvModalNavigationDrawer>
-    <MdvDialog :model-value="confirming" title="Discard navigation note?" role="dialog" description="This local note has not been saved." @update:model-value="answer(false)">
-      <template #actions>
-        <MdvButton variant="text" @click="answer(false)">Keep editing</MdvButton>
-        <MdvButton variant="text" @click="answer(true)">Discard and close</MdvButton>
-      </template>
-    </MdvDialog>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-The local note has no persistence service: Discard clears it and permits the original close, while Keep editing rejects that close. A thrown/rejected guard reports an error and keeps the drawer open. A guard controls dismissal, not destination state: defer your own routing or active-state changes as well when they require approval.
-
-## Responsive composition
-
-Standard and Modal do not switch automatically. Observe the application's available width, preserve shared destination state, and mount the appropriate drawer. This example uses a **600px workspace breakpoint**, independent of the documentation site's own drawer breakpoint.
+MDV does not switch between standard and modal drawers automatically. Choose a breakpoint in your layout and share the active destination between the two presentations.
 
 <DemoBlock>
   <DrawerResponsiveDemo />
@@ -430,81 +274,13 @@ onBeforeUnmount(() => observer?.disconnect())
   </template>
 </DemoBlock>
 
-The preview can grow to 720px inside its own horizontal scroll region. On compact workspaces, the App Bar shows a menu action and destinations open in a modal; on expanded workspaces, Standard stays beside the content. Returning to expanded layout clears the modal model and disposes its overlay. The modal still covers the real browser viewport; it is not clipped to the preview.
+## With an App Bar
 
-## App Bar adjacency, scrolling, and local themes
+Place `MdvAppBarScaffold` immediately after a standard drawer in the same flex container to continue the App Bar surface behind the drawer corner.
 
-Keep `MdvAppBarScaffold` as the **immediately following sibling** of Standard inside their shared flex container. MDV uses that adjacency to carry the App Bar's surface behind the drawer's content-side rounded corner, including during theme transitions.
+Use `href` for destinations and derive `active` from the current route when using Vue Router.
 
-<DemoBlock>
-  <DrawerCompositionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvAppBar, MdvAppBarScaffold, MdvCheckbox, MdvNavigationDrawer, MdvNavigationDrawerGroup, MdvNavigationDrawerItem } from '@mdv-ui/mdv'
-
-const open = ref(true)
-const dark = ref(false)
-const rtl = ref(false)
-const current = ref('Inbox')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="open" label="Show composed drawer" />
-      <MdvCheckbox v-model="dark" label="Use a local dark theme" />
-      <MdvCheckbox v-model="rtl" label="Use right-to-left composition" />
-    </div>
-    <div class="overflow-x-auto rounded-xl" role="region" aria-label="Drawer and app bar composition" tabindex="0">
-      <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="flex h-80 min-w-0 overflow-hidden bg-mdv-surface-container-low text-mdv-on-surface" style="inline-size: max(100%, 640px)">
-        <MdvNavigationDrawer v-model="open" title="Mail" width="240px">
-          <MdvNavigationDrawerItem label="Inbox" :active="current === 'Inbox'" @click="current = 'Inbox'" />
-          <MdvNavigationDrawerGroup label="Folders" divider>
-            <MdvNavigationDrawerItem v-for="number in 12" :key="number" :label="`Project ${number}: a long destination label`" :active="current === `Project ${number}`" :badge="number" @click="current = `Project ${number}`" />
-          </MdvNavigationDrawerGroup>
-        </MdvNavigationDrawer>
-        <MdvAppBarScaffold class="min-w-0 flex-1" :content-attrs="{ 'aria-label': 'Composed workspace content' }">
-          <template #appbar><MdvAppBar :title="current" :heading-level="3" /></template>
-          <div class="grid gap-4 p-5 text-sm">
-            <p v-for="number in 8" :key="number">Workspace section {{ number }}. Scroll this content and compare the drawer corner with the app bar.</p>
-          </div>
-        </MdvAppBarScaffold>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Use `surface-container-low` for the common composition background, while allowing the drawer and App Bar to keep their own surface roles. Do not apply one background to every panel to hide a mismatch. The destination list scrolls independently; headers and footers remain outside it. Scaffold content has its own scrolling area.
-
-Switch the local theme and RTL controls and compare the corner while opening/closing. Standard uses `surface` without a shadow; Modal uses `surface-container-low`, elevation level 1, and a 32% scrim. Content-side corners are 16px; destination rows are at least 56px high with 24px icons. Active destinations use `secondary-container` and `on-secondary-container`.
-
-## Routing, keyboard, and semantics
-
-Use real `href` values for navigation. With Vue Router's custom `RouterLink` slot, bind `href` and `isExactActive` to an item and handle `click` with `navigate`; do not place another interactive anchor inside the item. MDV does not bundle a router, choose the active destination, or generate route URLs. With asynchronous route guards, decide whether to keep a modal open until navigation is accepted.
-
-The surface is a navigation landmark with list semantics. Groups and destinations are not an ARIA menu, tree, or tablist. Give multiple navigation regions distinct names.
-
-<DocsTable label="Drawer keyboard behavior" min-width="30rem">
-
-| Input | Behavior |
-| --- | --- |
-| Tab / Shift+Tab | Visits enabled controls in normal order; Modal confines focus to the topmost dialog |
-| ArrowUp / ArrowDown | Moves among visible enabled destinations and disclosure buttons without changing the active destination |
-| Home / End | Focuses the first / last available navigation row |
-| Enter / Space on a button | Activates its native action; a disclosure toggles expansion |
-| Enter on a link | Follows native link navigation |
-| Escape | Requests closing the topmost Modal when enabled; Standard stays open |
-
-</DocsTable>
-
-Text fields and other editing controls keep their own keyboard behavior. Disabled destinations and collapsed descendants are excluded from directional navigation. Reduced motion removes or shortens panel, width, disclosure, and state transitions. Validate actual layout, focus restoration, touch gestures, and larger text in the target browsers.
+---
 
 ## API
 

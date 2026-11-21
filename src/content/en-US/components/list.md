@@ -7,11 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import ListVariantDemo from '@/components/docs/demos/list/variant.vue'
 import ListContentDemo from '@/components/docs/demos/list/content.vue'
 import ListSelectionDemo from '@/components/docs/demos/list/selection.vue'
-import ListControlledDemo from '@/components/docs/demos/list/controlled.vue'
 import ListActionsDemo from '@/components/docs/demos/list/actions.vue'
-import ListGroupsDemo from '@/components/docs/demos/list/groups.vue'
-import ListThemeDemo from '@/components/docs/demos/list/theme.vue'
-import ListFormDemo from '@/components/docs/demos/list/form.vue'
 
 const listProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'MdvListModelValue', default: 'null', description: 'Single value or null for single selection; an array for multiple selection. Changes require parent acceptance. Ignored by selection-mode=none.' },
@@ -63,14 +59,13 @@ const subheaderSlots: SlotTableItem[] = [
   { name: 'default', description: 'Visible subheader text. No slot parameters.' },
 ]
 </script>
-
 # List
 
-`MdvList` arranges related rows with `MdvListItem` and optional `MdvListSubheader`. An ordinary list can contain static information, native actions, and independent controls. A selection list uses a controlled `listbox` model with one keyboard entry point.
+Use `MdvList` and `MdvListItem` to display related rows, actions, or selectable options.
 
 ## Variants and layouts
 
-Choose `expressive` or `baseline`, independently of `standard` or `segmented` layout. Expressive is the default. Every example starts with the same selected destination.
+Use `variant` for Expressive or Baseline appearance and `layout` for Standard or Segmented rows.
 
 <DemoBlock>
   <ListVariantDemo />
@@ -108,22 +103,9 @@ const destinations = ['workspace', 'projects', 'archive']
   </template>
 </DemoBlock>
 
-<DocsTable label="List variant and layout behavior" min-width="35rem">
+## Row content
 
-| Combination | Resting rows | Selected rows | Interaction shape |
-| --- | --- | --- | --- |
-| Expressive standard | Transparent, 4px corners | `secondary-container`, 16px corners | Hover 8px; focus/pressed 16px |
-| Expressive segmented | `surface-container`; 16px group end corners, 4px inner corners | `secondary-container`, 16px corners | Interaction shape overrides resting segment corners |
-| Baseline standard | Transparent, 4px corners | `secondary-container` | Fixed corners |
-| Baseline segmented | `surface-container`, 4px corners | `secondary-container` | Fixed corners |
-
-</DocsTable>
-
-The expressive selected shape takes priority over hover. Segmented lists use 8px padding and 2px gaps. Subheaders or other non-item nodes break a run of connected segments. Explicit `layout` takes priority over the `segmented` shorthand.
-
-## Content, line counts, and dividers
-
-Use props for common row content, or slots to replace individual areas. An item's `lines` overrides the list default; otherwise the count is inferred from the visible overline, headline/content, and supporting areas.
+Use the row’s content props or slots for a headline, supporting text, icons, and other content. Set `lines` to override the inferred line count.
 
 <DemoBlock>
   <ListContentDemo />
@@ -162,24 +144,9 @@ const image = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" widt
   </template>
 </DemoBlock>
 
-<DocsTable label="List row dimensions" min-width="28rem">
-
-| Content | Default minimum height or size |
-| --- | --- |
-| One / two / three lines | 56 / 72 / 88px |
-| Leading icon / avatar / image | 24 / 40 / 56px |
-| Row leading / trailing padding | 16 / 24px |
-| Gap between content regions | 16px |
-
-</DocsTable>
-
-These heights are minimums; media and custom content can make a row taller. Three-line content aligns to the top. Headline and overline truncate on one line. Supporting text uses at most two lines in a three-line row without an overline, and one line otherwise.
-
-Standard `full-width` dividers span adjacent rows; `inset` follows the text start after an icon, avatar, or image. Segmented lists use their gaps and suppress these dividers. Built-in images and icons are decorative; use a slot with appropriate naming for meaningful imagery.
-
 ## Single and multiple selection
 
-Provide a unique string or number `value` on every selectable row and name the listbox. Single selection accepts a scalar or `null`; multiple selection uses an array.
+Give each selectable item a unique `value` and name the listbox. Bind a single value or `null` for single selection, and an array for multiple selection.
 
 <DemoBlock>
   <ListSelectionDemo />
@@ -221,72 +188,9 @@ const multiple = ref<MdvListModelValue>(['updates'])
   </template>
 </DemoBlock>
 
-Numeric `1` and string `'1'` are different values because comparisons use `Object.is`. Clicking the selected single option keeps it selected. Multiple selection toggles values using a new array. Disabled options cannot change the model.
+## Independent actions
 
-The built-in checkbox, radio, and switch presentations are decorative selection indicators. They follow the row's selected state unless `leading-value` or `trailing-value` overrides their appearance. They are not nested inputs, independent actions, or submitted form fields.
-
-Selection keyboard rules:
-
-- Tab enters one option, preferring the selected or current option. Other options use `tabindex="-1"`.
-- Arrow keys move focus and wrap; Home/End focus the first/last available option. Moving focus does not select.
-- Enter/Space selects the focused option. Disabled, `hidden`, and `inert` rows are skipped.
-- Removing or disabling a focused option moves focus to an available row. Applications still own any model cleanup when values are removed.
-
-Link rows and rows without values do not participate in selection. Keep native navigation links and independently interactive rows in an ordinary list.
-
-## Controlled acceptance and cancellation
-
-A selection request changes the visible state only after the parent accepts it. `v-model` handles acceptance directly. The example starts by rejecting requests; cancelling the row click prevents the request itself.
-
-<DemoBlock>
-  <ListControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvList, MdvListItem } from '@mdv-ui/mdv'
-import type { MdvListModelValue } from '@mdv-ui/mdv'
-
-const selected = ref<MdvListModelValue>('draft')
-const accept = ref(false)
-const cancelClick = ref(false)
-const message = ref('The parent currently rejects selection changes.')
-
-function update(value: MdvListModelValue) {
-  message.value = `Requested ${value}: ${accept.value ? 'accepted' : 'rejected'}.`
-  if (accept.value) selected.value = value
-}
-
-function activate(event: MouseEvent) {
-  if (!cancelClick.value) return
-  event.preventDefault()
-  message.value = 'Click cancelled before the selection request.'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="accept" label="Accept list selection" />
-      <MdvCheckbox v-model="cancelClick" label="Cancel row clicks" />
-    </div>
-    <MdvList :model-value="selected" selection-mode="single" layout="segmented" aria-label="Review stage" @update:model-value="update">
-      <MdvListItem v-for="stage in ['draft', 'review', 'approved']" :key="stage" :value="stage" :headline="stage" trailing="radio" @click="activate" />
-    </MdvList>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Selected: {{ selected }} · {{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Cancelling the primary action's native `click`, or the default behavior of its selection `keydown`, prevents that selection. `MdvListItem` does not emit its own `update:selected`; selection belongs to the parent List model. Outside selection mode, `selected` is a presentation prop.
-
-## Independent controls and native actions
-
-Put real controls in `#leading-action` or `#trailing-action`. They share the row surface while remaining siblings of its primary action, so they keep their own focus and do not trigger the primary button.
+Use `leading-action` or `trailing-action` for independent controls, rather than nesting a button inside the row’s primary action.
 
 <DemoBlock>
   <ListActionsDemo />
@@ -330,131 +234,11 @@ const more = ref(0)
   </template>
 </DemoBlock>
 
-Try the save checkbox, main project action, More action, and sync switch separately. Bind the slot's `disabled` parameter to each control to retain native disabled semantics and appearance. Disabling a row also blocks activation from its action areas. Disabled links lose `href`, leave the Tab order, and retain disabled link semantics; re-enabling restores them.
+## Section headings
 
-Use an ordinary list for rows with multiple controls. Keep interactive elements out of the headline, content, leading, and trailing display slots. A row with `href` uses a native anchor; `interactive` or activation listeners use a native button; otherwise the content is static. Static information does not add a Tab stop.
+Use `MdvListSubheader` to label sections. Preserve item identity with stable Vue keys when items are reordered.
 
-## Subheaders, reordering, and focus
-
-Subheaders label visual sections and break segmented runs. `inset` aligns text with a standard leading icon. Stable item keys keep selection and row identity when ordering changes.
-
-<DemoBlock>
-  <ListGroupsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvList, MdvListItem, MdvListSubheader } from '@mdv-ui/mdv'
-import type { MdvListModelValue } from '@mdv-ui/mdv'
-import folderIcon from '@iconify-icons/material-symbols/folder-outline'
-
-const list = useTemplateRef<InstanceType<typeof MdvList>>('list')
-const selected = ref<MdvListModelValue>('research')
-const showSubheader = ref(true)
-const projects = ref(['research', 'prototype', 'release'])
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="showSubheader" label="Show the project group label" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" @click="projects = [...projects].reverse()">Reverse project order</MdvButton>
-      <MdvButton variant="outlined" @click="list?.focus()">Focus selected row</MdvButton>
-    </div>
-    <MdvList ref="list" v-model="selected" selection-mode="single" layout="segmented" aria-label="Grouped destinations">
-      <MdvListSubheader inset>Workspace</MdvListSubheader>
-      <MdvListItem value="inbox" headline="Inbox" :icon="folderIcon" />
-      <MdvListItem value="archive" headline="Archive" :icon="folderIcon" />
-      <MdvListSubheader v-if="showSubheader" inset>Projects</MdvListSubheader>
-      <MdvListItem v-for="project in projects" :key="project" :value="project" :headline="project" :icon="folderIcon" />
-    </MdvList>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Selected: {{ selected }}. Reordering preserves each row's value.</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Hide the project label to join the segments, reverse the projects, and use Focus selected row to call the List instance's `focus()`. Selection navigation follows current DOM order. The subheader is a presentational `li`, not an expandable group, sticky heading, or extra keyboard stop.
-
-## Native forms
-
-Ordinary interactive rows support native button types, required validation, reset, and submitter attributes. Make the row interactive explicitly; `type` alone does not turn static content into a button.
-
-<DemoBlock>
-  <ListFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvList, MdvListItem, MdvTextField } from '@mdv-ui/mdv'
-
-const name = ref('')
-const message = ref('Enter a display name before submitting.')
-
-function submit(event: Event) {
-  const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null
-  message.value = `Submitted ${name.value} with intent=${submitter?.value || '(none)'}.`
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <form class="grid gap-3" @submit.prevent="submit" @reset="name = ''; message = 'Profile reset.'">
-      <MdvTextField v-model="name" label="Display name" name="displayName" required full-width />
-      <MdvList aria-label="Profile form actions">
-        <MdvListItem interactive type="submit" name="intent" value="save" headline="Submit profile" supporting-text="Uses native required-field validation." />
-        <MdvListItem interactive type="reset" headline="Reset profile" />
-        <MdvListItem interactive headline="Preview profile" @click="message = `Preview: ${name || '(empty)'}`" />
-      </MdvList>
-    </form>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Preview profile uses the default `button` type and does not submit. Submit profile supplies `name="intent"` and `value="save"`; the application handles submission. The List selection model itself is not serialized and has no built-in `name`, validation, or reset API. Add form fields explicitly when selection belongs in submitted data.
-
-## Long content, local themes, and direction
-
-The same rows inherit local light/dark scopes, MDV tokens, and logical direction. Long text stays in its content column while trailing content retains its space.
-
-<DemoBlock>
-  <ListThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvList, MdvListItem } from '@mdv-ui/mdv'
-import notificationsIcon from '@iconify-icons/material-symbols/notifications-outline'
-
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Use right-to-left lists" />
-    <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" :dir="rtl ? 'rtl' : 'ltr'" class="min-w-0 rounded-xl bg-mdv-surface-container-lowest p-2 text-mdv-on-surface">
-      <MdvList layout="segmented" :aria-label="`${theme} list preview`">
-        <MdvListItem :lines="3" headline="A long notification headline that stays within the row" supporting-text="Supporting text can wrap onto two lines in a three-line row without an overline, while its trailing content keeps its space." :icon="notificationsIcon" trailing-text="Now" />
-        <MdvListItem :lines="3" headline="Archive export" supporting-text="ReportArchive2026WithALongUnbrokenSupportingValueToCheckWrapping" avatar-name="Alex Morgan" trailing="checkbox" :trailing-value="true" selected />
-      </MdvList>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-The selected row uses `on-secondary-container` text and display icons. Expressive hover, pressed, focus-visible, and selected states retain the shared surface and ripple. Reduced motion minimizes transitions; forced-colors mode uses system colors. This component does not provide a color-seed prop.
+---
 
 ## API
 

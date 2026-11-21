@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import RadioBasicDemo from '@/components/docs/demos/radio/basic.vue'
 import RadioStandaloneDemo from '@/components/docs/demos/radio/standalone.vue'
 import RadioStateDemo from '@/components/docs/demos/radio/state.vue'
-import RadioColorDemo from '@/components/docs/demos/radio/color.vue'
-import RadioControlledDemo from '@/components/docs/demos/radio/controlled.vue'
 import RadioFormDemo from '@/components/docs/demos/radio/form.vue'
 
 const radioProps: ApiTableItem[] = [
@@ -40,16 +38,13 @@ const groupSlots: SlotTableItem[] = [
   { name: 'label', description: 'Replaces the legend content. No slot arguments; preserve a meaningful group name.' },
 ]
 </script>
-
 # Radio
 
-`MdvRadio` selects one scalar value from mutually exclusive options. `MdvRadioGroup` supplies the shared model, accessible group, keyboard selection, and validation. This page describes **MDV 0.1.5**. Use Checkbox for independent choices and Switch for a setting that changes immediately.
+Use `MdvRadioGroup` and `MdvRadio` when users can select one option from a set. For independent choices, use [Checkbox](./checkbox).
 
-## Groups, orientation, and strict values
+## Radio groups
 
-Bind the model on the group and give every child a unique `value`. Do not put separate models on its children. Values are strings or numbers, with `null` representing no selection. The number `1` and text `'1'` select different options.
-
-Horizontal options wrap when space is limited. Tab enters the selected available option or the first enabled option. Arrow keys both move focus and select, skipping disabled options. Clicking an already selected radio keeps it selected; offer a separate reset action if clearing is needed.
+Bind `v-model` on the group and give each option a distinct `value`. Strings and numbers are compared without conversion; use `null` for no selection. Label the group with `label` or the `label` slot.
 
 <DemoBlock>
   <RadioBasicDemo />
@@ -87,11 +82,9 @@ const typed = ref<MdvRadioModelValue>(1)
   </template>
 </DemoBlock>
 
-## Standalone radios and native names
+## Standalone radios
 
-Standalone radios can share one model and one native `name`. Use a unique name for each independent choice set so the browser does not accidentally group unrelated inputs on the same page. A semantic `fieldset` and `legend` supply the group context in this example. Prefer `MdvRadioGroup` when you need its coordinated keyboard, required, and validation behavior.
-
-Native form values are strings even when application values are numbers. The example resets to the model value present when it mounted.
+Outside a group, bind the radios to the same model and use the same native `name`. Use a different `name` for each independent set.
 
 <DemoBlock>
   <RadioStandaloneDemo />
@@ -131,13 +124,9 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## Labels, disabled options, and errors
+## Labels and states
 
-Use `label` for plain text or the default slot for rich label content. Supporting text is associated with the native input. A Radio default slot replaces its label; the Group `label` slot replaces its legend.
-
-Group `disabled` and an ancestor disabled `fieldset` disable descendants through native semantics. An option can disable itself but cannot override a disabled ancestor. Group errors propagate to options; individual supporting text remains attached to each option, while the group shows its shared error message. Set group `error-text` for a group-level message.
-
-`error` and `error-text` describe an application error. To block a native form submission, use a native constraint or `setCustomValidity()` as well. Merely supplying `error-text` does not activate error state.
+Use `supporting-text` for a hint and `disabled` for unavailable options. Set `error` and `error-text` on the group for a shared message.
 
 <DemoBlock>
   <RadioStateDemo />
@@ -171,90 +160,9 @@ const value = ref<MdvRadioModelValue>('standard')
   </template>
 </DemoBlock>
 
-## Colors, local themes, and RTL
+## Forms and validation
 
-Colors support `primary`, `secondary`, `tertiary`, `success`, `warning`, `error`, `info`, or a valid `#RGB`/`#RRGGBB` seed. A group provides the default color and an explicit child color overrides it. Error and disabled presentation follow MDV state rules. Custom colors participate in light/dark schemes rather than painting a fixed hex fill onto the control.
-
-<DemoBlock>
-  <RadioColorDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvRadio, MdvRadioGroup } from '@mdv-ui/mdv'
-import type { MdvRadioColor, MdvRadioModelValue } from '@mdv-ui/mdv'
-
-const selected = ref<MdvRadioModelValue>('primary')
-const colors: MdvRadioColor[] = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error', 'info', '#006c4c']
-const preference = ref<MdvRadioModelValue>('inherited')
-</script>
-
-<template>
-  <div class="grid gap-5">
-    <MdvRadioGroup v-model="selected" label="Theme roles and seed colors" orientation="horizontal">
-      <MdvRadio v-for="color in colors" :key="color" :value="color" :color="color" :label="color" />
-    </MdvRadioGroup>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div v-for="theme in ['light', 'dark'] as const" :key="theme" :data-mdv-theme="theme" :dir="theme === 'dark' ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface-container-low p-4 text-mdv-on-surface">
-        <MdvRadioGroup v-model="preference" color="tertiary" :label="`${theme} theme${theme === 'dark' ? ' · RTL' : ''}`">
-          <MdvRadio value="inherited" label="Inherited tertiary" />
-          <MdvRadio value="override" color="#006c4c" label="Local seed override" />
-          <MdvRadio value="disabled" label="Disabled" disabled />
-        </MdvRadioGroup>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Parent-controlled acceptance
-
-With an explicit model, the parent decides whether to accept `update:modelValue`. Rejected requests restore native checked state to the accepted model. Focus can still move to the attempted option; focused and selected are distinct states. The example starts with acceptance disabled.
-
-<DemoBlock>
-  <RadioControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvRadio, MdvRadioGroup } from '@mdv-ui/mdv'
-import type { MdvRadioModelValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvRadioModelValue>('basic')
-const accept = ref(false)
-const requested = ref<MdvRadioModelValue>(null)
-function update(next: MdvRadioModelValue) {
-  requested.value = next
-  if (accept.value) value.value = next
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="accept" label="Accept selection requests" />
-    <MdvRadioGroup :model-value="value" label="Controlled plan" @update:model-value="update">
-      <MdvRadio value="basic" label="Basic plan" /><MdvRadio value="pro" label="Pro plan" />
-    </MdvRadioGroup>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Requested: {{ requested ?? 'none' }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Native forms, validation, and reset
-
-Set the group's `name` to submit only its selected enabled input. No hidden surrogate field is created. Without a name, the group can still select and validate but is absent from `FormData`. Avoid overriding child names in a coordinated group; use a separate group for a separate choice.
-
-`form` can associate the group with an external form: it is inherited by child inputs. Native input attributes such as `id`, `form`, ARIA, and event listeners can also be set on an individual Radio. An explicit child `name` or `form` takes precedence over the inherited value.
-
-The example keeps options outside the form element, demonstrates required selection and a disabled group, reads real `FormData`, and exposes validation actions. A server error uses `setCustomValidity()`; clear it with an empty string. Reset restores the initial model and clears reported validation state. Native reset does not clear custom validity, so this example explicitly clears its own server error in the reset handler.
+Set `name` to submit the selected, enabled option. Use `required` to require a choice and `form` to associate the group with an external form. Native reset restores the initial selection.
 
 <DemoBlock>
   <RadioFormDemo />
@@ -309,25 +217,9 @@ function reset(event: Event) {
   </template>
 </DemoBlock>
 
-In MDV 0.1.5, reporting an empty required group and then selecting another valid option clears the group error, but can leave the originally invalid option red with `aria-invalid="true"` even though its native validity is now valid. This is a recorded library defect; the demo keeps the original styling so the integration behavior remains visible.
+After a required-field error, the previously invalid option can still appear invalid even when the new selection passes native validation.
 
-## Accessibility and keyboard interaction
-
-<DocsTable label="Radio Group keyboard interaction">
-
-| Key | Behavior |
-| --- | --- |
-| Tab / Shift+Tab | Enters/leaves the group at the selected enabled option or its first enabled option. |
-| Arrow Right / Arrow Down | Selects and focuses the next enabled option, wrapping. |
-| Arrow Left / Arrow Up | Selects and focuses the previous enabled option, wrapping. |
-| Home / End | Selects and focuses the first/last enabled option. |
-| Space | Selects the focused native radio. |
-
-</DocsTable>
-
-Radio renders an actual `input[type="radio"]` with a 48px minimum interaction area. Group renders `fieldset`, `legend`, and `role="radiogroup"`. If no visible label is provided, supply `aria-label` or `aria-labelledby`. Do not replace radio semantics with button or menu roles. Native `input`, `change`, `invalid`, focus, and blur events reach the input; component model updates carry the typed option value.
-
-MDV handles reduced motion and forced-color styles. Screen-reader announcements, touch targets in your final layout, browser validation UI, and cross-browser form behavior still require application checks. Disabled ancestor fieldsets retain the browser's first-legend exception.
+---
 
 ## API
 
@@ -375,5 +267,3 @@ import type {
   MdvRadioOrientation,  // 'vertical' | 'horizontal'
 } from '@mdv-ui/mdv'
 ```
-
-MDV 0.1.5 does not export `MdvRadioProps` or `MdvRadioGroupProps` interfaces. Use the actual component types when typing template refs.

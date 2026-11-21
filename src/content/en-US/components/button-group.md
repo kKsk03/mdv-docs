@@ -9,7 +9,6 @@ import ButtonGroupSingleDemo from '@/components/docs/demos/buttonGroup/single.vu
 import ButtonGroupMultipleDemo from '@/components/docs/demos/buttonGroup/multiple.vue'
 import ButtonGroupIndependentDemo from '@/components/docs/demos/buttonGroup/independent.vue'
 import ButtonGroupSizeDemo from '@/components/docs/demos/buttonGroup/size.vue'
-import ButtonGroupStatesDemo from '@/components/docs/demos/buttonGroup/states.vue'
 import ButtonGroupFormDemo from '@/components/docs/demos/buttonGroup/form.vue'
 
 const groupProps: ApiTableItem[] = [
@@ -50,14 +49,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'selected', description: 'Selected icon, replacing leading content or an icon-only default slot. Receives { selected }; no checkmark is inserted automatically.' },
 ]
 </script>
-
 # Button Group
 
-`MdvButtonGroup` arranges related `MdvButtonGroupItem` controls in a single row. Standard groups work well for related actions; connected groups visually combine choices. Selection is configured separately from appearance.
+Use `MdvButtonGroup` to present related actions or selections. Put one `MdvButtonGroupItem` in the group for each control.
 
 ## Standard actions
 
-The default `standard` layout uses `selection="none"`. Each item owns its native action and may have a different appearance. Pressing an item can expand its width by borrowing safe space from its immediate neighbors while keeping the group's overall width stable.
+Keep `selection="none"` for standard actions. Handle each item’s click separately.
 
 <DemoBlock>
   <ButtonGroupActionsDemo />
@@ -86,11 +84,9 @@ const message = ref('Choose a document action.')
   </template>
 </DemoBlock>
 
-Use `MdvButtonGroupItem` rather than placing ordinary `MdvButton` controls inside the group. An ordinary action can use `href` to render a native link; toggle items always remain buttons and ignore `href`.
+## Connected choices
 
-### Connected single selection
-
-Connected groups default to single selection and full width. Bind the accepted value with `v-model` and give every item a unique `value`.
+Use `layout="connected"` with `selection="single"` or `multiple` for related choices. Bind a single value for single selection or an array for multiple selection.
 
 <DemoBlock>
   <ButtonGroupSingleDemo />
@@ -122,12 +118,6 @@ const required = ref(true)
   </template>
 </DemoBlock>
 
-Without `selection-required`, clicking the selected item clears it to `null`. The option only prevents clearing the last selected item; it does not select an item automatically, make an empty initial value valid, or implement HTML `required` validation. Initialize the model when a choice must already be present.
-
-### Multiple selection
-
-Set `selection="multiple"` and use an array model. Add a `selected` slot when you want a checkmark; MDV does not insert one automatically.
-
 <DemoBlock>
   <ButtonGroupMultipleDemo />
   <template #source>
@@ -158,13 +148,9 @@ const filters = ref<MdvButtonGroupModelValue>(['photos'])
   </template>
 </DemoBlock>
 
-Values are strings or numbers; `0` and `'0'` are different choices. Updates use a new array rather than modifying the supplied array in place. Selection can also be enabled in a standard group by setting `selection` explicitly.
+## Independent toggles
 
----
-
-## Independent toggles and icons
-
-For controls with independent boolean models, keep `selection="none"` and bind each item's `v-model:selected`. Provide accessible names for icon-only buttons. Do not combine independent `selected` models with the group's single/multiple selection.
+With `selection="none"`, use `v-model:selected` on individual items for independent toggles. Give each icon-only item an accessible name.
 
 <DemoBlock>
   <ButtonGroupIndependentDemo />
@@ -204,13 +190,9 @@ const underline = ref(false)
   </template>
 </DemoBlock>
 
-An icon-only item supports `width="narrow"`, `"default"`, or `"wide"`. Its `default`, `leading`, `trailing`, and `selected` slots receive `{ selected }`. Keep slot content decorative; do not put interactive controls inside a button.
+## Sizes and shapes
 
----
-
-## Sizes, shapes, and density
-
-Five sizes share the Button scale. Standard items can override the group's `size` and `shape`; connected items inherit both so their joined geometry stays consistent. Toggle Square shape and Density -2 to compare their effect.
+Set `size` and `shape` on the group for a consistent appearance. Standard items can override those values; connected items inherit them.
 
 <DemoBlock>
   <ButtonGroupSizeDemo />
@@ -249,68 +231,9 @@ const message = ref('Choose a size example.')
   </template>
 </DemoBlock>
 
-<DocsTable label="Button group size and spacing">
-
-| Size | Default visual height | Standard gap |
-| --- | --- | --- |
-| `xs` | 32px | 18px |
-| `s` | 40px | 12px |
-| `m` | 56px | 8px |
-| `l` | 96px | 8px |
-| `xl` | 136px | 8px |
-
-</DocsTable>
-
-Connected gaps stay at 2px. Density values `0`, `-1`, `-2`, `-3` reduce visual height by 4px per step while preserving at least 48px interaction targets. Text scaling can increase natural height.
-
-Groups remain in one row and scroll internally when space is insufficient. Prefer short labels or an explicit menu composition for long action lists. `full-width` defaults to `false` for standard and `true` for connected groups; it can be overridden.
-
-## Disabled, loading, and colors
-
-Use group-level `disabled` for the whole group or item-level `disabled` for one action. Loading is visual only; this example binds `disabled` as well to prevent duplicate publishing while showing the spinner.
-
-<DemoBlock>
-  <ButtonGroupStatesDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButtonGroup, MdvButtonGroupItem, MdvCheckbox } from '@mdv-ui/mdv'
-
-const loading = ref(false)
-const disabled = ref(false)
-const message = ref('Toggle the states, then try the available actions.')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="loading" label="Show loading" />
-      <MdvCheckbox v-model="disabled" label="Disable group" />
-    </div>
-    <MdvButtonGroup :disabled="disabled" aria-label="Publishing actions">
-      <MdvButtonGroupItem :loading="loading" :disabled="loading" loading-text="Publishing…" @click="message = 'Published.'">
-        Publish
-      </MdvButtonGroupItem>
-      <MdvButtonGroupItem variant="elevated" color="tertiary" @click="message = 'Preview opened.'">Preview</MdvButtonGroupItem>
-      <MdvButtonGroupItem disabled variant="outlined">Unavailable</MdvButtonGroupItem>
-    </MdvButtonGroup>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Item `color` supports the same seven named roles and local hexadecimal seeds as Button. Omitted color uses the item's variant defaults. Selected shape/color changes, state layers, focus outlines, spring motion, theme inheritance, RTL, and reduced motion are handled by MDV.
-
----
-
 ## Native forms
 
-Set `name` on the group to submit accepted selections. Multiple choices become repeated hidden fields with the same name; read them using `FormData.getAll()`.
+Set `name` on the group to submit its selection. Multiple selections are submitted as repeated fields with the same name.
 
 <DemoBlock>
   <ButtonGroupFormDemo />
@@ -349,15 +272,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-The Vue model retains number/string types; native form values become strings. `selection="none"` does not submit group selections. `form` can associate with an external form. Reset requests the model captured at creation; controlled parents must still accept the update, and cancelling the native reset preserves the current state. Disabled groups/fieldsets follow native form disabling rules.
-
-## Keyboard and controlled state
-
-- The container is a named `role="group"`, not a tablist or radio group. Use `aria-label` or `aria-labelledby` to describe its purpose.
-- Tab and Shift+Tab visit each available native control. Arrow keys move focus, Home/End move to the first/last available item, and navigation wraps while skipping disabled, hidden, and inert items. Horizontal movement mirrors in RTL.
-- Moving focus does not select. Enter/Space activate buttons; links retain native Enter behavior. Toggle buttons expose `aria-pressed`.
-- A bound model is authoritative. The parent may reject `update:modelValue`; visuals and `aria-pressed` keep the accepted value. Calling `preventDefault()` on an item's native click cancels its selection change.
 
 ---
 

@@ -8,10 +8,8 @@ import SearchBarDemo from '@/components/docs/demos/searchBar/bar.vue'
 import SearchFormDemo from '@/components/docs/demos/searchBar/form.vue'
 import SearchViewDemo from '@/components/docs/demos/searchBar/view.vue'
 import SearchTriggerDemo from '@/components/docs/demos/searchBar/trigger.vue'
-import SearchGuardDemo from '@/components/docs/demos/searchBar/guard.vue'
 import SearchAsyncDemo from '@/components/docs/demos/searchBar/async.vue'
 import SearchAppBarDemo from '@/components/docs/demos/searchBar/appbar.vue'
-import SearchCompositionDemo from '@/components/docs/demos/searchBar/composition.vue'
 
 const barProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'string', default: "''（内部）", description: '搜索词。不传时内部管理，显式传入后由父级决定是否接受更新。' },
@@ -59,18 +57,13 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'search-trailing', description: '搜索框内的尾部内容，接收搜索状态，可能分别在入口和展开栏渲染。' },
 ]
 </script>
-
 # 搜索栏
 
-`MdvSearchBar` 提供可编辑搜索输入；`MdvSearchView` 添加可展开的模态建议与结果表面；`MdvSearchAppBar` 将该体验放进应用栏。本页覆盖 **MDV 0.1.5** 的这三个组件。
+用 `MdvSearchBar` 在当前页面搜索，用 `MdvSearchView` 展开建议和结果，或用 `MdvSearchAppBar` 将搜索放进应用栏。
 
-数据、筛选、请求、历史记录和结果操作由应用负责。组件不实现搜索服务，也不为任意结果自动添加 combobox/listbox 语义。
+## 基本搜索
 
-## 独立输入、提交与表单
-
-搜索直接更新当前页面、不需要独立结果表面时使用 SearchBar。它最小高 56px，并占满容器。`v-model` 跟踪输入，`search` 表示主动提交。Enter 会发出 search 并阻止原生表单隐式提交，示例因此提供单独提交按钮来读取 `FormData`。
-
-清空会更新为空字符串、发出 `clear`，并将焦点放回输入。只读允许查看和提交当前搜索词，但不能修改或清空；禁用会阻止交互。SearchBar 的原生 `name`、`form`、`id`、输入事件与校验属性直接作用于输入，`class` 和 `style` 作用于外壳。重置恢复初始搜索词，受控值仍需要父级接受更新。
+用 `v-model` 绑定查询词，通过 `search` 处理搜索。按 Enter 会触发 `search`，不会提交外层表单；需要提交表单时，请提供独立的提交按钮。
 
 <DemoBlock>
   <SearchBarDemo />
@@ -107,57 +100,9 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## SearchView 输入归属与表单
+## 建议与结果
 
-SearchView 的入口与展开输入共享搜索词，但仅活动输入具有表单名称及指定 ID。通过 `input-attrs` 提供原生关联，不要把 `name` 放在组件外壳上。示例可分别在两种形态读取外部表单，不会重复提交 `q` 字段，并可在保持搜索展开时恢复初始搜索词。模态内按钮显式关联同一表单。
-
-<DemoBlock>
-  <SearchFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId } from 'vue'
-import { MdvButton, MdvSearchView } from '@mdv-ui/mdv'
-
-const id = `search-view-form-${useId()}`
-const inputId = `search-view-input-${useId()}`
-const query = ref('design')
-const message = ref('No form submission yet.')
-function submit(event: Event) {
-  message.value = `Form data: ${JSON.stringify([...new FormData(event.currentTarget as HTMLFormElement)])}`
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
-      <template #default="{ close }">
-        <div class="grid gap-4 p-5">
-          <p class="text-sm">Only the active search input belongs to the external form.</p>
-          <div class="flex flex-wrap gap-3"><MdvButton type="submit" :form="id">Submit from search</MdvButton><MdvButton type="reset" :form="id" variant="outlined">Reset from search</MdvButton><MdvButton variant="text" @click="close()">Close form search</MdvButton></div>
-          <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
-        </div>
-      </template>
-    </MdvSearchView>
-    <form :id="id" class="flex flex-wrap gap-3" @submit.prevent="submit">
-      <MdvButton type="submit">Submit collapsed search</MdvButton><MdvButton type="reset" variant="outlined">Reset collapsed search</MdvButton>
-    </form>
-    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 建议、外观与响应式布局
-
-聚焦或点击入口输入可以打开 SearchView。`contained` 使用分离的圆角输入与结果表面，`divided` 使用带分割线的整体表面。示例同时由应用切换配套 List 的外观。
-
-`auto` 参考的是**视口**，不是示例容器：小于 600px 使用全屏，600px 及以上停靠入口。两种布局均为原生模态 dialog，包含遮罩与焦点限制。因此停靠结果也不是内联的非模态弹出框。contained 展开后会向入口两侧各延伸 12px，默认外壳提供 24px 水平内边距；应给组件留出空间，不要覆盖内部定位。
-
-Enter 发出 `search` 并将焦点移入结果区，不会选中结果或关闭搜索。示例显式处理结果选择并调用插槽 `close()`。清空保持展开，筛选与空状态属于普通插槽内容。
+用 `MdvSearchView` 的默认插槽显示建议或结果。`layout="auto"` 在视口宽度达到 600px 时使用停靠布局，更窄时使用全屏。由应用处理结果选择，再调用插槽提供的 `close()` 请求关闭。
 
 <DemoBlock>
   <SearchViewDemo />
@@ -218,11 +163,55 @@ function choose(title: string, close: MdvSearchSlotProps['close']) {
   </template>
 </DemoBlock>
 
-## 图标入口与受控模型
+用 `placeholder`、`clear-label` 和 `back-label` 设置界面语言。内部结果区的无障碍名称固定为中文。
 
-将完整 `triggerProps` 绑定到一个入口，包括 `ref`、点击处理、dialog 关联、展开状态和禁用状态。纯图标入口还应提供可访问名称。省略 ref 或将绑定分散到不同元素，会破坏定位或焦点恢复。
+## 搜索表单
 
-搜索词和展开模型彼此独立。不绑定时内部管理；显式 `:model-value` 或 `:open` 需要父级接受更新，拒绝时保持已接受状态。示例把接受控制放在模态内部，拒绝关闭后仍可重新启用，避免无法通过键盘退出。
+通过 `input-attrs` 传递 `name` 和 `form`。只有当前使用的输入框带有提交名称，展开搜索后不会重复提交查询词。
+
+<DemoBlock>
+  <SearchFormDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref, useId } from 'vue'
+import { MdvButton, MdvSearchView } from '@mdv-ui/mdv'
+
+const id = `search-view-form-${useId()}`
+const inputId = `search-view-input-${useId()}`
+const query = ref('design')
+const message = ref('No form submission yet.')
+function submit(event: Event) {
+  message.value = `Form data: ${JSON.stringify([...new FormData(event.currentTarget as HTMLFormElement)])}`
+}
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
+      <template #default="{ close }">
+        <div class="grid gap-4 p-5">
+          <p class="text-sm">Only the active search input belongs to the external form.</p>
+          <div class="flex flex-wrap gap-3"><MdvButton type="submit" :form="id">Submit from search</MdvButton><MdvButton type="reset" :form="id" variant="outlined">Reset from search</MdvButton><MdvButton variant="text" @click="close()">Close form search</MdvButton></div>
+          <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
+        </div>
+      </template>
+    </MdvSearchView>
+    <form :id="id" class="flex flex-wrap gap-3" @submit.prevent="submit">
+      <MdvButton type="submit">Submit collapsed search</MdvButton><MdvButton type="reset" variant="outlined">Reset collapsed search</MdvButton>
+    </form>
+    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+## 自定义触发控件
+
+把完整的 `triggerProps` 绑定到同一个自定义触发控件；如果只显示图标，请提供无障碍名称。查询词与 `v-model:open` 相互独立。
 
 <DemoBlock>
   <SearchTriggerDemo />
@@ -273,70 +262,9 @@ function updateQuery(next: string) {
   </template>
 </DemoBlock>
 
-## 异步关闭确认
+## 异步搜索
 
-`beforeClose(detail)` 返回 `false` 或异步得到 `false` 时阻止关闭；成功的 `void`/`true` 允许提出模型请求，父级仍可拒绝。直接修改 `open` 会绕过守卫。动画结束应使用 `closed`；`close()` 可能在动画结束前就返回接受结果。
-
-示例等待 Keep editing 或 Discard note 后再决定是否关闭，并在卸载时结束等待中的 Promise，防止离开文档页后残留确认。清空搜索词不会调用关闭守卫。
-
-<DemoBlock>
-  <SearchGuardDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
-import { MdvButton, MdvSearchView, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvSearchBeforeClose, MdvSearchCloseDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const note = ref('')
-const dirty = ref(false)
-const pendingReason = ref('')
-const message = ref('No close request yet.')
-let resolveClose: ((accepted: boolean) => void) | undefined
-const beforeClose: MdvSearchBeforeClose = detail => {
-  if (!dirty.value) return true
-  pendingReason.value = detail.reason
-  return new Promise<boolean>(resolve => { resolveClose = resolve })
-}
-function decide(discard: boolean) {
-  if (discard) { note.value = ''; dirty.value = false }
-  pendingReason.value = ''
-  resolveClose?.(discard)
-  resolveClose = undefined
-}
-function closed(detail: MdvSearchCloseDetail) { message.value = `Closed: ${detail.reason}` }
-onBeforeUnmount(() => resolveClose?.(false))
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvSearchView v-model:open="open" placeholder="Search and annotate" clear-label="Clear annotation query" back-label="Leave annotation search" variant="divided" :before-close="beforeClose" @closed="closed">
-      <template #default="{ close }">
-        <div class="grid gap-4 p-5">
-          <MdvTextField :model-value="note" label="Unsaved note" supporting-text="Type a note, then request closing." @update:model-value="note = String($event); dirty = true" />
-          <MdvButton variant="outlined" @click="close()">Close annotation search</MdvButton>
-          <div v-if="pendingReason" role="alert" class="grid gap-3 rounded-xl bg-mdv-secondary-container p-4 text-mdv-on-secondary-container">
-            <p class="text-sm">Discard the unsaved note? Close reason: {{ pendingReason }}</p>
-            <div class="flex flex-wrap gap-3"><MdvButton variant="text" @click="decide(false)">Keep editing</MdvButton><MdvButton variant="tonal" @click="decide(true)">Discard note</MdvButton></div>
-          </div>
-        </div>
-      </template>
-    </MdvSearchView>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }} · Unsaved: {{ dirty }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 加载、错误、重试与过期结果
-
-`loading` 提供 busy 状态，不自动显示进度或禁用输入。进度、错误、重试、结果和空状态需要自行渲染。使用简短的 `status-text` 播报当前结果，不要自动朗读每条结果。
-
-示例通过 Enter 启动可取消的模拟请求，不连接真实网络服务。编辑会使待处理结果失效，旧响应不能覆盖新搜索词；卸载时也清理计时器。真实请求应使用相同的取消/请求序号策略，并根据应用决定是否防抖。
+用 `loading` 标记忙碌状态，用 `status-text` 播报结果。在结果插槽中呈现进度、错误和重试操作，并取消或忽略过期请求，避免旧结果覆盖新查询。
 
 <DemoBlock>
   <SearchAsyncDemo />
@@ -399,11 +327,9 @@ onBeforeUnmount(cancel)
   </template>
 </DemoBlock>
 
-## 搜索应用栏与独立正文滚动
+## 搜索应用栏
 
-将 SearchAppBar 放到 `MdvAppBarScaffold` 的 `appbar` 插槽。它使用 64px 应用栏，不指定 `scroll-target` 时跟随 Scaffold 正文。`enter-always` 在向下滚动时隐藏、向上滚动时显示；焦点和已打开搜索会保持相关操作可访问。示例在自己的有限高度区域内滚动。
-
-`leading`、`actions` 位于搜索框外，接收应用栏状态；`search-leading`、`search-trailing` 位于搜索框内，接收搜索状态。SearchAppBar 没有自定义 `trigger` 插槽，独立图标入口应使用 SearchView。与 Standard Navigation Drawer 相邻时遵循普通 App Bar 的布局规则。
+将 `MdvSearchAppBar` 放在 `MdvAppBarScaffold` 的 `appbar` 插槽中，应用栏会跟随 Scaffold 的滚动区域。栏上的操作用 `leading` 和 `actions`，输入框内部的操作用 `search-leading` 和 `search-trailing`。
 
 <DemoBlock>
   <SearchAppBarDemo />
@@ -449,77 +375,7 @@ const results = computed(() => subjects.filter(title => title.toLowerCase().incl
   </template>
 </DemoBlock>
 
-## 对话框组合、局部主题与 RTL
-
-SearchView 保持在原组件树中，由原生 dialog 进入顶层，因此可继承局部主题和方向，也能在另一个 MDV 对话框中打开搜索。Escape 先关闭最上层搜索并恢复入口焦点，外层对话框保持打开。应为两个层级提供明确名称。
-
-避免将独立浮层放入会渲染两次的 `trailing` 插槽。与其他 MDV 浮层组合相同，应在搜索根组件旁声明，使用共享状态控制。
-
-<DemoBlock>
-  <SearchCompositionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDialog, MdvList, MdvListItem, MdvSearchView } from '@mdv-ui/mdv'
-
-const dark = ref(false)
-const rtl = ref(false)
-const dialog = ref(false)
-const query = ref('')
-const selected = ref('No document selected.')
-const documents = ['Design system overview', 'Forms and validation', 'Navigation and focus']
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-4"><MdvCheckbox v-model="dark" label="Local dark theme" /><MdvCheckbox v-model="rtl" label="Right to left" /></div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface-container-low p-5 text-mdv-on-surface">
-      <MdvButton variant="tonal" @click="dialog = true">Choose a document</MdvButton>
-      <p role="status" class="mt-4 text-sm">{{ selected }}</p>
-      <MdvDialog v-model="dialog" title="Attach a document" description="Open the nested search. Escape closes search first and returns to this dialog.">
-        <MdvSearchView v-model="query" placeholder="Search attachments" clear-label="Clear attachment query" back-label="Back to attachment dialog" variant="divided">
-          <template #default="{ close }">
-            <MdvList><MdvListItem v-for="title in documents.filter(value => value.toLowerCase().includes(query.toLowerCase()))" :key="title" :headline="title" interactive @click="selected = title; close()" /></MdvList>
-            <MdvButton class="m-4" variant="text" @click="close()">Close attachment search</MdvButton>
-          </template>
-        </MdvSearchView>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close()">Finish attaching</MdvButton></template>
-      </MdvDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 键盘、输入法、无障碍与输入归属
-
-<DocsTable label="搜索键盘操作">
-
-| 按键或操作 | 行为 |
-| --- | --- |
-| 输入内 Enter | 非重复且不处于输入法组合时发出 `search(query, event)`；View 聚焦结果区但不关闭。 |
-| 输入内下 / 上方向键 | View 聚焦首个/最后一个可用搜索结果，必要时先打开。 |
-| 结果内上 / 下方向键 | 移动已识别结果操作焦点；首项向上返回输入。 |
-| 结果上 Home / End | 聚焦首个/最后一个已识别结果。 |
-| Tab / Shift+Tab | 按普通控件顺序移动，已展开 View 限制模态焦点。 |
-| Escape | 启用时请求关闭最上层 View。 |
-| 清空操作 | 更新为空字符串、发出 clear、聚焦输入，并保持 View 打开。 |
-
-</DocsTable>
-
-MDV 识别可交互 `MdvListItem` 的主要操作，以及带 `data-mdv-search-result` 的可聚焦元素。自定义结果仍需正确的名称和原生交互语义。内部筛选、文字输入和自己处理键盘的组件保留原交互。加载与状态不会将任意内容变成 combobox 或应用菜单。
-
-输入法草稿在组合结束后提交。用于确认候选词的 Enter、重复 Enter 和旧式输入法键码不会提交搜索。示例文字保持英文，组件输入支持组合文本。
-
-SearchView 包含入口输入与展开输入，共享同一搜索词。使用 `input-attrs` 提供 `id`、`name`、`form`、`required` 和原生输入监听。仅当前活动输入参与表单，传入 ID 也随之分配。需要时重新读取 `inputElement`，不要缓存可能转为非活动状态的输入。SearchView 根属性属于外壳，SearchAppBar 根属性属于应用栏。
-
-默认 placeholder、清空和返回标签是中文，英文示例均显式覆盖。MDV 0.1.5 的内部结果区名称另固定为“搜索建议与结果”，没有公开覆盖入口；本地化该内部名称需要库侧改进。应用应自行本地化 `status-text`。
-
-MDV 提供减少动态效果、原生 dialog 焦点和文档滚动锁定。真实触摸、读屏、视觉视口变化、SSR/hydration 及跨浏览器嵌套模态仍需结合应用验证。停靠面板默认不额外提供搜索专属阴影。
+---
 
 ## API
 

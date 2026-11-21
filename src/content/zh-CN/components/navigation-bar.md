@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import NavigationBarBasicDemo from '@/components/docs/demos/navigationBar/basic.vue'
 import NavigationBarOrientationDemo from '@/components/docs/demos/navigationBar/orientation.vue'
 import NavigationBarLinksDemo from '@/components/docs/demos/navigationBar/links.vue'
-import NavigationBarThemeDemo from '@/components/docs/demos/navigationBar/theme.vue'
 
 const barProps: ApiTableItem[] = [
   { name: 'orientation', type: "'auto' | 'vertical' | 'horizontal'", default: "'auto'", description: '每个条目内部图标与标签的排列。Auto 在导航栏容器宽度小于 600px 时纵排，达到 600px 时横排；导航栏本身仍位于底部。' },
@@ -26,14 +24,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'badge', description: '位于图标附近的可选 Badge 或计数内容，接收 { active }。重要通知信息应包含在目的地可访问名称中。' },
 ]
 </script>
-
 # 导航栏
 
-`MdvNavigationBar` 提供固定在底部的导航表面，`MdvNavigationBarItem` 用图标与始终可见的文字表示顶层目的地。建议放置 3–5 个简短目的地；目的地较多或需要更宽的持久侧栏时，应由应用布局选择其他导航组件。
+用 `MdvNavigationBar` 在视口底部展示少量主要入口，每个入口使用一个 `MdvNavigationBarItem`。
 
-## 目的地、选中图标与徽标
+## 入口与徽标
 
-当前目的地由应用维护，在导航成功后更新 `active`；导航栏与条目均没有选择 `v-model`。图标插槽接收 `active`，可以切换图形而不挤动文字和徽标。
+根据当前入口设置 `active`。图标插槽可根据 `active` 切换图案，`badge` 插槽可展示数量或状态。请为导航栏提供明确的无障碍名称。
 
 <DemoBlock>
   <NavigationBarBasicDemo />
@@ -77,13 +74,9 @@ const destinations = [
   </template>
 </DemoBlock>
 
-在线演示通过包含块，将真实固定定位的导航栏限制在示例视口内。这属于预览外壳，不是 Navigation Bar 的定位属性。实际应用中，导航栏通常固定于真正的视口。
+## 图标与标签布局
 
-示例通过目的地名称表达 Explore 的通知计数。计数本身不应成为独立键盘目标，也不应替换目的地的可见标签。
-
-## 自动与显式排列
-
-`orientation` 表示条目内部图标与文字如何排列，并不改变导航栏的物理位置。`auto` 根据具名容器的宽度，小于 600px 时纵排，达到 600px 时横排；显式 `vertical` 与 `horizontal` 会强制对应排列。
+`orientation` 设置图标与标签的排列方式。`auto` 在容器宽度小于 600px 时上下排列，达到 600px 后左右排列。请为固定在底部的导航栏预留空间。
 
 <DemoBlock>
   <NavigationBarOrientationDemo />
@@ -126,22 +119,9 @@ const destinations = [{ label: 'Home', icon: homeIcon }, { label: 'Search', icon
   </template>
 </DemoBlock>
 
-开启 720px 预览可以查看中等宽度布局，空间不足时在示例内横向滚动。更宽时，MDV 不会自动将导航栏替换成 Rail 或 Drawer。
+## 链接与路由
 
-<DocsTable label="导航栏尺寸" min-width="32rem">
-
-| 排列 | 导航栏最小高度 | 条目最小高度 | 指示器 |
-| --- | --- | --- | --- |
-| 纵排 | 80px | 56px | 图标后的 64 × 32px 胶囊 |
-| 横排 | 64px | 48px | 图标与文字后的胶囊 |
-
-</DocsTable>
-
-这些是最小值，标签换行或放大文字可能撑高。横排条目最大宽 168px，条目集合最大宽 840px。MDV 会处理底部安全区；页面正文需要为实际导航栏高度和安全区预留空间，避免末段内容被遮挡。固定定位外壳本身不占布局空间。
-
-## 原生链接与路由组合
-
-真实目的地使用 `href`，保留原生导航、修饰键点击和链接语义。与 Vue Router 组合时，使用自定义 RouterLink 插槽提供的 `href`、`isExactActive`、`navigate`，将其绑定到条目，不要在交互元素中再嵌套链接。
+用 `href` 指定链接。集成 Vue Router 时，通过 `RouterLink` 的自定义插槽获取 `href`、`isExactActive` 和 `navigate`，不要嵌套链接。`disabled` 会禁用原生跳转，但不会阻止自定义点击回调，请在回调里检查禁用状态。
 
 <DemoBlock>
   <NavigationBarLinksDemo />
@@ -186,63 +166,7 @@ const destinations = [
   </template>
 </DemoBlock>
 
-以上为真实文档链接。Intro 与 Setup 会离开当前文章，Navigation 指向当前页面。示例跟随当前文档语言，但演示标签保持英文。
-
-应使用路由器的激活状态，而不是在导航守卫完成前立即修改独立选中模型。禁用链接移除 `href`，输出 `aria-disabled="true"` 与 `tabindex="-1"`。组件本身不会生成 URL。
-
-在 MDV 0.1.5 中，禁用链接会取消原生导航，但不会阻止应用传入的 click 回调。因此示例会先检查禁用状态，再调用 RouterLink 的 `navigate`；自定义导航回调也应保留此检查。这个库侧集成问题已记录到文档开发清单。
-
-## 局部主题、方向与较长标签
-
-主题作用域提供表面与指示器颜色。RTL 跟随逻辑布局方向，标签需要换行时仍保持可见。顶层目的地名称应尽量简短，不应为了腾空间而隐藏标签。
-
-<DemoBlock>
-  <NavigationBarThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBadge, MdvCheckbox, MdvIcon, MdvNavigationBar, MdvNavigationBarItem } from '@mdv-ui/mdv'
-import homeIcon from '@iconify-icons/material-symbols/home-outline'
-import mailIcon from '@iconify-icons/material-symbols/mail-outline'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const rtl = ref(false)
-const current = ref('Inbox')
-const destinations = [{ label: 'Home', icon: homeIcon }, { label: 'Inbox', icon: mailIcon }, { label: 'Recently saved', icon: bookmarkIcon }]
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Use right-to-left navigation bars" />
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" :dir="rtl ? 'rtl' : 'ltr'" class="relative isolate h-56 min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low text-mdv-on-surface [contain:layout]">
-        <p class="p-5 pb-32 text-sm">{{ theme }} · {{ current }}</p>
-        <MdvNavigationBar orientation="vertical" :aria-label="`${theme} example destinations`">
-          <MdvNavigationBarItem v-for="destination in destinations" :key="destination.label" :label="destination.label" :active="current === destination.label" :aria-label="destination.label === 'Inbox' ? 'Inbox, more than 9 unread messages' : undefined" @click="current = destination.label">
-            <template #icon><MdvIcon :icon="destination.icon" /></template>
-            <template v-if="destination.label === 'Inbox'" #badge><MdvBadge variant="large" content="9+" /></template>
-          </MdvNavigationBarItem>
-        </MdvNavigationBar>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-选中指示器使用 `secondary-container`，选中图标使用 `on-secondary-container`，其他文字/图标使用 `on-surface-variant`。未选中项 hover 时，胶囊在 200ms 内从中心展开；已选中项保留指示器，焦点/按压叠加状态层。减少动态效果时缩短过渡，强制颜色模式使用系统边框与焦点色。没有公开的颜色或隐藏标签属性。
-
-## 键盘、语义与布局职责
-
-根节点为原生导航 landmark，应通过 `aria-label` 或 `aria-labelledby` 命名，尤其是同页还有抽屉或本页目录时。条目保留按钮/链接语义，当前目的地输出 `aria-current="page"`。
-
-所有可用目的地按原生顺序参与 Tab。按钮通过原生 Enter/Space 激活，链接遵守原生规则，禁用项退出 Tab。没有单一停靠项、方向键选择、tablist/面板关系或滑动导航。
-
-响应式断点、路由、当前目的地和正文留白由应用负责。导航栏不会自动接入 AppBarScaffold，不管理文档滚动，也不生成正文面板。除非刻意像演示一样建立局部视口，否则应避免将固定导航栏放入带 `transform` 或布局包含的祖先中。
+---
 
 ## API
 

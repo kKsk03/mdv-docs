@@ -7,9 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import CarouselBasicDemo from '@/components/docs/demos/carousel/basic.vue'
 import CarouselVariantDemo from '@/components/docs/demos/carousel/variant.vue'
 import CarouselFullScreenDemo from '@/components/docs/demos/carousel/fullScreen.vue'
-import CarouselControlledDemo from '@/components/docs/demos/carousel/controlled.vue'
 import CarouselContentDemo from '@/components/docs/demos/carousel/content.vue'
-import CarouselItemsDemo from '@/components/docs/demos/carousel/items.vue'
 
 const carouselProps: ApiTableItem[] = [
   { name: 'items', type: 'readonly T[]', description: 'Required item array. T extends object; every item needs a valid, unique stable key.' },
@@ -32,14 +30,13 @@ const carouselSlots: SlotTableItem[] = [
   { name: 'empty', description: 'Content shown for an empty items array. No slot parameters.' },
 ]
 </script>
-
 # Carousel
 
-`MdvCarousel` presents a browsable collection with responsive item masks and media. It supports horizontal multi-browse, uncontained, and hero layouts, plus a vertical full-screen layout. Browsing is controlled by stable item keys.
+Use `MdvCarousel` to browse a collection of images or related content.
 
 ## Basic usage
 
-Supply `items` with unique `key` values and bind the current browsing anchor with `v-model`. The example uses self-contained SVG illustrations, default image items, and English interface labels.
+Give each item a unique, stable `key` and bind the active key with `v-model`. Add `aria-label` and supply `labels` to translate the controls.
 
 <DemoBlock>
   <CarouselBasicDemo />
@@ -86,17 +83,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-The model is a browsing position, not a form selection or a DOM focus value. Default item activation emits `item-click`; the application owns the actual business action. A default item with `href` is a native link, while an item without it is a native button. Synchronously call `originalEvent.preventDefault()` in `item-click` to cancel link navigation and automatic item positioning.
-
-### Stable keys
-
-Keys must be unique strings or finite numbers. The default field is `key`; for another data shape, set `item-key="id"` or pass a resolver such as `:item-key="item => item.id"`. Missing or duplicate keys throw an error instead of silently using array indexes. String and numeric keys remain distinct.
-
----
-
 ## Horizontal layouts
 
-Multi-browse emphasizes larger items alongside smaller previews. Hero emphasizes a large centered item by default. Uncontained uses a common media height and permits items to pass through the viewport edges; `aspectRatio` can vary their widths.
+Use Multi-browse for prominent items alongside previews, Hero for a large featured item, or Uncontained for cards of different widths.
 
 <DemoBlock>
   <CarouselVariantDemo />
@@ -145,28 +134,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-<DocsTable label="Carousel layout defaults" min-width="32rem">
+## Vertical carousel
 
-| Variant | Default alignment | Default gesture settling |
-| --- | --- | --- |
-| `multi-browse` | `start` | `single-advance` |
-| `uncontained` | `start` | `no-snap` |
-| `hero` | `center` | `single-advance` |
-| `full-screen` | Vertical pages | Always `single-advance` |
-
-</DocsTable>
-
-### Sizing and gestures
-
-`item-size` is a preferred large width for multi-browse/hero and the base width for uncontained. It defaults to 186px; Hero fills the available width when it is omitted. Ordinary viewport height defaults to 205px, with an 8px gap. These are MDV defaults, not fixed Material requirements. Narrow containers and small collections adapt their item arrangement automatically.
-
-Use `alignment="start"` or `"center"` to choose a horizontal alignment. `fling-behavior="single-advance"` limits a fast fling to one neighboring anchor; slow long drags still follow distance. `multi-browse` permits traveling farther. `no-snap` is available only for uncontained; accepted free-scroll positions stay unsnapped.
-
-Mouse/touch dragging, horizontal trackpad input, and Shift+wheel can browse horizontal layouts. Ordinary vertical wheel movement stays available for page scrolling. Keep an alternative to horizontal gestures: the default controls are below the media, and custom controls belong there as well.
-
-## Vertical full-screen layout
-
-`variant="full-screen"` fills an explicitly sized host and browses vertically one page at a time. This example enables controls so it also works without a swipe or wheel gesture.
+Set `variant="full-screen"` for vertical browsing. Give the parent a definite height and include controls so navigation does not require a swipe.
 
 <DemoBlock>
   <CarouselFullScreenDemo />
@@ -208,75 +178,9 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-Full-screen means an immersive region within the host. It does not invoke the browser Fullscreen API, create an overlay, or lock the surrounding page. Its default gap is 16px, outer corners are square, and controls are hidden unless enabled. Use another layout when the application changes to an unsuitable landscape presentation.
-
-There is no autoplay, infinite loop, video playback manager, or automatic data loading. The application owns those behaviors and should not assume they are provided.
-
----
-
-## Controlled navigation
-
-In controlled mode, the parent decides whether to accept each requested key. Try Next while requests are rejected, then unlock navigation. Disabling dragging/wheel does not disable the remaining navigation methods.
-
-<DemoBlock>
-  <CarouselControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCarousel, MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvCarouselExpose, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
-
-const carousel = useTemplateRef<MdvCarouselExpose>('carousel')
-const current = ref<MdvCarouselKey | null>('first')
-const locked = ref(true)
-const gestures = ref(true)
-const result = ref('Unlock navigation to accept a different key.')
-const items = ['first', 'second', 'third', 'fourth'].map((key, index) => ({ key, label: `Chapter ${index + 1}` }))
-const labels: MdvCarouselLabels = {
-  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
-  skip: 'Skip carousel', empty: 'No chapters.',
-  item: (index, count) => `Chapter ${index + 1} of ${count}`,
-}
-
-function update(key: MdvCarouselKey | null) {
-  result.value = `Requested ${key}: ${locked.value ? 'rejected' : 'accepted'}.`
-  if (!locked.value) current.value = key
-}
-
-async function jump() {
-  const accepted = await carousel.value?.scrollTo('fourth', { animate: false, focus: true })
-  result.value = accepted ? 'Jump accepted and the chapter was focused.' : 'Jump rejected; the accepted chapter is unchanged.'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="locked" label="Reject navigation requests" />
-      <MdvCheckbox v-model="gestures" label="Enable dragging and wheel" />
-    </div>
-    <MdvCarousel ref="carousel" :model-value="current" :items="items" :labels="labels" :height="140" :user-scroll-enabled="gestures" aria-label="Controlled chapters" @update:model-value="update" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" @click="jump">Jump to chapter 4</MdvButton>
-      <MdvButton variant="outlined" @click="carousel?.focus()">Focus current chapter</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current }} · {{ result }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-A rejected request returns to the accepted anchor without emitting a successful `change`. Programmatic methods return `Promise<boolean>` reporting acceptance; they do not wait for motion to finish. `{ focus: true }` reveals and focuses the target immediately so focus is not left in a clipped item.
-
-`null` explicitly represents no anchor. An invalid controlled key does not create a replacement active value. Direct parent model changes do not emit another update request.
-
 ## Custom content and controls
 
-The item slot receives the original item, its zero-based index, and whether its key is active. Uncontained is useful for richer content with text and independent controls. The header and controls remain outside the masked items.
+Use the `item` slot for richer content. It receives the item, index, and active state. Keep interactive controls accessible without a drag gesture.
 
 <DemoBlock>
   <CarouselContentDemo />
@@ -330,80 +234,7 @@ const labels: MdvCarouselLabels = {
   </template>
 </DemoBlock>
 
-Custom slots own their actions, accessible names, links, and disabled states. Inputs and media keep their own editing/playback gestures. `data-mdv-carousel-no-drag` reserves a custom area's dragging, wheel, and arrow-key behavior for that area. Item state is retained across geometry updates and browsing; the carousel does not manage or reset business input values.
-
-`header` and `controls` receive `{ key, index, count, canPrevious, canNext, previous, next }`. `previous()` and `next()` request control navigation and return `Promise<boolean>`. Bind their availability flags to actual disabled controls. Set `show-controls` when using a controls slot with full-screen.
-
-## Changing the collection
-
-Stable keys preserve item identity when reordering. Removing the active item requests a nearby key; clearing the collection requests `null`. A disabled default item remains part of the browsable collection but cannot activate its action.
-
-<DemoBlock>
-  <CarouselItemsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCarousel } from '@mdv-ui/mdv'
-import type { MdvCarouselItem, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
-
-const initial: MdvCarouselItem[] = [
-  { key: 'design', label: 'Design' },
-  { key: 'research', label: 'Research' },
-  { key: 'drafts', label: 'Drafts', disabled: true },
-  { key: 'archive', label: 'Archive' },
-]
-const items = ref([...initial])
-const current = ref<MdvCarouselKey | null>('design')
-const labels: MdvCarouselLabels = {
-  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
-  skip: 'Skip carousel', empty: 'No collections.',
-  item: (index, count) => `Collection ${index + 1} of ${count}`,
-}
-
-function rotate() {
-  if (items.value.length) items.value = [...items.value.slice(1), items.value[0]!]
-}
-
-function reset() {
-  items.value = [...initial]
-  current.value = 'design'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCarousel v-model="current" :items="items" :labels="labels" :height="150" aria-label="Dynamic collections">
-      <template #empty><p>No collections left. Restore them to continue.</p></template>
-    </MdvCarousel>
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" :disabled="!items.length" @click="rotate">Move first to end</MdvButton>
-      <MdvButton variant="outlined" :disabled="current === null" @click="items = items.filter(item => item.key !== current)">Remove current</MdvButton>
-      <MdvButton variant="text" :disabled="!items.length" @click="items = []">Clear</MdvButton>
-      <MdvButton variant="text" @click="reset">Restore</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current ?? '(none)' }} · {{ items.length }} collections</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Accept the requested model when removing items in a controlled collection. If the parent rejects the replacement, the carousel does not invent an active item. Use `#empty` to provide application-specific recovery actions or guidance.
-
 ---
-
-## Accessibility, themes, and motion
-
-- Name the region with `aria-label` or `aria-labelledby`. The `labels` object localizes slide descriptions, controls, skip link, empty state, and zero-based `item(index, count)` formatting; defaults are Chinese.
-- Arrow keys and Home/End browse while focus is in an item; horizontal arrows mirror in RTL, and full-screen uses Up/Down. This navigation updates the browsing anchor and focus. Inputs retain their editing keys.
-- Tab moves through native controls. Leaving one item's final control reveals the next item; leaving the final item exits normally. Offscreen items leave the Tab order and accessibility tree; navigation reveals targets before focusing them.
-- A keyboard-visible skip link moves past the carousel. Mounting and resizing do not intentionally steal focus.
-- Reduced motion removes parallax and dynamic width expansion, using stable item sizes; full-screen retains page positioning. Local themes and forced colors follow MDV tokens.
-
-The component supports `--mdv-carousel-radius`, `--mdv-carousel-background`, and `--mdv-carousel-foreground` overrides. Item content can read `--mdv-carousel-mask-start`, `--mdv-carousel-mask-size`, and `--mdv-carousel-label-opacity` for mask-aware presentation without rerendering every animation frame. Avoid recreating the library's mask geometry in documentation CSS.
 
 ## API
 

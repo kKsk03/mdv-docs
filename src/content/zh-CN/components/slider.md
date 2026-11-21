@@ -31,14 +31,13 @@ const sliderSlots: SlotTableItem[] = [
   { name: 'inset-icon', description: '仅 standard 且尺寸为 m、l、xl 时可显示的装饰图标，收到 { value }；可使用 MdvIcon 和本地图标数据。' },
 ]
 </script>
-
 # Slider
 
-`MdvSlider` 提供带标签的范围控件，可选择单个数值、围绕中心点的偏移，或一段范围。本页对应 **MDV 0.1.5**。滑块适合相对调整；需要精确输入时，可与文本框并列提供。
+用 `MdvSlider` 选择数值或数值范围。
 
-## Standard、Centered 与 Range
+## 滑块变体
 
-standard 使用单个数字，centered 突出显示 `centerValue`，range 使用两个升序数值组成的元组。数值格式化器同时用于短暂的数值提示和辅助技术读取。range 两个手柄应具有不同且已本地化的名称。
+标准和居中滑块绑定单个数值，范围滑块绑定由两个数值组成的元组。单滑块用 `label` 或 `aria-label` 命名，范围两端用 `start-aria-label` 和 `end-aria-label` 分别命名。
 
 <DemoBlock>
   <VariantsDemo />
@@ -74,11 +73,9 @@ function recordChange() { changeCount.value++ }
   </template>
 </DemoBlock>
 
-range 的显示值会限制在边界内并对齐步长；两端会按升序显示，手柄不能相互越过。组件不会修改传入的元组；用户调整时会发出新的元组。
+## 尺寸与刻度
 
-## 尺寸、刻度与禁用状态
-
-滑块提供五档视觉尺寸。`step` 与 `stops` 相互独立：可以按步长离散选择但不绘制刻度，也可以显示现有步长刻度。即使最大值不是步长的整数倍，最后的 `max` 仍然可选。
+用 `size` 设置尺寸，`step` 设置步长，`stops` 显示刻度。用 `disabled` 禁止修改。
 
 <DemoBlock>
   <SizesDemo />
@@ -107,9 +104,9 @@ const disabled = ref(true)
   </template>
 </DemoBlock>
 
-## 原生表单与重置
+## 表单与重置
 
-组件内部使用原生 `input[type="range"]`。传入 `name`，必要时传入外部表单的 `form` ID，即可关联表单。命名的 range 会以相同名称提交两个值；禁用滑块不会提交。表单重置恢复组件创建时的初始模型快照，而不是之后的程序赋值。
+设置 `name` 后，表单会提交滑块数值。范围会以同名字段提交两个值。原生重置会恢复初始模型。
 
 <DemoBlock>
   <FormDemo />
@@ -146,13 +143,7 @@ function submit(event: SubmitEvent) {
   </template>
 </DemoBlock>
 
-获取范围值请使用 `FormData.getAll(name)`。原生范围输入始终有值，因此该组件不提供空值或 `required` 校验。原生 `input`、`change`、`focus`、`blur` 监听器会转发至真实 range 输入；拖动时持续产生 input，数值改变并正常结束时产生一次 change，键盘每次有效步进会同时触发两者。程序更新模型及表单重置不会伪造这些事件。
-
-## 无障碍与键盘操作
-
-请提供可见的 `label`，或显式设置 `aria-label`/`aria-labelledby`。range 变体请设置 `start-aria-label` 和 `end-aria-label`，以使用当前界面语言清晰命名两个手柄。辅助说明会关联到原生输入；设置 `formatValue` 时会生成本地化的 `aria-valuetext`。
-
-Tab 可逐个聚焦手柄。方向键每次移动一个步长；横向左右键遵循继承的文本方向，上下键保持通常的增减方向。Home/End 移动至当前手柄可达边界；PageUp/PageDown 或按住 Space 再按方向键可移动十个步长。指针取消会结束手势，但不会额外伪造最终 change 事件。启用减少动态效果时会关闭刻度移动过渡。
+---
 
 ## API
 

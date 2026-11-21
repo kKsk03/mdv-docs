@@ -30,14 +30,13 @@ const splitButtonSlots: SlotTableItem[] = [
   { name: 'leading / trailing', description: 'Decorative icons beside the primary label; hidden while loading.' },
 ]
 </script>
-
 # Split Button
 
-`MdvSplitButton` combines one primary action with a separate menu trigger for related alternatives. It does not own the menu or its selection model. This page describes **MDV 0.1.5**; use the ordinary Button when there is no meaningful set of related secondary actions.
+Use `MdvSplitButton` for a primary action with related alternatives in a menu.
 
 ## Compose with MdvMenu
 
-Use the Menu trigger slot's complete `triggerProps` on `menu-button-attrs`, and bind the slot's accepted `open` boolean to `expanded`. The primary click remains independent from the menu. Menu keyboard navigation, dismissal, selection, and focus return stay owned by `MdvMenu`.
+Bind the `MdvMenu` trigger slot’s `triggerProps` to `menu-button-attrs` and its `open` state to `expanded`. Use the primary button’s click separately.
 
 <DemoBlock>
   <MenuDemo />
@@ -69,11 +68,9 @@ function save() { result.value = 'The document was saved.' }
   </template>
 </DemoBlock>
 
-Do not bind `triggerProps` to the split-button group root. Keeping them on the actual trailing button preserves its ID, ref, ARIA relationships, and listeners. When a controlled Menu rejects an open request, `expanded` remains false and the split-button presentation continues to reflect the accepted state.
+## Variants and sizes
 
-## Variants, sizes, and independent actions
-
-The component offers four Button appearances and five sizes. The primary and menu halves are separate native controls with independent disabled states. A loading indicator belongs to the primary action and does not disable the menu button.
+Set `variant` and `size` to change both halves together.
 
 <DemoBlock>
   <VariantsDemo />
@@ -112,9 +109,9 @@ const result = ref('Each half has its own action and focus target.')
   </template>
 </DemoBlock>
 
-## Loading, disabled, and focus behavior
+## Loading and disabled states
 
-Each half is separately reachable in normal Tab order. `focus()` targets the primary control, `focusMenu()` targets the trailing menu button, and `blur()` blurs both. The group itself does not add an extra tab stop. When using `iconOnly`, supply an accessible name through `actionAttrs` and keep `menuButtonLabel` meaningful.
+Loading affects only the primary action. Disable either half independently. For an icon-only primary action, include an accessible name in `action-attrs`.
 
 <DemoBlock>
   <StateDemo />
@@ -149,7 +146,7 @@ function submit() { result.value = 'The native submit action ran.' }
   </template>
 </DemoBlock>
 
-The primary control is a native button unless `href` or `actionAttrs.href` selects link semantics. The menu side is always a button. Only the primary button uses `type`; neither the group nor menu trigger submits a form. Use `actionAttrs` for primary native form attributes and `menuButtonAttrs` for the secondary button.
+---
 
 ## API
 

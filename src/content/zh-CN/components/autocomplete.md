@@ -8,7 +8,6 @@ import AutocompleteVariantDemo from '@/components/docs/demos/autocomplete/varian
 import AutocompleteMenuDemo from '@/components/docs/demos/autocomplete/menuVariant.vue'
 import AutocompleteOptionDemo from '@/components/docs/demos/autocomplete/option.vue'
 import AutocompleteRemoteDemo from '@/components/docs/demos/autocomplete/remote.vue'
-import AutocompleteStatesDemo from '@/components/docs/demos/autocomplete/states.vue'
 import AutocompleteFormDemo from '@/components/docs/demos/autocomplete/form.vue'
 
 const autocompleteProps: ApiTableItem[] = [
@@ -36,14 +35,13 @@ const autocompleteSlots: SlotTableItem[] = [
   { name: 'option', description: '自定义选项内容，接收 { option, selected, active }。仅负责呈现，不应放置按钮、链接或其他可聚焦控件。' },
 ]
 </script>
-
 # 自动补全
 
-`MdvAutocomplete` 为可编辑输入提供建议。用户可以选择一项，也可以保留任意输入文本；需要严格限定为已有选项时使用 `MdvSelect`。
+用 `MdvAutocomplete` 在输入时提供匹配建议，也可以接受不在建议中的文本。
 
 ## 基本用法
 
-通过 `v-model` 绑定 `string | number | null`，传入 `{ value, label }` 组成的 `options`。默认按标签进行本地过滤，忽略大小写并去除查询首尾空格。
+绑定 `v-model`，并在 `options` 中为每条建议提供 `value` 和 `label`。默认按标签匹配，不区分大小写。
 
 <DemoBlock>
   <AutocompleteBasicDemo />
@@ -83,15 +81,9 @@ const options: MdvSelectOption[] = [
   </template>
 </DemoBlock>
 
-选中 London 后，模型为 `'london'`，输入框显示 `London`；输入未匹配的城市时，模型就是输入字符串。数字值与字符串值按不同选项处理，例如 `1` 和 `'1'` 不等价。
-
-每项还支持 `supportingText` 和 `disabled`。禁用项可见，但不能被选择或成为键盘活动项。模型与 `value` 的类型应保持一致，且每个 `value` 唯一。
-
----
-
 ## 字段外观
 
-通过 `variant` 设置 `outlined` 或 `filled`，默认 `outlined`。`full-width` 可让字段填满父容器。
+将 `variant` 设为 `outlined` 或 `filled`，用 `full-width` 填满父容器。
 
 <DemoBlock>
   <AutocompleteVariantDemo />
@@ -123,10 +115,6 @@ const options = [
   </template>
 </DemoBlock>
 
-### 建议面板
-
-`menu-variant` 独立控制面板外观。默认 Expressive 使用较大的圆角和选中形状，Baseline 使用较小圆角和连续行布局。
-
 <DemoBlock>
   <AutocompleteMenuDemo />
   <template #source>
@@ -157,13 +145,9 @@ const options = [
   </template>
 </DemoBlock>
 
-面板使用 combobox/listbox 语义。它与操作菜单的用途不同，不需要组合 `MdvMenu`。
-
----
-
 ## 自定义选项
 
-`option` 插槽接收原始选项、选中状态和键盘活动状态。用于补充文字、图像等展示内容；原有选择和键盘行为由组件管理。
+用 `option` 插槽自定义建议项的外观。选择和键盘交互仍由自动补全组件处理。
 
 <DemoBlock>
   <AutocompleteOptionDemo />
@@ -197,15 +181,9 @@ const options = [
   </template>
 </DemoBlock>
 
-不要在选项内放置独立按钮、链接或输入控件。需要多个可交互操作时，应选择适合该场景的组合。
-
----
-
 ## 异步搜索
 
-设置 `filter-mode="external"` 后，组件原样展示使用方提供的 `options`。通过 `search` 获取查询，再更新列表和 `loading`。
-
-下面用本地定时器模拟 350ms 响应，不会访问网络。输入新内容时取消上一轮响应，开始搜索时清空旧选项，卸载时清理定时器。
+用 `filter-mode="external"` 直接显示服务端返回的结果。通过 `search` 读取查询词，再更新 `options` 和 `loading`，并取消或忽略过期请求。
 
 <DemoBlock>
   <AutocompleteRemoteDemo />
@@ -266,45 +244,9 @@ onBeforeUnmount(() => clearTimeout(timer))
   </template>
 </DemoBlock>
 
-真实应用需要自行处理请求、防抖、错误、排序和过期结果，例如通过 `AbortController` 或请求序号取消过时结果。`loading` 只展示状态，不自动禁止旧选项或管理请求。
-
-默认 `loading-text` 和 `no-options-text` 为中文；本站共享演示显式传入英文，使两种语言的示例保持一致。使用方可按自己的语言设置文案。
-
----
-
-## 禁用与错误
-
-通过 `disabled` 禁用字段，通过 `error`、`error-text` 表达业务错误。设置 `error-text` 本身不会开启错误；需要阻止提交时使用原生约束或 `setCustomValidity()`。
-
-<DemoBlock>
-  <AutocompleteStatesDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvAutocomplete } from '@mdv-ui/mdv'
-
-const options = [{ value: 'paris', label: 'Paris' }]
-</script>
-
-<template>
-  <div class="grid gap-5 sm:grid-cols-2">
-    <MdvAutocomplete label="Disabled" model-value="paris" :options="options" disabled full-width />
-    <MdvAutocomplete label="Destination" :options="options" error error-text="Choose a supported destination." no-options-text="No cities found." full-width />
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
----
-
 ## 表单与校验
 
-`name` 提交模型值，显示标签不会额外提交。模型为 `null` 时不创建该字段；非 null 的数字提交时转换为字符串。禁用字段不参与提交，`form` 可关联外部表单。
-
-直接点击 Submit 查看必填提示。选择建议或输入自由文本都能通过必填校验；Reset 恢复创建时的初始模型。
+用 `name` 提交模型值，而不是显示标签。用原生约束或 `setCustomValidity()` 阻止无效提交；`error` 和 `error-text` 只负责显示提示。
 
 <DemoBlock>
   <AutocompleteFormDemo />
@@ -355,23 +297,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-`required` 只检查非 null、非空字符串，不限制必须来自建议列表，也不自动裁剪模型中的空格。若业务要求固定选项，应使用 `MdvSelect`，或自行增加校验。
-
-原生表单校验代理负责将错误反馈到可见字段。表单 reset 会请求恢复初始模型并收起面板，受控模式仍需父级接受更新；读取恢复状态前等待 Vue 更新。外部业务错误和自定义校验消息由使用方清理。
-
----
-
-## 打开状态与键盘
-
-省略 `open` 时由组件管理面板；通过 `v-model:open` 可受控管理。模板引用还提供 `open()`、`close()` 和焦点方法，受控面板仍服从父级接受的状态。
-
-- ArrowDown、ArrowUp 浏览可用建议，Enter 提交当前活动项，Escape 收起。
-- 焦点保留在输入框，通过 `aria-activedescendant` 表达活动项。
-- Home、End 保留原生光标编辑行为；Tab 按原生顺序离开字段。
-- 支持中文输入法组合输入。建议列表与状态说明会提供相应的无障碍语义。
-
-为字段提供 `label` 或可访问名称；占位文字不能替代标签。自定义选项不会替换原有的 option 语义。
 
 ---
 

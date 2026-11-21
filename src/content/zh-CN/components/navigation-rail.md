@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import RailBasicDemo from '@/components/docs/demos/navigationRail/basic.vue'
 import RailLinksDemo from '@/components/docs/demos/navigationRail/links.vue'
 import RailModalDemo from '@/components/docs/demos/navigationRail/modal.vue'
-import RailPolicyDemo from '@/components/docs/demos/navigationRail/policy.vue'
-import RailThemeDemo from '@/components/docs/demos/navigationRail/theme.vue'
 
 const railProps: ApiTableItem[] = [
   { name: 'expanded', attribute: 'v-model:expanded', type: 'boolean', default: 'false', description: '受控展开状态。父级需要接受 update:expanded；不绑定时不会自动维护展开状态。' },
@@ -40,18 +38,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'badge', description: '通知内容。接收 { active, expanded }。需要徽标表面时自行组合 MdvBadge；选中项目不会自动清除徽标。' },
 ]
 </script>
-
 # 导航轨
 
-`MdvNavigationRail` 在正文旁常驻主要目的地，`MdvModalNavigationRail` 则覆盖正文展开。两者都使用 `MdvNavigationRailItem` 表示目的地。本页对应已安装的 **MDV 0.1.5**。
+导航轨用于在页面侧边展示主要入口。`MdvNavigationRail` 在布局内展开，`MdvModalNavigationRail` 覆盖正文展开，两者都使用 `MdvNavigationRailItem`。
 
-收起轨适合少量主要目的地，通常为 3–7 个。保留明确的标签，次要目的地可以在展开后显示。组件不决定响应式断点，也不会自动替换为抽屉或底部导航栏。
+## 标准导航轨
 
-## 标准布局与展开
-
-为外层 flex/grid 布局提供明确高度，并为正文设置 `min-width: 0`。收起宽度为 96px；标准轨展开会改变真实布局宽度，正文随之让位。示例在窄屏展开时隐藏旁边的说明区域，确保导航操作仍然可用。
-
-`menuAttrs` 包含 `aria-controls`、`aria-expanded` 和 `onClick`，绑定到菜单按钮一次即可。再加 `@click="toggle"` 会触发两次切换。FAB 插槽不内置创建逻辑，示例由应用统计创建草稿次数。
+用 `v-model:expanded` 控制展开，将当前入口设为 `active`。为布局设置明确的高度，并给正文设置 `min-width: 0`，让它在导航轨展开时可以收窄。
 
 <DemoBlock>
   <RailBasicDemo />
@@ -120,11 +113,69 @@ const destinations = [{ label: 'Home', icon: homeOutlineIcon }, { label: 'Explor
   </template>
 </DemoBlock>
 
-## 受控请求、链接与键盘焦点
+将 `menuAttrs` 绑定到菜单按钮。它已包含点击处理，不要再绑定 `toggle`。
 
-`expanded` 是受控状态：父级接受 `update:expanded` 才会改变展开结果。项目的 `active` 同样由应用管理。移动焦点不会选中目的地，点击也不会自动修改 `active`。
+## 模态导航轨
 
-设置 `href` 后渲染原生链接，保留修饰键、`target`、`rel` 和下载行为。同步调用 `preventDefault()` 可以取消导航及随后的选择关闭。禁用项会阻止激活回调。接入 Vue Router 时，可使用自定义 `RouterLink` 插槽提供的 `href`、导航处理函数，并从路由计算 `active`，保留真实链接语义。
+模态导航轨在布局中保留收起时的宽度，展开时覆盖正文。若用 `hide-on-collapse` 隐藏收起后的导航轨，请提供外部按钮以重新打开。
+
+<DemoBlock>
+  <RailModalDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref, useId } from 'vue'
+import { MdvBadge, MdvButton, MdvCheckbox, MdvDialog, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
+import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
+import menuIcon from '@iconify-icons/material-symbols/menu'
+import homeIcon from '@iconify-icons/material-symbols/home-outline'
+import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
+import editIcon from '@iconify-icons/material-symbols/edit'
+
+const id = `modal-rail-${useId()}`
+const expanded = ref(false)
+const immersive = ref(false)
+const compose = ref(false)
+const current = ref('Home')
+const reason = ref('Not closed yet')
+function closed(detail: MdvNavigationRailCloseDetail) { reason.value = detail.reason }
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvCheckbox v-model="immersive" label="Hide the collapsed rail" />
+    <div class="flex h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
+      <MdvModalNavigationRail :id="id" v-model:expanded="expanded" :hide-on-collapse="immersive" aria-label="Modal workspace navigation" @closed="closed">
+        <template #menu="{ menuAttrs, expanded: isExpanded }"><MdvIconButton v-bind="menuAttrs" variant="standard" :aria-label="isExpanded ? 'Close modal rail' : 'Expand modal rail'"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
+        <template #fab><MdvIconButton variant="tonal" size="m" shape="square" aria-label="Compose from rail" @click="compose = true"><MdvIcon :icon="editIcon" /></MdvIconButton></template>
+        <MdvNavigationRailItem label="Home" :active="current === 'Home'" @click="current = 'Home'"><template #icon><MdvIcon :icon="homeIcon" /></template></MdvNavigationRailItem>
+        <MdvNavigationRailItem label="Saved" :active="current === 'Saved'" @click="current = 'Saved'">
+          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
+          <template #badge><MdvBadge variant="large" content="5" aria-label="5 saved updates" /></template>
+        </MdvNavigationRailItem>
+      </MdvModalNavigationRail>
+      <div class="min-w-0 flex-1 overflow-auto p-4">
+        <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open modal rail</MdvButton>
+        <p class="mt-4 text-sm text-mdv-on-surface-variant">Modal expansion overlays the page. The external trigger also works when the collapsed rail is hidden.</p>
+      </div>
+    </div>
+    <p role="status" class="text-sm text-mdv-on-surface-variant">Destination: {{ current }} · Last close: {{ reason }}</p>
+    <MdvDialog v-model="compose" title="New draft" description="This dialog is declared outside the rail slots so only one instance exists.">
+      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
+    </MdvDialog>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+用 `aria-label` 或 `aria-labelledby` 为导航命名。模态布局会在两种视图中渲染插槽，因此不要在插槽内写固定 ID 或各自挂载对话框。
+
+## 链接与键盘导航
+
+用 `href` 指定链接目标。集成 Vue Router 时，通过 `RouterLink` 的自定义插槽获取 `href` 和导航方法，根据当前路由设置 `active`。方向键移动焦点，但不会切换当前入口。
 
 <DemoBlock>
   <RailLinksDemo />
@@ -182,191 +233,7 @@ function cancel(event: MouseEvent) {
   </template>
 </DemoBlock>
 
-## 模态展开与沉浸布局
-
-模态展开保留收起轨的 96px 占位，展开层通过原生 dialog 进入顶层覆盖正文。MDV 提供遮罩、模态焦点限制、Escape 和焦点恢复。使用 `aria-label` 或 `aria-labelledby` 命名导航；内置兜底名称为中文。
-
-`hide-on-collapse` 会移除收起轨及其占位。必须保留可访问的外部菜单按钮，并关联 `aria-controls` 和 `aria-expanded`。示例中的外部按钮在两种布局下均可使用。
-
-默认情况下，模态插槽会分别为收起轨和展开层渲染两份内容，接收到不同的 `expanded`。避免在其中硬编码重复 ID，或重复声明独立浮层。示例将嵌套 Dialog 声明在导航轨外部。
-
-<DemoBlock>
-  <RailModalDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId } from 'vue'
-import { MdvBadge, MdvButton, MdvCheckbox, MdvDialog, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
-import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import homeIcon from '@iconify-icons/material-symbols/home-outline'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-import editIcon from '@iconify-icons/material-symbols/edit'
-
-const id = `modal-rail-${useId()}`
-const expanded = ref(false)
-const immersive = ref(false)
-const compose = ref(false)
-const current = ref('Home')
-const reason = ref('Not closed yet')
-function closed(detail: MdvNavigationRailCloseDetail) { reason.value = detail.reason }
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="immersive" label="Hide the collapsed rail" />
-    <div class="flex h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
-      <MdvModalNavigationRail :id="id" v-model:expanded="expanded" :hide-on-collapse="immersive" aria-label="Modal workspace navigation" @closed="closed">
-        <template #menu="{ menuAttrs, expanded: isExpanded }"><MdvIconButton v-bind="menuAttrs" variant="standard" :aria-label="isExpanded ? 'Close modal rail' : 'Expand modal rail'"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-        <template #fab><MdvIconButton variant="tonal" size="m" shape="square" aria-label="Compose from rail" @click="compose = true"><MdvIcon :icon="editIcon" /></MdvIconButton></template>
-        <MdvNavigationRailItem label="Home" :active="current === 'Home'" @click="current = 'Home'"><template #icon><MdvIcon :icon="homeIcon" /></template></MdvNavigationRailItem>
-        <MdvNavigationRailItem label="Saved" :active="current === 'Saved'" @click="current = 'Saved'">
-          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
-          <template #badge><MdvBadge variant="large" content="5" aria-label="5 saved updates" /></template>
-        </MdvNavigationRailItem>
-      </MdvModalNavigationRail>
-      <div class="min-w-0 flex-1 overflow-auto p-4">
-        <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open modal rail</MdvButton>
-        <p class="mt-4 text-sm text-mdv-on-surface-variant">Modal expansion overlays the page. The external trigger also works when the collapsed rail is hidden.</p>
-      </div>
-    </div>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Destination: {{ current }} · Last close: {{ reason }}</p>
-    <MdvDialog v-model="compose" title="New draft" description="This dialog is declared outside the rail slots so only one instance exists.">
-      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
-    </MdvDialog>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 关闭策略与内容生命周期
-
-`closeOnEsc`、`closeOnScrim`、`closeOnSelect` 分别控制对应的关闭请求。菜单按钮和公开的 `close()` 仍可请求关闭。父级保持 `expanded` 不变即可拒绝请求，此时不会触发已接受关闭的生命周期。Navigation Rail **没有 `beforeClose` 属性**；需要确认时由应用决定是否接受状态更新。
-
-`close(): Promise<boolean>` 表示父级是否接受关闭，不代表动画完成。动画结束使用 `closed`。调用此方法的原因是 `menu`；直接修改模型的原因是 `model`。
-
-下面的便笺属于 TextField 内部状态，普通关闭后会保留；启用 `destroy-on-close` 后，关闭再打开会创建新实例。保存在导航外部的模型不会随销毁重置。示例还提供直接改模型的关闭按钮，便于在拒绝请求时退出。
-
-<DemoBlock>
-  <RailPolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const id = `rail-policy-${useId()}`
-const rail = useTemplateRef<InstanceType<typeof MdvModalNavigationRail>>('rail')
-const expanded = ref(false)
-const acceptClose = ref(true)
-const closeOnEsc = ref(true)
-const closeOnScrim = ref(true)
-const closeOnSelect = ref(true)
-const destroy = ref(false)
-const message = ref('No close request yet.')
-function update(value: boolean) {
-  if (value || acceptClose.value) expanded.value = value
-  else message.value = 'Parent rejected closing.'
-}
-async function close() { message.value = `close() accepted: ${await rail.value?.close()}` }
-function closed(detail: MdvNavigationRailCloseDetail) { message.value = `Closed: ${detail.reason}` }
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="closeOnEsc" label="Escape closes" />
-      <MdvCheckbox v-model="closeOnScrim" label="Scrim closes" />
-      <MdvCheckbox v-model="closeOnSelect" label="Selection closes" />
-      <MdvCheckbox v-model="destroy" label="Destroy expanded content on close" />
-    </div>
-    <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open policy example</MdvButton>
-    <MdvModalNavigationRail :id="id" ref="rail" :expanded="expanded" hide-on-collapse :close-on-esc="closeOnEsc" :close-on-scrim="closeOnScrim" :close-on-select="closeOnSelect" :destroy-on-close="destroy" aria-label="Rail close policy" @update:expanded="update" @closed="closed">
-      <template #menu="{ menuAttrs }"><MdvIconButton v-bind="menuAttrs" variant="standard" aria-label="Request policy close"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-      <MdvNavigationRailItem label="Saved"><template #icon><MdvIcon :icon="bookmarkIcon" /></template></MdvNavigationRailItem>
-      <div class="grid gap-3 px-5 py-4">
-        <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-        <MdvTextField label="Local note" placeholder="Type, close, then reopen" />
-        <MdvButton variant="outlined" @click="close">Request close()</MdvButton>
-        <MdvButton variant="text" @click="expanded = false">Close directly</MdvButton>
-        <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-      </div>
-    </MdvModalNavigationRail>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 滚动、长标签、局部主题与 RTL
-
-两种形态的标签都允许换行。展开宽度根据标签、徽标或 `expanded-width` 测量，并受到可用空间约束。为导航设置有限高度，使导航项独立滚动，菜单和 FAB 仍可访问。主题色、逻辑边缘、焦点轮廓和减少动态效果由 MDV 处理，示例只修改局部容器主题与方向。
-
-<DemoBlock>
-  <RailThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBadge, MdvCheckbox, MdvIcon, MdvIconButton, MdvNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const expanded = ref(true)
-const dark = ref(false)
-const rtl = ref(false)
-const current = ref('A shared workspace with a long destination label')
-const labels = ['A shared workspace with a long destination label', 'Reading list', 'Project drafts', 'Notifications', 'Recent activity', 'Archive', 'Account settings']
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-4"><MdvCheckbox v-model="dark" label="Local dark theme" /><MdvCheckbox v-model="rtl" label="Right to left" /></div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="flex h-[27rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low text-mdv-on-surface">
-      <MdvNavigationRail v-model:expanded="expanded" expanded-width="280px" show-divider aria-label="Scrollable themed destinations">
-        <template #menu="{ menuAttrs }"><MdvIconButton v-bind="menuAttrs" variant="standard" aria-label="Toggle themed rail"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-        <MdvNavigationRailItem v-for="(label, index) in labels" :key="label" :label="label" :active="current === label" @click="current = label">
-          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
-          <template v-if="index === 0" #badge><MdvBadge variant="large" content="99+" aria-label="More than 99 updates" /></template>
-        </MdvNavigationRailItem>
-      </MdvNavigationRail>
-      <p class="min-w-0 flex-1 overflow-auto p-4 text-sm" :class="expanded ? 'hidden sm:block' : ''">Long labels wrap. Only the destinations scroll; the menu remains reachable.</p>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 无障碍与集成
-
-<DocsTable label="导航轨键盘操作">
-
-| 按键或操作 | 行为 |
-| --- | --- |
-| Tab / Shift+Tab | 依次访问可用目的地与其他普通控件。 |
-| 上 / 下方向键 | 循环移动目的地焦点，跳过禁用或隐藏项；不修改选中状态。 |
-| Home / End | 聚焦首个或最后一个可用目的地。 |
-| Enter / Space | 使用原生按钮或链接行为；Space 激活按钮。 |
-| 模态内 Escape | 启用时请求关闭，仅最上层模态处理。 |
-| 标准轨 `focus(options?)` | 聚焦当前可用项，否则聚焦首个可用项。 |
-
-</DocsTable>
-
-使用项目提供的标签，不在项目内部再嵌套交互链接。通知数量有意义时应为徽标提供说明。切换页面后，应用负责更新目的地状态，并按需将焦点移到新内容。导航轨宽度变化与页面切换过渡相互独立。
-
-组件使用 `nav` 和原生按钮/链接，不是 `menu`。不额外提供滑动手势、隐藏标签模式、密度变体或自动移动端替换。模态继承所在位置的主题和方向，无需应用手写 Teleport。真实触摸、读屏、强制颜色和 SSR/hydration 仍需结合实际应用验证。
+---
 
 ## API
 

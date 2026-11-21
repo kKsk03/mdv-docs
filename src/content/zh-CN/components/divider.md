@@ -5,8 +5,6 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import type { ApiTableItem } from '@/components/docs/api-table.types'
 import DividerBasicDemo from '@/components/docs/demos/divider/basic.vue'
 import DividerVerticalDemo from '@/components/docs/demos/divider/vertical.vue'
-import DividerSemanticsDemo from '@/components/docs/demos/divider/semantics.vue'
-import DividerThemeDemo from '@/components/docs/demos/divider/theme.vue'
 
 const dividerProps: ApiTableItem[] = [
   { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'", description: '分割线方向。竖线在 flex 或 grid 布局中默认沿交叉轴拉伸，也可以显式设置高度。' },
@@ -14,14 +12,13 @@ const dividerProps: ApiTableItem[] = [
   { name: 'decorative', type: 'boolean', default: 'true', description: '默认从辅助技术中隐藏。设为 false 时提供 separator 语义和方向信息。' },
 ]
 </script>
-
 # 分割线
 
-`MdvDivider` 用细线区分相邻的内容或操作。优先通过留白建立层次，需要更清晰的边界时再加入分割线。组件本身没有交互，也不额外提供周围的间距。
+用 `MdvDivider` 分隔成组的内容或控件。
 
 ## 水平分割线
 
-默认分割线占满可用宽度。`inset` 在逻辑起始端留出 16px，`middle-inset` 在两端各留出 16px。适合放在内容分区之间，无需在每个简短条目后都加一条线。
+水平分隔线填满可用宽度。用 `inset` 在逻辑起始端留白，或用 `middle-inset` 在两端留白。
 
 <DemoBlock>
   <DividerBasicDemo />
@@ -51,7 +48,7 @@ const variants: MdvDividerVariant[] = ['full-width', 'inset', 'middle-inset']
 
 ## 垂直分割线
 
-设置 `orientation="vertical"`，即可分隔并排的操作或栏目。在横向 flex 布局中，竖线默认拉伸到可用高度；需要短一些时可显式指定高度。普通 block 容器可能需要明确高度才能确定竖线长度。
+相邻条目之间可用 `orientation="vertical"`。请为分隔线或其所在布局设置高度。
 
 <DemoBlock>
   <DividerVerticalDemo />
@@ -92,81 +89,13 @@ const underline = ref(false)
   </template>
 </DemoBlock>
 
-工具栏中第二条竖线设置了 `h-8 self-center`，第一条自然拉伸。分割线周围的空间由容器的 `gap` 管理。它不是操作控件，因此没有最小触摸目标。
+## 分隔语义
 
-## 装饰与语义
+分隔线默认是装饰内容。需要提供分隔语义时，设置 `:decorative="false"`。
 
-分割线默认只起装饰作用：根节点带有 `aria-hidden="true"`，不提供 separator 角色。如果这条边界能够帮助理解操作组或内容结构，可以设置 `:decorative="false"`。
+## 线条样式
 
-<DemoBlock>
-  <DividerSemanticsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDivider } from '@mdv-ui/mdv'
-
-const semantic = ref(true)
-const message = ref('Tab moves between the actions, skipping the divider.')
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="semantic" label="Expose a semantic separator" />
-    <div class="grid justify-items-start gap-4 rounded-xl bg-mdv-surface-container-low p-4">
-      <MdvButton variant="outlined" @click="message = 'Previous action selected.'">Previous action</MdvButton>
-      <MdvDivider class="w-full" :decorative="!semantic" aria-label="Reading and actions" />
-      <MdvButton variant="outlined" @click="message = 'Next action selected.'">Next action</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-语义分割线会提供 `role="separator"` 和 `aria-orientation`，但仍不会进入 Tab 顺序。它不支持拖动调节尺寸、焦点管理或数值属性，不能直接用作可拖拽的分栏控制器。
-
-## 主题、尺寸与 RTL
-
-分割线继承 `outline-variant` 色彩，默认厚度为 1px，两端无圆角。下面对比局部浅色、深色主题，以及逻辑缩进和显式色彩、厚度覆盖。
-
-<DemoBlock>
-  <DividerThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvDivider } from '@mdv-ui/mdv'
-
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-    <div class="grid gap-4 sm:grid-cols-2" :dir="rtl ? 'rtl' : 'ltr'">
-      <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" class="grid gap-4 rounded-xl bg-mdv-surface-container-low py-4 text-mdv-on-surface">
-        <p class="px-4 font-medium">{{ theme }} · logical start inset</p>
-        <MdvDivider variant="inset" />
-        <p class="px-4 text-sm">The 16px inset follows the text direction.</p>
-      </div>
-    </div>
-    <div class="grid gap-4 rounded-xl bg-mdv-surface-container-low py-4" style="--mdv-sys-color-outline-variant: var(--mdv-sys-color-primary)">
-      <p class="px-4 text-sm">A local color role and a 2px line</p>
-      <MdvDivider variant="middle-inset" style="height: 2px" />
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-水平 `inset` 跟随书写方向：LTR 时留白在左侧，RTL 时在右侧。对于竖线，MDV 将单端缩进映射到顶部，双端缩进映射到顶部和底部；这是 MDV 的 API 约定。
+用以下 CSS 变量自定义分隔线。留白方向随文字方向变化。
 
 <DocsTable label="分割线布局与定制" min-width="31rem">
 
@@ -181,7 +110,7 @@ const rtl = ref(false)
 
 </DocsTable>
 
-可以按设计需要加粗线条，但这不会使组件具备交互能力。按照当前 Tailwind 层级配置，工具类可以覆盖普通组件样式。
+---
 
 ## API
 

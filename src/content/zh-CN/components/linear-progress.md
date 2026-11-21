@@ -7,7 +7,6 @@ import LinearProgressBasicDemo from '@/components/docs/demos/linearProgress/basi
 import LinearProgressVariantDemo from '@/components/docs/demos/linearProgress/variant.vue'
 import LinearProgressTaskDemo from '@/components/docs/demos/linearProgress/task.vue'
 import LinearProgressSizeDemo from '@/components/docs/demos/linearProgress/size.vue'
-import LinearProgressThemeDemo from '@/components/docs/demos/linearProgress/theme.vue'
 
 const progressProps: ApiTableItem[] = [
   { name: 'value', type: 'number', default: '0', description: '当前任务值，限制在 0–max 内。非有限数值回退到 0，保留小数。' },
@@ -18,14 +17,13 @@ const progressProps: ApiTableItem[] = [
   { name: 'label', type: 'string', description: '图形上方的可见文字，同时提供可访问名称；显式 ARIA 命名优先。' },
 ]
 </script>
-
 # 线性进度指示器
 
-`MdvLinearProgress` 沿可用宽度展示任务进度。已知完成量时使用确定进度，未知时使用不确定进度。需要紧凑圆形展示时，参阅[圆形进度指示器](/zh-CN/components/circular-progress)；短暂等待且不展示百分比时，参阅[加载指示器](/zh-CN/components/loading-indicator)。
+用 `MdvLinearProgress` 在区域内显示任务进度。需要紧凑的指示器时，请用[环形进度条](./circular-progress)。
 
-## 确定进度与任务单位
+## 确定进度
 
-`value` 与 `max` 可以直接使用业务单位。下面的传输通过 `aria-valuetext` 说明兆字节，不必先将公开数值换算为百分比。
+使用任务本身的单位设置 `value` 和 `max`。为进度条提供无障碍名称，需要包含单位时用 `aria-valuetext`。
 
 <DemoBlock>
   <LinearProgressBasicDemo />
@@ -56,11 +54,9 @@ const total = 256
   </template>
 </DemoBlock>
 
-默认范围为 `0…100`。超出范围的值会被限制，无效值回退到 `0`，无效上限回退到 `100`。完成后指示器仍然可见，由业务决定隐藏时机并提供完成状态。
-
 ## 平直与波浪外观
 
-使用 `variant="wavy"` 开启波浪外观，默认使用 `flat`。未知进度需要显式设置 `indeterminate`。
+用 `variant="wavy"` 显示波浪描边。直线和波浪外观都可以用 `indeterminate` 表示未知进度。
 
 <DemoBlock>
   <LinearProgressVariantDemo />
@@ -87,11 +83,9 @@ const variants: MdvProgressVariant[] = ['flat', 'wavy']
   </template>
 </DemoBlock>
 
-波浪确定进度在不超过 `10%` 或达到 `95%` 时收回为平直，收放期间图形高度保持稳定。不确定波浪进度持续保留波形。圆形端点、轨道间隔和确定进度末端标记由 MDV 绘制；默认标记为 4px，并在接近完成时收起。
+## 未知进度
 
-## 未知进度、完成与失败
-
-任务状态由业务维护。启动示例后，可以确认总量、推进进度或模拟失败。这些操作只在本地切换状态，不会上传文件。
+任务总量未知时设置 `indeterminate`。完成或出错时使用独立的状态文本，进度条不会自动播报这些状态。
 
 <DemoBlock>
   <LinearProgressTaskDemo />
@@ -140,13 +134,9 @@ function advance() {
   </template>
 </DemoBlock>
 
-连接期间省略 `aria-valuenow` 和自定义数值说明；进度明确后使用真实的 `0…256` 范围。外围内容区负责 `aria-busy`，独立于繁忙区域的状态文字负责通知关键变化。失败后移除指示器并允许重试，成功后保留完成状态的指示器。
+## 宽度与描边
 
-组件没有内置请求处理、错误状态、完成事件、自动隐藏或耗时估计。
-
-## 宽度、线宽与方向
-
-线性组件占满容器宽度，可以通过外层容器或根节点的 `class`、`style` 限制。通过 `thickness` 调整图形线宽，不要用根节点高度替代。
+进度条填满容器。用布局样式控制宽度，用 `thickness` 设置描边宽度。
 
 <DemoBlock>
   <LinearProgressSizeDemo />
@@ -181,35 +171,9 @@ const options = [2, 4, 8, 12].map(value => ({ value, label: `${value}px` }))
   </template>
 </DemoBlock>
 
-平直图形高度等于 `thickness`，波浪图形额外预留 6px，默认分别为 4px 和 10px。可见标签还会增加文字高度和 4px 间隔。线性进度没有 `size` 属性。
+## 颜色
 
-继承 `dir="rtl"` 时，确定进度的增长方向与不确定进度的移动方向都会镜像，标签仍按正常逻辑方向排列。
-
-## 局部主题与颜色
-
-活动线条和末端标记使用 `primary`，轨道使用 `secondary-container`。局部主题继承相同角色；需要其他配色时覆盖专用变量。
-
-<DemoBlock>
-  <LinearProgressThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvLinearProgress } from '@mdv-ui/mdv'
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" class="grid gap-6 rounded-xl bg-mdv-surface-container p-5 text-mdv-on-surface">
-      <MdvLinearProgress :value="60" :label="`${theme}: primary`" />
-      <MdvLinearProgress :value="60" variant="wavy" :label="`${theme}: tertiary`" style="--mdv-progress-active-color: var(--mdv-sys-color-tertiary); --mdv-progress-track-color: var(--mdv-sys-color-tertiary-container)" />
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
+用以下 CSS 变量修改进度描边和轨道颜色。
 
 <DocsTable label="线性进度颜色变量" min-width="28rem">
 
@@ -220,16 +184,7 @@ import { MdvLinearProgress } from '@mdv-ui/mdv'
 
 </DocsTable>
 
-组件没有 `color` 属性。保持图形与承载表面的对比，使用文字说明完成或失败，不要只依赖颜色。强制颜色模式使用系统 `Highlight` 和 `GrayText`。
-
-## 无障碍与动效
-
-- 使用可见 `label`、`aria-label` 或 `aria-labelledby` 提供名称。显式 ARIA 名称优先，但不会替换可见标签；补充说明可通过 `aria-describedby` 关联。
-- 根节点是只读 `progressbar`，提供 `aria-valuemin="0"` 和规范化的上限。确定模式还提供真实当前值；ARIA 会立即更新，不等待视觉插值。
-- SVG 为装饰内容，不增加 Tab 入口，也不转移焦点。进度指示器不是滑块或输入控件。
-- 组件不创建实时播报区域。需要通知完成或失败时，由任务级状态文字负责，避免逐帧播报。
-- 数值变化和波浪收放约为 500ms，打断更新后从当前显示帧继续。减少动态效果时，确定进度直接更新，不确定进度使用静态图形。
-- 页面隐藏、图形离开视口或所属 KeepAlive 页面停用时暂停持续动画。SSR 输出稳定初始图形，浏览器挂载后再测量实际宽度。
+---
 
 ## API
 

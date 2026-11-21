@@ -6,9 +6,7 @@ import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import FullscreenBasicDemo from '@/components/docs/demos/fullscreenDialog/basic.vue'
 import FullscreenFormDemo from '@/components/docs/demos/fullscreenDialog/form.vue'
-import FullscreenPolicyDemo from '@/components/docs/demos/fullscreenDialog/policy.vue'
 import FullscreenAsyncDemo from '@/components/docs/demos/fullscreenDialog/async.vue'
-import FullscreenScrollDemo from '@/components/docs/demos/fullscreenDialog/scroll.vue'
 import FullscreenGuardDemo from '@/components/docs/demos/fullscreenDialog/guard.vue'
 
 const dialogProps: ApiTableItem[] = [
@@ -28,14 +26,13 @@ const dialogSlots: SlotTableItem[] = [
   { name: 'footer', description: 'Optional bottom action area outside the scrolling body. Receives the same { close } callback.' },
 ]
 </script>
-
 # Fullscreen Dialog
 
-`MdvFullscreenDialog` provides a focused modal workspace for forms or longer tasks. It always fills the viewport, including on desktop. Choose it explicitly for the task; it does not automatically become an ordinary [Dialog](/en-US/components/dialog) at wider widths.
+Use `MdvFullscreenDialog` for a task that needs the entire screen, such as editing a form.
 
-## Header actions, footer, and results
+## Header and footer
 
-Bind `v-model`, provide a title, and place the main action in `#actions`. The optional `#footer` stays outside the scrolling body. Both slots receive `close()`.
+Bind `v-model`, provide a title, and put the main action in `#actions`. Use `#footer` for controls that should stay outside the scrolling body.
 
 <DemoBlock>
   <FullscreenBasicDemo />
@@ -65,13 +62,9 @@ const result = ref('No result yet.')
   </template>
 </DemoBlock>
 
-The component provides the header X, but the application owns approval, saving, and other business actions. A result passed to `close('approved')` appears in the closing event's `returnValue`; the X and Escape have their own close reasons.
+## Submit a form
 
-The surface uses `surface-container-high` with no rounded corners or shadow. Header and footer are each at least 56px high. The body has 24px padding with device safe-area accommodation. Keep header labels concise so the title and action fit on mobile.
-
-## Native forms and header submission
-
-A header button can submit a body form using its native `form` attribute. Give each form a unique ID and set `type="submit"` explicitly; required-field validation still applies.
+Give the body form an ID. Set `type="submit"` and `form` on the header action to submit it with native validation.
 
 <DemoBlock>
   <FullscreenFormDemo />
@@ -112,65 +105,9 @@ async function save() {
   </template>
 </DemoBlock>
 
-Try Save with an empty name, then enter a name and retry. The field receives initial focus through `autofocus`. This example uses `@submit.prevent` and requests closing through the instance after the local save action; the component does not reinterpret every Enter key as confirmation.
+## Async saving
 
-Native `method="dialog"` and a submitter's `formmethod="dialog"` are also supported: submission goes through the close guard and exit animation, and the submitter's `value` becomes `returnValue`. A form's `@submit.prevent` cancels that native closing path. Use `requestSubmit()` for programmatic submission rather than bypassing validation with `form.submit()`.
-
-## Close policy and content lifetime
-
-`closable` controls the header X, while `close-on-esc` controls Escape. FullscreenDialog has no `close-on-scrim` prop because the visible surface covers the viewport. Keep an explicit exit action available when hiding the X or disabling Escape.
-
-<DemoBlock>
-  <FullscreenPolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvFullscreenDialog, MdvTextField } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const closable = ref(true)
-const escape = ref(true)
-const destroy = ref(false)
-const reject = ref(false)
-const message = ref('Closing requests are accepted.')
-
-function update(value: boolean) {
-  message.value = reject.value ? 'The parent rejected closing.' : 'The parent accepted closing.'
-  if (!reject.value) open.value = value
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="closable" label="Show the close action" />
-      <MdvCheckbox v-model="escape" label="Close on Escape" />
-      <MdvCheckbox v-model="destroy" label="Destroy content after closing" />
-    </div>
-    <MdvButton variant="tonal" @click="open = true">Try fullscreen policy</MdvButton>
-    <MdvFullscreenDialog :model-value="open" title="Close policy" close-label="Close policy preview" :closable="closable" :close-on-esc="escape" :destroy-on-close="destroy" @update:model-value="update">
-      <div class="mx-auto grid max-w-2xl gap-5">
-        <MdvTextField label="Temporary note" full-width autofocus />
-        <MdvCheckbox v-model="reject" label="Reject closing requests" />
-        <p class="text-sm" role="status">{{ message }}</p>
-      </div>
-      <template #footer="{ close }"><MdvButton variant="text" @click="close('done')">Done</MdvButton></template>
-    </MdvFullscreenDialog>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-The rejection switch stays inside the dialog so closing can be re-enabled. A controlled parent that rejects `update:modelValue=false` keeps the modal open. Try editing Temporary note, closing, and reopening: internal state is retained by default. Enabling `destroy-on-close` unmounts it after exit and resets that internal field, without clearing state bound in the parent.
-
-## Asynchronous saving and failure
-
-Keep the draft available when a save fails, and close only after success. A loading indicator does not automatically prevent repeated activation; this example explicitly disables submission and rejects close requests during saving.
+Keep the draft and show an error if saving fails. Disable the save action while pending and close only after success.
 
 <DemoBlock>
   <FullscreenAsyncDemo />
@@ -226,55 +163,9 @@ onBeforeUnmount(() => clearTimeout(timer))
   </template>
 </DemoBlock>
 
-Publish first with failure enabled, then disable failure and retry. The timeout only simulates a local request and is cleaned up on unmount. A real application should similarly own request cancellation, errors, and success handling. Directly setting the bound model to `false` bypasses `before-close`; reserve that path for deliberate parent decisions.
+## Confirm before closing
 
-## Long content, themes, and direction
-
-The header and footer remain available while the body scrolls. Long bodies can receive a Tab stop for keyboard scrolling. The dialog enters the native top layer from its existing DOM location, preserving local MDV theme inheritance.
-
-<DemoBlock>
-  <FullscreenScrollDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvFullscreenDialog } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const dark = ref(true)
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="dark" label="Local dark theme" />
-      <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-    </div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'">
-      <MdvButton @click="open = true">Read long content</MdvButton>
-      <MdvFullscreenDialog v-model="open" close-label="Close reading view" :dir="rtl ? 'rtl' : 'ltr'">
-        <template #title>Workspace review and reading notes</template>
-        <div class="mx-auto grid max-w-3xl gap-6">
-          <p v-for="index in 30" :key="index">Section {{ index }}: the body scrolls independently while the header and footer remain available. Keep real content structured with useful headings and concise paragraphs.</p>
-        </div>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close('finished')">Finish</MdvButton></template>
-        <template #footer="{ close }"><MdvButton variant="text" @click="close('back')">Back</MdvButton></template>
-      </MdvFullscreenDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-This example defaults to a local dark theme even on a light page. It also demonstrates the title slot and RTL layout. The title slot keeps its generated heading association; do not add a second outer heading just to name the dialog.
-
-## Confirming unsaved changes
-
-`before-close` receives a read-only `{ reason, returnValue }`. Return `false` to reject, return normally to allow, or return a Promise while an ordinary Dialog asks for confirmation.
+Return `false` from `before-close` to prevent dismissal, or a promise to wait for confirmation. Keep an explicit exit action if hiding the header close button.
 
 <DemoBlock>
   <FullscreenGuardDemo />
@@ -336,18 +227,7 @@ onBeforeUnmount(() => answer?.(false))
   </template>
 </DemoBlock>
 
-Change the name and try X, Escape, or Cancel. Keep editing and Escape from the confirmation preserve the draft; Discard allows the pending outer close. The example resolves the pending decision after the confirmation's `closed` event, so its modal cleanup finishes first. Save changes accepts the local draft without asking to discard it.
-
-Repeated close attempts share the in-flight guard result. A thrown/rejected guard leaves the dialog open and logs the failure. Parent closure, reopening, or unmount invalidates obsolete requests; clean up any application-owned pending confirmation too.
-
-## Accessibility and motion
-
-- The default role is `dialog`, with `aria-modal="true"`. The visible title is associated automatically; a simple `description` is associated when no custom default slot replaces it. Explicit ARIA naming takes priority. Without a visible title, provide `aria-label` or `aria-labelledby`.
-- Initial focus prefers internal `autofocus`, then an available control, then the dialog/content fallback. Tab/Shift+Tab stay in the top modal. Nested dialogs coordinate focus and scroll locking; closing restores the appropriate available opener.
-- The built-in close label defaults to Chinese; the English demos supply `close-label`. Hiding the close action does not remove the need for an available exit route.
-- Entry slides from below over 300ms and exit takes 200ms, with a separate scrim fade. Text is not scaled. Quick reversals and reduced-motion preferences are handled by MDV.
-- `close()` reports accepted state, not completed motion. Use `closed` for exit completion and cleanup. KeepAlive deactivation and unmount release modal resources.
-- Use a modern browser with native dialog support. SSR outputs a closed node; an initially true model establishes the modal after hydration. `open`, `closedby`, and `tabindex` are managed by MDV.
+---
 
 ## API
 

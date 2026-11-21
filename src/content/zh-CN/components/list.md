@@ -7,11 +7,7 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import ListVariantDemo from '@/components/docs/demos/list/variant.vue'
 import ListContentDemo from '@/components/docs/demos/list/content.vue'
 import ListSelectionDemo from '@/components/docs/demos/list/selection.vue'
-import ListControlledDemo from '@/components/docs/demos/list/controlled.vue'
 import ListActionsDemo from '@/components/docs/demos/list/actions.vue'
-import ListGroupsDemo from '@/components/docs/demos/list/groups.vue'
-import ListThemeDemo from '@/components/docs/demos/list/theme.vue'
-import ListFormDemo from '@/components/docs/demos/list/form.vue'
 
 const listProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'MdvListModelValue', default: 'null', description: '单选使用单个值或 null，多选使用数组。变更需要父级接受；selection-mode=none 时不参与选择。' },
@@ -63,14 +59,13 @@ const subheaderSlots: SlotTableItem[] = [
   { name: 'default', description: '可见分组标题文字，无插槽参数。' },
 ]
 </script>
-
 # 列表
 
-`MdvList` 通过 `MdvListItem` 和可选的 `MdvListSubheader` 排列相关条目。普通列表可以包含静态信息、原生操作和独立控件；选择列表使用受控的 `listbox` 模型，保留单一键盘入口。
+用 `MdvList` 和 `MdvListItem` 展示相关条目、操作或可选项。
 
 ## 变体与布局
 
-可以独立选择 `expressive`、`baseline` 变体，以及 `standard`、`segmented` 布局。默认使用 Expressive，下面各组初始选中相同的目标。
+用 `variant` 选择 Expressive 或 Baseline 外观，用 `layout` 选择标准或分段布局。
 
 <DemoBlock>
   <ListVariantDemo />
@@ -108,22 +103,9 @@ const destinations = ['workspace', 'projects', 'archive']
   </template>
 </DemoBlock>
 
-<DocsTable label="列表变体与布局行为" min-width="35rem">
+## 条目内容
 
-| 组合 | 默认条目 | 选中条目 | 交互形状 |
-| --- | --- | --- | --- |
-| Expressive standard | 透明，4px 圆角 | `secondary-container`，16px 圆角 | Hover 8px，焦点/按压 16px |
-| Expressive segmented | `surface-container`，分组外角 16px、内角 4px | `secondary-container`，16px 圆角 | 交互形状覆盖默认分段圆角 |
-| Baseline standard | 透明，4px 圆角 | `secondary-container` | 固定圆角 |
-| Baseline segmented | `surface-container`，4px 圆角 | `secondary-container` | 固定圆角 |
-
-</DocsTable>
-
-Expressive 选中形状优先于 hover。分段列表使用 8px 内边距和 2px 条目间隙；分组标题或其他非条目节点会切断连续分段。显式 `layout` 优先于 `segmented` 简写。
-
-## 内容、行数与分隔线
-
-常见内容可以通过属性提供，也可以用插槽替换局部区域。子项 `lines` 优先于列表默认值；都省略时，根据上方标签、主标题/正文和辅助区域推断行数。
+通过条目属性或插槽设置标题、辅助文本、图标等内容。用 `lines` 覆盖自动计算的行数。
 
 <DemoBlock>
   <ListContentDemo />
@@ -162,24 +144,9 @@ const image = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" widt
   </template>
 </DemoBlock>
 
-<DocsTable label="列表条目尺寸" min-width="28rem">
-
-| 内容 | 默认最小高度或尺寸 |
-| --- | --- |
-| 一行 / 两行 / 三行 | 56 / 72 / 88px |
-| 前置图标 / 头像 / 图片 | 24 / 40 / 56px |
-| 起始 / 末端内边距 | 16 / 24px |
-| 内容区域之间的间距 | 16px |
-
-</DocsTable>
-
-以上高度为最小值，媒体和自定义内容可以自然撑高。三行内容顶部对齐，主标题与上方标签单行省略；三行且无上方标签时，辅助文字最多两行，其他情况为一行。
-
-普通布局的 `full-width` 分隔线铺满相邻项之间，`inset` 随图标、头像或图片后的正文起点对齐。分段布局使用间隙并隐藏这些分隔线。内置图片与图标为装饰内容，有独立信息意义的图片应通过插槽提供适当名称。
-
 ## 单选与多选
 
-为每个可选项提供唯一的字符串或数值 `value`，并为 listbox 命名。单选使用单个值或 `null`，多选使用数组。
+为可选项设置不同的 `value`，并为列表框命名。单选绑定一个值或 `null`，多选绑定数组。
 
 <DemoBlock>
   <ListSelectionDemo />
@@ -221,72 +188,9 @@ const multiple = ref<MdvListModelValue>(['updates'])
   </template>
 </DemoBlock>
 
-比较使用 `Object.is`，因此数值 `1` 和字符串 `'1'` 不相等。单选重复点击当前项会保持选中，多选通过新数组添加或移除值。禁用项不会修改模型。
+## 独立操作
 
-内置 checkbox、radio、switch 是装饰性的选择指示器，默认跟随整行选择，也可以通过 `leading-value`、`trailing-value` 单独覆盖视觉值。它们不是嵌套输入控件、独立操作或表单字段。
-
-选择列表的键盘规则：
-
-- Tab 进入唯一停靠项，优先选中项或当前项，其他项为 `tabindex="-1"`。
-- 方向键循环移动焦点，Home/End 到首尾可用项，移动焦点不会自动选择。
-- Enter/Space 选择当前项，跳过禁用、`hidden` 与 `inert` 条目。
-- 焦点项被移除或禁用时，焦点移到可用项；删除值后的模型清理仍由业务负责。
-
-链接行和没有值的行不参与选择。原生导航链接和带独立操作的条目应放在普通列表中。
-
-## 受控接受与取消
-
-选择请求只有被父级接受后才改变可见状态，`v-model` 会直接处理接受。示例默认拒绝请求，取消行点击则会阻止选择请求本身。
-
-<DemoBlock>
-  <ListControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvList, MdvListItem } from '@mdv-ui/mdv'
-import type { MdvListModelValue } from '@mdv-ui/mdv'
-
-const selected = ref<MdvListModelValue>('draft')
-const accept = ref(false)
-const cancelClick = ref(false)
-const message = ref('The parent currently rejects selection changes.')
-
-function update(value: MdvListModelValue) {
-  message.value = `Requested ${value}: ${accept.value ? 'accepted' : 'rejected'}.`
-  if (accept.value) selected.value = value
-}
-
-function activate(event: MouseEvent) {
-  if (!cancelClick.value) return
-  event.preventDefault()
-  message.value = 'Click cancelled before the selection request.'
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="accept" label="Accept list selection" />
-      <MdvCheckbox v-model="cancelClick" label="Cancel row clicks" />
-    </div>
-    <MdvList :model-value="selected" selection-mode="single" layout="segmented" aria-label="Review stage" @update:model-value="update">
-      <MdvListItem v-for="stage in ['draft', 'review', 'approved']" :key="stage" :value="stage" :headline="stage" trailing="radio" @click="activate" />
-    </MdvList>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Selected: {{ selected }} · {{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-取消主操作原生 `click`，或取消用于选择的 `keydown` 默认行为，都会阻止该次选择。`MdvListItem` 不发出自己的 `update:selected`，选择属于父级 List 模型。选择模式以外，`selected` 只是视觉属性。
-
-## 独立控件与原生操作
-
-将真实控件放入 `#leading-action` 或 `#trailing-action`。它们与主操作互为兄弟节点，共享条目表面，因此保留自己的焦点入口，也不会触发主按钮。
+用 `leading-action` 或 `trailing-action` 放置独立控件，不要在条目的主操作中嵌套按钮。
 
 <DemoBlock>
   <ListActionsDemo />
@@ -330,131 +234,11 @@ const more = ref(0)
   </template>
 </DemoBlock>
 
-可以分别尝试保存复选框、项目主操作、更多操作和同步开关。为每个控件绑定插槽的 `disabled`，保持原生禁用语义与外观一致；禁用行也会阻止操作区域激活。禁用链接移除 `href`、退出 Tab 顺序并保留禁用链接语义，重新启用后恢复地址。
+## 分段标题
 
-包含多个控件时使用普通列表，不要在主标题、正文、leading、trailing 展示插槽中放置交互元素。提供 `href` 时使用原生链接，提供 `interactive` 或激活监听器时使用原生按钮，否则保持静态内容。静态信息不会增加 Tab 入口。
+用 `MdvListSubheader` 为列表分段设置标题。条目重新排序时，使用稳定的 Vue `key` 保持条目身份。
 
-## 分组标题、重排与焦点
-
-分组标题提供视觉分区并切断连续分段，`inset` 用于对齐普通前置图标后的正文。稳定条目 key 可以在重排时保留选择和节点身份。
-
-<DemoBlock>
-  <ListGroupsDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvList, MdvListItem, MdvListSubheader } from '@mdv-ui/mdv'
-import type { MdvListModelValue } from '@mdv-ui/mdv'
-import folderIcon from '@iconify-icons/material-symbols/folder-outline'
-
-const list = useTemplateRef<InstanceType<typeof MdvList>>('list')
-const selected = ref<MdvListModelValue>('research')
-const showSubheader = ref(true)
-const projects = ref(['research', 'prototype', 'release'])
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="showSubheader" label="Show the project group label" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" @click="projects = [...projects].reverse()">Reverse project order</MdvButton>
-      <MdvButton variant="outlined" @click="list?.focus()">Focus selected row</MdvButton>
-    </div>
-    <MdvList ref="list" v-model="selected" selection-mode="single" layout="segmented" aria-label="Grouped destinations">
-      <MdvListSubheader inset>Workspace</MdvListSubheader>
-      <MdvListItem value="inbox" headline="Inbox" :icon="folderIcon" />
-      <MdvListItem value="archive" headline="Archive" :icon="folderIcon" />
-      <MdvListSubheader v-if="showSubheader" inset>Projects</MdvListSubheader>
-      <MdvListItem v-for="project in projects" :key="project" :value="project" :headline="project" :icon="folderIcon" />
-    </MdvList>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">Selected: {{ selected }}. Reordering preserves each row's value.</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-隐藏项目标题可以连通分段，反转项目后，Focus selected row 按钮会调用 List 实例的 `focus()`。选择导航跟随当前 DOM 顺序。Subheader 是展示性的 `li`，不是可展开分组、吸顶标题，也不增加键盘停靠点。
-
-## 原生表单
-
-普通交互行支持原生按钮类型、必填校验、重置与提交者属性。需要显式启用交互，单独设置 `type` 不会将静态内容变成按钮。
-
-<DemoBlock>
-  <ListFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvList, MdvListItem, MdvTextField } from '@mdv-ui/mdv'
-
-const name = ref('')
-const message = ref('Enter a display name before submitting.')
-
-function submit(event: Event) {
-  const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null
-  message.value = `Submitted ${name.value} with intent=${submitter?.value || '(none)'}.`
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <form class="grid gap-3" @submit.prevent="submit" @reset="name = ''; message = 'Profile reset.'">
-      <MdvTextField v-model="name" label="Display name" name="displayName" required full-width />
-      <MdvList aria-label="Profile form actions">
-        <MdvListItem interactive type="submit" name="intent" value="save" headline="Submit profile" supporting-text="Uses native required-field validation." />
-        <MdvListItem interactive type="reset" headline="Reset profile" />
-        <MdvListItem interactive headline="Preview profile" @click="message = `Preview: ${name || '(empty)'}`" />
-      </MdvList>
-    </form>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Preview profile 使用默认 `button` 类型，不会提交。Submit profile 提供 `name="intent"` 与 `value="save"`，由业务处理提交。列表选择模型本身不会序列化，也没有内置 `name`、校验或重置 API；需要提交选择时，请另外绑定表单字段。
-
-## 长内容、局部主题与方向
-
-条目继承局部浅深色、MDV 令牌及逻辑方向。长文字保持在正文列内，尾部内容保留自己的空间。
-
-<DemoBlock>
-  <ListThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvList, MdvListItem } from '@mdv-ui/mdv'
-import notificationsIcon from '@iconify-icons/material-symbols/notifications-outline'
-
-const rtl = ref(false)
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="rtl" label="Use right-to-left lists" />
-    <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" :dir="rtl ? 'rtl' : 'ltr'" class="min-w-0 rounded-xl bg-mdv-surface-container-lowest p-2 text-mdv-on-surface">
-      <MdvList layout="segmented" :aria-label="`${theme} list preview`">
-        <MdvListItem :lines="3" headline="A long notification headline that stays within the row" supporting-text="Supporting text can wrap onto two lines in a three-line row without an overline, while its trailing content keeps its space." :icon="notificationsIcon" trailing-text="Now" />
-        <MdvListItem :lines="3" headline="Archive export" supporting-text="ReportArchive2026WithALongUnbrokenSupportingValueToCheckWrapping" avatar-name="Alex Morgan" trailing="checkbox" :trailing-value="true" selected />
-      </MdvList>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-选中时文字与展示图标使用 `on-secondary-container`。Expressive 的悬停、按压、可见焦点和选中状态保留共用表面与涟漪。减少动态效果会缩短过渡，强制颜色模式使用系统颜色。列表不提供种子色属性。
+---
 
 ## API
 

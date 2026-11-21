@@ -1,0 +1,25 @@
+import type { MdvTimePickerLabels } from '@mdv-ui/mdv'
+
+export const englishTimePickerLabels: MdvTimePickerLabels = {
+  title: 'Choose a time',
+  time: 'Time',
+  hour: 'Hour',
+  minute: 'Minute',
+  period: 'AM or PM',
+  open: 'Open time picker',
+  dial: 'Switch to dial',
+  input: 'Switch to text entry',
+  cancel: 'Cancel',
+  confirm: 'OK',
+  clear: 'Clear time',
+  formatHint: 'Time format',
+  keyboardHint: 'Use arrow keys to change the value, Home or End to go to the first or last option, and Space or Enter to select.',
+  invalidTime: 'Enter a valid time.',
+  required: 'Choose a time.',
+  outOfBounds: 'This time is outside the allowed range.',
+  disabledTime: 'This time is unavailable.',
+  invalidBounds: 'The earliest and latest times are invalid or out of order.',
+  invalidStep: 'The minute step must be a positive divisor of 60.',
+  stepMismatch: 'Use a time that matches the minute step.',
+  noAvailableTime: 'There are no available times.',
+}

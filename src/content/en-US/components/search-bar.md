@@ -8,10 +8,8 @@ import SearchBarDemo from '@/components/docs/demos/searchBar/bar.vue'
 import SearchFormDemo from '@/components/docs/demos/searchBar/form.vue'
 import SearchViewDemo from '@/components/docs/demos/searchBar/view.vue'
 import SearchTriggerDemo from '@/components/docs/demos/searchBar/trigger.vue'
-import SearchGuardDemo from '@/components/docs/demos/searchBar/guard.vue'
 import SearchAsyncDemo from '@/components/docs/demos/searchBar/async.vue'
 import SearchAppBarDemo from '@/components/docs/demos/searchBar/appbar.vue'
-import SearchCompositionDemo from '@/components/docs/demos/searchBar/composition.vue'
 
 const barProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'string', default: "'' (internal)", description: 'Query. Omit for internal state; an explicit value lets the parent accept or reject updates.' },
@@ -59,18 +57,13 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'search-trailing', description: 'Search field trailing content; receives search state and can render in both entry and expanded fields.' },
 ]
 </script>
-
 # Search Bar
 
-`MdvSearchBar` is an editable search field. `MdvSearchView` adds suggestions/results in an expandable modal surface. `MdvSearchAppBar` places that experience inside an application bar. This page covers all three components in **MDV 0.1.5**.
+Use `MdvSearchBar` to search the current page, `MdvSearchView` to show suggestions and results in an expandable panel, or `MdvSearchAppBar` to put search in an App Bar.
 
-The application owns its data, filtering, requests, history, and result actions. These components do not implement a search service or add implicit combobox/listbox semantics to arbitrary results.
+## Basic search
 
-## Standalone input, submission, and forms
-
-Use SearchBar when search updates an existing page without opening a separate result surface. It is at least 56px high and fills its container. `v-model` tracks input; `search` is an explicit submission event. Pressing Enter emits search and prevents implicit native form submission, so the example provides a separate submit button for reading `FormData`.
-
-Clearing emits the empty query and `clear`, then returns focus to the input. Readonly allows viewing/submitting the current query but prevents edits and clearing. Disabled blocks interaction. Native `name`, `form`, `id`, input events, and validation attributes go directly to the SearchBar input; `class` and `style` style its outer wrapper. Reset restores its initial query, subject to parent acceptance for a controlled value.
+Bind the query with `v-model` and listen for `search`. Enter emits `search` instead of submitting the surrounding form. For native form submission, provide a separate submit button.
 
 <DemoBlock>
   <SearchBarDemo />
@@ -107,57 +100,9 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## SearchView input ownership and forms
+## Suggestions and results
 
-SearchView's entry and expanded inputs share a query, but only the active one owns the form name and supplied ID. Use `input-attrs` to provide native association instead of putting `name` on the component wrapper. This example reads the external form from either presentation without duplicating its `q` field, and resets to the initial query while search remains open. The buttons inside the modal explicitly reference the same form.
-
-<DemoBlock>
-  <SearchFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId } from 'vue'
-import { MdvButton, MdvSearchView } from '@mdv-ui/mdv'
-
-const id = `search-view-form-${useId()}`
-const inputId = `search-view-input-${useId()}`
-const query = ref('design')
-const message = ref('No form submission yet.')
-function submit(event: Event) {
-  message.value = `Form data: ${JSON.stringify([...new FormData(event.currentTarget as HTMLFormElement)])}`
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
-      <template #default="{ close }">
-        <div class="grid gap-4 p-5">
-          <p class="text-sm">Only the active search input belongs to the external form.</p>
-          <div class="flex flex-wrap gap-3"><MdvButton type="submit" :form="id">Submit from search</MdvButton><MdvButton type="reset" :form="id" variant="outlined">Reset from search</MdvButton><MdvButton variant="text" @click="close()">Close form search</MdvButton></div>
-          <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
-        </div>
-      </template>
-    </MdvSearchView>
-    <form :id="id" class="flex flex-wrap gap-3" @submit.prevent="submit">
-      <MdvButton type="submit">Submit collapsed search</MdvButton><MdvButton type="reset" variant="outlined">Reset collapsed search</MdvButton>
-    </form>
-    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Suggestions, appearances, and responsive layouts
-
-Focus or click the entry field to open SearchView. `contained` uses separated rounded input/result surfaces; `divided` uses a joined surface with a divider. The List appearance in the example changes alongside the search appearance, under application control.
-
-`auto` responds to the **viewport**, not the demo container: below 600px it becomes fullscreen; at 600px and above it docks to the entry. Either layout is a native modal dialog with a scrim and focus containment. Docked results are therefore not an inline, nonmodal popover. Expanded contained search extends 12px beyond either side of its entry; the default wrapper supplies 24px horizontal padding. Give the component room instead of overriding internal positioning.
-
-Enter emits `search` and moves focus into the results region; it does not select a result or close the view. The example chooses a result explicitly and calls its slot `close()` action. A clear action leaves search open. Filters and empty states are ordinary slot content.
+Use `MdvSearchView` to render suggestions or results in its default slot. `layout="auto"` docks the modal at viewport widths of 600px and above and uses fullscreen below 600px. Selecting a result is up to the application; the slot’s `close()` requests dismissal.
 
 <DemoBlock>
   <SearchViewDemo />
@@ -218,11 +163,55 @@ function choose(title: string, close: MdvSearchSlotProps['close']) {
   </template>
 </DemoBlock>
 
-## Icon triggers and controlled models
+Localize the field and actions with `placeholder`, `clear-label`, and `back-label`. The internal results region has a fixed Chinese accessible name.
 
-Bind the complete `triggerProps` object to one trigger, including its `ref`, click handler, dialog relationship, expanded state, and disabled state. Supply an accessible name on icon-only triggers. Omitting the ref or splitting the bindings across elements breaks anchoring or focus restoration.
+## Search forms
 
-Query and open models are independent. Unbound models use internal state. An explicit `:model-value` or `:open` requires the parent to accept updates; rejecting a request leaves the accepted state unchanged. The demo exposes acceptance controls inside the modal so a rejected close can be enabled again without leaving keyboard focus trapped.
+Pass `name` and `form` through `input-attrs`. Only the active input owns the submitted name, so expanding the view does not submit a second copy of the query.
+
+<DemoBlock>
+  <SearchFormDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref, useId } from 'vue'
+import { MdvButton, MdvSearchView } from '@mdv-ui/mdv'
+
+const id = `search-view-form-${useId()}`
+const inputId = `search-view-input-${useId()}`
+const query = ref('design')
+const message = ref('No form submission yet.')
+function submit(event: Event) {
+  message.value = `Form data: ${JSON.stringify([...new FormData(event.currentTarget as HTMLFormElement)])}`
+}
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
+      <template #default="{ close }">
+        <div class="grid gap-4 p-5">
+          <p class="text-sm">Only the active search input belongs to the external form.</p>
+          <div class="flex flex-wrap gap-3"><MdvButton type="submit" :form="id">Submit from search</MdvButton><MdvButton type="reset" :form="id" variant="outlined">Reset from search</MdvButton><MdvButton variant="text" @click="close()">Close form search</MdvButton></div>
+          <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
+        </div>
+      </template>
+    </MdvSearchView>
+    <form :id="id" class="flex flex-wrap gap-3" @submit.prevent="submit">
+      <MdvButton type="submit">Submit collapsed search</MdvButton><MdvButton type="reset" variant="outlined">Reset collapsed search</MdvButton>
+    </form>
+    <p role="status" class="break-words text-sm text-mdv-on-surface-variant">{{ message }} · Query: {{ query }}</p>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+## Custom triggers
+
+Bind all of `triggerProps` to one custom trigger, and name it if it is icon-only. The query and `v-model:open` are independent.
 
 <DemoBlock>
   <SearchTriggerDemo />
@@ -273,70 +262,9 @@ function updateQuery(next: string) {
   </template>
 </DemoBlock>
 
-## Asynchronous closing confirmation
+## Async search
 
-`beforeClose(detail)` can return `false` or resolve to `false` to reject closing. A successful `void`/`true` result allows a model request, which the parent can still reject. Directly assigning `open` bypasses this guard. Use `closed` for animation completion; `close()` resolves to acceptance before the animation necessarily finishes.
-
-This demo suspends a requested close until the reader chooses Keep editing or Discard note. The pending promise is resolved during unmount so leaving the docs page cannot retain an abandoned confirmation. Clearing the query does not invoke the close guard.
-
-<DemoBlock>
-  <SearchGuardDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
-import { MdvButton, MdvSearchView, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvSearchBeforeClose, MdvSearchCloseDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const note = ref('')
-const dirty = ref(false)
-const pendingReason = ref('')
-const message = ref('No close request yet.')
-let resolveClose: ((accepted: boolean) => void) | undefined
-const beforeClose: MdvSearchBeforeClose = detail => {
-  if (!dirty.value) return true
-  pendingReason.value = detail.reason
-  return new Promise<boolean>(resolve => { resolveClose = resolve })
-}
-function decide(discard: boolean) {
-  if (discard) { note.value = ''; dirty.value = false }
-  pendingReason.value = ''
-  resolveClose?.(discard)
-  resolveClose = undefined
-}
-function closed(detail: MdvSearchCloseDetail) { message.value = `Closed: ${detail.reason}` }
-onBeforeUnmount(() => resolveClose?.(false))
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvSearchView v-model:open="open" placeholder="Search and annotate" clear-label="Clear annotation query" back-label="Leave annotation search" variant="divided" :before-close="beforeClose" @closed="closed">
-      <template #default="{ close }">
-        <div class="grid gap-4 p-5">
-          <MdvTextField :model-value="note" label="Unsaved note" supporting-text="Type a note, then request closing." @update:model-value="note = String($event); dirty = true" />
-          <MdvButton variant="outlined" @click="close()">Close annotation search</MdvButton>
-          <div v-if="pendingReason" role="alert" class="grid gap-3 rounded-xl bg-mdv-secondary-container p-4 text-mdv-on-secondary-container">
-            <p class="text-sm">Discard the unsaved note? Close reason: {{ pendingReason }}</p>
-            <div class="flex flex-wrap gap-3"><MdvButton variant="text" @click="decide(false)">Keep editing</MdvButton><MdvButton variant="tonal" @click="decide(true)">Discard note</MdvButton></div>
-          </div>
-        </div>
-      </template>
-    </MdvSearchView>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }} · Unsaved: {{ dirty }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Loading, errors, retry, and stale results
-
-`loading` exposes busy state without showing a progress component or disabling input. Render progress, errors, retry controls, results, and empty content yourself. Use a short `status-text` to announce the current outcome rather than reading every result automatically.
-
-The example uses a cancellable simulated request started with Enter, not a real network service. Editing invalidates pending results; late responses cannot overwrite a newer query. It also clears its timer on unmount. Real requests should use equivalent cancellation or request identifiers and an application-chosen debounce policy.
+Use `loading` for busy semantics and `status-text` to announce results. Render progress, errors, and retry controls in the results slot. Cancel or ignore outdated requests so they cannot replace newer results.
 
 <DemoBlock>
   <SearchAsyncDemo />
@@ -399,11 +327,9 @@ onBeforeUnmount(cancel)
   </template>
 </DemoBlock>
 
-## Search App Bar and independent content scrolling
+## Search App Bar
 
-Place SearchAppBar in `MdvAppBarScaffold`'s `appbar` slot. It uses a 64px App Bar, and without an explicit `scroll-target` follows the scaffold's content. `enter-always` hides on downward scrolling and reveals on upward scrolling; focus and open search keep the relevant controls available. The example scrolls its own bounded pane.
-
-`leading` and `actions` belong outside the field and receive App Bar state. `search-leading` and `search-trailing` belong inside the field and receive search state. SearchAppBar does not expose the custom `trigger` slot: use SearchView for a standalone icon-trigger experience. Adjacent Standard Navigation Drawer layout follows the ordinary App Bar rules.
+Place `MdvSearchAppBar` in the `appbar` slot of `MdvAppBarScaffold`. The bar follows the scaffold’s scroll area. Use `leading` and `actions` for bar controls, or `search-leading` and `search-trailing` for controls inside the field.
 
 <DemoBlock>
   <SearchAppBarDemo />
@@ -449,77 +375,7 @@ const results = computed(() => subjects.filter(title => title.toLowerCase().incl
   </template>
 </DemoBlock>
 
-## Dialog composition, local themes, and RTL
-
-SearchView remains in its component tree while its native dialog enters the top layer. This preserves local theme and direction and supports a search modal inside another MDV dialog. Escape closes the topmost search first and restores focus to its trigger; the enclosing dialog stays open. Give both layers useful names.
-
-Avoid independent overlays inside a `trailing` slot that renders twice. Declare them alongside the search root and use one shared state, as with other MDV overlay compositions.
-
-<DemoBlock>
-  <SearchCompositionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDialog, MdvList, MdvListItem, MdvSearchView } from '@mdv-ui/mdv'
-
-const dark = ref(false)
-const rtl = ref(false)
-const dialog = ref(false)
-const query = ref('')
-const selected = ref('No document selected.')
-const documents = ['Design system overview', 'Forms and validation', 'Navigation and focus']
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-4"><MdvCheckbox v-model="dark" label="Local dark theme" /><MdvCheckbox v-model="rtl" label="Right to left" /></div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface-container-low p-5 text-mdv-on-surface">
-      <MdvButton variant="tonal" @click="dialog = true">Choose a document</MdvButton>
-      <p role="status" class="mt-4 text-sm">{{ selected }}</p>
-      <MdvDialog v-model="dialog" title="Attach a document" description="Open the nested search. Escape closes search first and returns to this dialog.">
-        <MdvSearchView v-model="query" placeholder="Search attachments" clear-label="Clear attachment query" back-label="Back to attachment dialog" variant="divided">
-          <template #default="{ close }">
-            <MdvList><MdvListItem v-for="title in documents.filter(value => value.toLowerCase().includes(query.toLowerCase()))" :key="title" :headline="title" interactive @click="selected = title; close()" /></MdvList>
-            <MdvButton class="m-4" variant="text" @click="close()">Close attachment search</MdvButton>
-          </template>
-        </MdvSearchView>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close()">Finish attaching</MdvButton></template>
-      </MdvDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Keyboard, IME, accessibility, and input ownership
-
-<DocsTable label="Search keyboard interaction">
-
-| Key or action | Behavior |
-| --- | --- |
-| Enter in input | Emits `search(query, event)` unless repeated or during IME composition. View focuses its results region without closing. |
-| Arrow Down / Arrow Up in input | In View, focuses the first/last available search result, opening the view if needed. |
-| Arrow Up / Arrow Down in results | Moves among recognized result actions; Up from the first returns to the input. |
-| Home / End on a result | Focuses the first/last recognized result. |
-| Tab / Shift+Tab | Follows ordinary controls; an open View contains modal focus. |
-| Escape | Requests closing the topmost View when enabled. |
-| Clear action | Updates query to empty, emits clear, focuses input, and leaves View open. |
-
-</DocsTable>
-
-MDV recognizes interactive `MdvListItem` primary actions and focusable elements marked `data-mdv-search-result`. Custom results need their own semantic names and native interaction. Nested filters, text inputs, and components with their own keyboard handling keep those interactions. Loading and status do not turn arbitrary content into a combobox or an application menu.
-
-IME draft text is committed after composition ends. Enter used to confirm a composition, repeated Enter, and legacy composition key codes do not submit search. The examples keep their text in English, while the library input supports composed text.
-
-SearchView has an entry input and an expanded input sharing the same query. Use `input-attrs` for `id`, `name`, `form`, `required`, and native input listeners. Only the active input participates in the form, and the supplied ID follows it. Read `inputElement` when needed rather than caching an input that may become inactive. SearchView root attributes belong to its wrapper; SearchAppBar root attributes belong to its App Bar.
-
-The default placeholder, clear label, and back label are Chinese; this page overrides them in English demos. MDV 0.1.5 also fixes its internal results-region label to “搜索建议与结果” without a public override. Localizing that internal accessible name requires a library improvement. Keep `status-text` localized in the application.
-
-MDV supports reduced-motion styling, native dialog focus and document scroll locking. Layout, actual touch input, screen readers, visual viewport changes, SSR/hydration, and browser-specific nested-modal behavior still need application validation. Docked panels have no extra search-specific elevation by default.
+---
 
 ## API
 

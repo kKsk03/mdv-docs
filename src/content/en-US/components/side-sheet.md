@@ -6,10 +6,8 @@ import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import ModalDemo from '@/components/docs/demos/sideSheet/modal.vue'
 import StandardDemo from '@/components/docs/demos/sideSheet/standard.vue'
-import PolicyDemo from '@/components/docs/demos/sideSheet/policy.vue'
 import GuardDemo from '@/components/docs/demos/sideSheet/guard.vue'
 import FormDemo from '@/components/docs/demos/sideSheet/form.vue'
-import CompositionDemo from '@/components/docs/demos/sideSheet/composition.vue'
 
 const commonProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'false', description: 'Controlled visibility. The parent must accept update:modelValue requests for built-in close actions to take effect.' },
@@ -43,16 +41,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'actions', description: 'Panel actions; receives { close }.' },
 ]
 </script>
-
 # Side Sheet
 
-`MdvSideSheet` presents supplemental content in a modal panel. `MdvSideSheetScaffold` reserves space alongside main content for a Standard panel. This page describes **MDV 0.1.5**. Use Navigation Drawer for destinations and Side Sheet for details or tasks related to the current page.
+Use a Side Sheet for details or actions related to the current page. `MdvSideSheet` opens a modal panel; `MdvSideSheetScaffold` reserves room for a standard panel beside the page.
 
-## Modal appearance, placement, and back actions
+## Modal sheet
 
-Modal sheets use the native dialog top layer, a scrim, and focus containment. `placement` follows logical start/end and mirrors in RTL. Attached panels round the edge facing the content; `detached` adds margins and rounds every corner. The default width is 256px and the maximum is 400px, constrained by the available area.
-
-The close action always exists. `show-back` adds a separate action that emits `back` without automatically closing. The example uses it to return from project history to details. Supply English `close-label`/`back-label` in English interfaces because their library defaults are Chinese.
+Bind `v-model` to open the modal. Set `placement` to `start` or `end`, and use `detached` for a panel with margins. Give the panel a title or an accessible name.
 
 <DemoBlock>
   <ModalDemo />
@@ -104,11 +99,9 @@ function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${eve
   </template>
 </DemoBlock>
 
-## Standard layout and independent scrolling
+## Standard sheet
 
-Scaffold needs a bounded-height parent. Its default slot is the main area; `sheet` is the side panel. Opening the panel genuinely reduces the main area's width and closing restores it. Each area scrolls independently. `show-divider` controls the outer vertical boundary; `dividers` controls the internal horizontal separators.
-
-The example caps its custom widths with container-relative lengths to leave usable main content in a narrow embedded preview. Applications normally switch to Modal when the main content can no longer fit. MDV does not choose a breakpoint or switch between these components automatically.
+Place the main content in the default slot and the panel in `#sheet`. Give the scaffold a definite height so the content and sheet can scroll independently.
 
 <DemoBlock>
   <StandardDemo />
@@ -163,69 +156,9 @@ function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${eve
   </template>
 </DemoBlock>
 
-Standard is nonmodal: the main area remains interactive, opening does not steal focus, Tab can leave the panel, and Escape is not captured globally. The instance `focus()` explicitly focuses its dialog container. Closing restores earlier focus only when focus is still inside that panel and no nested modal owns it.
+## Confirm before closing
 
-## Close policy, controlled acceptance, and retention
-
-Disable individual Modal close policies as needed; the built-in close button remains available. `close()` and slot `close()` request parent acceptance. A result of `true` means the parent accepted the request, while the exit animation may still be running. Wait for `closed` when work requires the final closed state.
-
-`destroy-on-close` removes the child subtree after exit, resetting unbound child fields when reopened. It does not reset state stored by the parent. Directly setting the parent model to false is a programmatic close and bypasses `before-close`.
-
-<DemoBlock>
-  <PolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvSideSheet, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvSideSheetCloseDetail } from '@mdv-ui/mdv'
-
-const sheet = useTemplateRef<InstanceType<typeof MdvSideSheet>>('sheet')
-const open = ref(false)
-const acceptClose = ref(true)
-const escape = ref(true)
-const scrim = ref(true)
-const swipe = ref(true)
-const destroy = ref(false)
-const message = ref('No close request yet.')
-function update(value: boolean) {
-  if (value || acceptClose.value) open.value = value
-  else message.value = 'Parent rejected closing.'
-}
-async function requestClose() { message.value = `close() accepted: ${await sheet.value?.close('requested')}` }
-function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${event.reason} · Result: ${event.returnValue || '(empty)'}` }
-</script>
-
-<template>
-  <div class="grid gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="escape" label="Escape closes" />
-      <MdvCheckbox v-model="scrim" label="Scrim closes" />
-      <MdvCheckbox v-model="swipe" label="Edge swipe closes" />
-      <MdvCheckbox v-model="destroy" label="Destroy content on close" />
-    </div>
-    <div><MdvButton @click="open = true">Open close policy</MdvButton></div>
-    <MdvSideSheet ref="sheet" :model-value="open" title="Close policy" width="360px" :close-on-esc="escape" :close-on-scrim="scrim" :close-on-swipe="swipe" :destroy-on-close="destroy" close-label="Request policy close" @update:model-value="update" @closed="closed">
-      <div class="grid gap-4">
-        <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-        <MdvTextField label="Local draft" placeholder="Close and reopen to compare retention" full-width />
-        <MdvButton variant="outlined" @click="requestClose">Request close()</MdvButton>
-        <MdvButton variant="text" @click="open = false">Close directly</MdvButton>
-        <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-      </div>
-    </MdvSideSheet>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Asynchronous unsaved-change decisions
-
-`before-close` receives readonly close details and may return a promise. Concurrent close requests share the pending decision. Returning false keeps the sheet open. The example keeps the decision inside the active panel, resolves it on Keep/Discard, and cancels pending decisions on external close or unmount. Save records the draft before requesting closure.
+Use `before-close` to confirm unsaved edits. Return `false` to keep the panel open; a promise lets you wait for the decision. Setting the model to `false` directly bypasses the guard.
 
 <DemoBlock>
   <GuardDemo />
@@ -288,11 +221,9 @@ onBeforeUnmount(() => decide(false))
   </template>
 </DemoBlock>
 
-For a synchronous policy, return `false` directly. Exceptions or rejected guards keep the panel open and are logged by MDV; do not use exceptions as ordinary cancellation.
+## Dialog forms
 
-## Native dialog forms
-
-A Modal `form method="dialog"` follows native field validation before MDV handles the accepted submit and requests closure with reason `form`. The submit button's `value` becomes `returnValue`. Capture FormData in the submit handler; do not add `.prevent` if you want the built-in dialog-form close path. A cancel submitter can use `formnovalidate`.
+Inside a modal, use `method="dialog"` to validate the native form before requesting closure. The submitter’s `value` becomes `returnValue`; do not prevent the submit event if you want this built-in behavior.
 
 <DemoBlock>
   <FormDemo />
@@ -334,76 +265,7 @@ function closed(detail: MdvSideSheetCloseDetail) { result.value = `Closed: ${det
   </template>
 </DemoBlock>
 
-Standard does not intercept dialog-form submission because it has no native modal dialog. Use an ordinary form, handle its submission in the application, and call the scoped `close('saved')` only after saving successfully.
-
-## Local themes, RTL, and nested overlays
-
-Sheets remain in their original DOM tree and inherit local MDV theme variables and direction. This example nests a Side Sheet inside a Dialog and opens a Select listbox in the sheet. Dismiss the current popup/modal before its parent, and keep the close controls named and reachable.
-
-<DemoBlock>
-  <CompositionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDialog, MdvSelect, MdvSideSheet } from '@mdv-ui/mdv'
-import type { MdvSelectValue } from '@mdv-ui/mdv'
-
-const dialogOpen = ref(false)
-const sheetOpen = ref(false)
-const dark = ref(false)
-const rtl = ref(false)
-const access = ref<MdvSelectValue | null>('team')
-</script>
-
-<template>
-  <div class="grid gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="dark" label="Local dark theme" />
-      <MdvCheckbox v-model="rtl" label="Right to left" />
-    </div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface p-4 text-mdv-on-surface">
-      <MdvButton @click="dialogOpen = true">Open document dialog</MdvButton>
-      <MdvDialog v-model="dialogOpen" title="Shared document">
-        <div class="grid gap-4">
-          <p>Open supplemental settings, then dismiss the topmost overlay first.</p>
-          <MdvButton variant="outlined" @click="sheetOpen = true">Edit access settings</MdvButton>
-          <MdvSideSheet v-model="sheetOpen" title="Access settings" width="360px" detached placement="end" close-label="Close access settings">
-            <MdvSelect v-model="access" label="Who can read" :options="[{ value: 'team', label: 'Team members' }, { value: 'public', label: 'Anyone with the link' }]" full-width />
-            <template #actions="{ close }"><MdvButton variant="text" @click="close('done')">Apply access</MdvButton></template>
-          </MdvSideSheet>
-          <p role="status">Access: {{ access }}</p>
-        </div>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close('done')">Done</MdvButton></template>
-      </MdvDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Accessibility, gestures, and motion
-
-Modal uses `dialog` with `aria-modal=true`, confines focus, locks background scrolling, and restores focus when closed. Standard uses a nonmodal `section role="dialog"` within the layout. Title or header content supplies the panel name; otherwise provide `aria-label` or `aria-labelledby`. The description fallback is associated automatically only when the body slot is absent.
-
-<DocsTable label="Side Sheet interaction">
-
-| Interaction | Modal | Standard |
-| --- | --- | --- |
-| Tab / Shift+Tab | Stays within the active modal. | Moves normally between panel, main content, and surrounding UI. |
-| Escape | Requests closure of the topmost sheet when enabled. | No global Escape dismissal. |
-| Close action | Guarded close-button request. | Guarded close-button request. |
-| Back action | Emits back without closing. | Emits back without closing. |
-| Edge swipe | Enabled by default; respects guards and parent rejection. | Not provided. |
-
-</DocsTable>
-
-Modal's 12px inner edge accepts a horizontal drag toward the hidden side. Direction combines placement and RTL. Short/cancelled/rejected gestures rebound; vertical scrolling and ordinary content interactions stay native. Dragging does not resize the panel; change `width` through application state if needed.
-
-Panel translation, Standard reserved width, and scrim motion run separately without scaling body text. Reduced motion jumps to the accepted state. Test real touch/swipe, nested focus and Escape, screen readers, forced colors, and your final responsive layout separately.
+---
 
 ## API
 

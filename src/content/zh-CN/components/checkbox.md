@@ -9,7 +9,6 @@ import CheckboxIndeterminateDemo from '@/components/docs/demos/checkbox/indeterm
 import CheckboxSelectAllDemo from '@/components/docs/demos/checkbox/selectAll.vue'
 import CheckboxLabelDemo from '@/components/docs/demos/checkbox/label.vue'
 import CheckboxColorDemo from '@/components/docs/demos/checkbox/color.vue'
-import CheckboxColorCustomDemo from '@/components/docs/demos/checkbox/colorCustom.vue'
 import CheckboxDisabledDemo from '@/components/docs/demos/checkbox/disabled.vue'
 import CheckboxErrorDemo from '@/components/docs/demos/checkbox/error.vue'
 import CheckboxFormDemo from '@/components/docs/demos/checkbox/form.vue'
@@ -82,14 +81,13 @@ const checkboxSlots: SlotTableItem[] = [
   { name: 'default', description: '自定义标签内容，替换 label。可包含强调文字或链接；交互元素保留各自的行为。' },
 ]
 </script>
-
 # 复选框
 
-复选框用于选择一个或多个选项，也可表示独立选项的开启与关闭。`MdvCheckbox` 使用原生 `input[type="checkbox"]`，支持键盘操作、表单校验和重置。
+用 `MdvCheckbox` 表示可独立勾选的选项，或选择列表中的多个项目。
 
 ## 基本用法
 
-导入 `MdvCheckbox`，通过 `v-model` 绑定布尔值。点击方框或标签都可以切换选中状态。
+用 `v-model` 绑定布尔值。设置 `label` 后，点击标签也能切换复选框。
 
 <DemoBlock>
   <CheckboxBasicDemo />
@@ -114,13 +112,9 @@ const checked = ref(false)
   </template>
 </DemoBlock>
 
----
-
 ## 数组多选
 
-多个复选框可以绑定同一个数组，通过各自的 `value` 区分选项。选中时添加对应值，取消选中时移除，组件会生成新数组。
-
-用 `fieldset` 和 `legend` 为一组相关选项提供名称。`value` 支持字符串和数字，数字 `1` 与字符串 `'1'` 是不同选项。
+将多个复选框绑定到同一数组，并为每项设置 `value`。勾选添加该值，取消勾选则移除。
 
 <DemoBlock>
   <CheckboxGroupDemo />
@@ -155,13 +149,9 @@ const selected = ref<MdvCheckboxValue[]>(['email'])
   </template>
 </DemoBlock>
 
----
-
 ## 半选状态
 
-通过 `v-model:indeterminate` 同步半选状态。半选时显示横线，并向辅助技术表达 `mixed` 状态。
-
-半选与 `v-model` 的选中值相互独立。点击半选项会清除半选并将它选中，再次点击才会取消选中，不会在三种状态之间循环。
+用 `v-model:indeterminate` 表示部分选中，例如只选择了部分条目时的「全选」复选框。
 
 <DemoBlock>
   <CheckboxIndeterminateDemo />
@@ -189,10 +179,6 @@ const indeterminate = ref(true)
 
   </template>
 </DemoBlock>
-
-### 全选
-
-全选项的选中与半选状态可根据子项推导：全部选中时显示勾，部分选中时显示横线，全部取消时显示空框。
 
 <DemoBlock>
   <CheckboxSelectAllDemo />
@@ -244,11 +230,9 @@ function selectAll(value: MdvCheckboxModelValue) {
   </template>
 </DemoBlock>
 
----
-
 ## 标签与辅助文字
 
-通过 `label` 设置标签，通过 `supporting-text` 显示辅助说明。默认插槽可以替换标签，加入强调文字或链接；其中的交互元素保持自身行为，辅助说明不属于切换区域。
+用 `label` 设置名称，用 `supporting-text` 补充说明。默认插槽可以替换可见标签。
 
 <DemoBlock>
   <CheckboxLabelDemo />
@@ -280,17 +264,9 @@ const priority = ref(false)
   </template>
 </DemoBlock>
 
-没有可见标签时，需通过 `aria-label` 或 `aria-labelledby` 为复选框提供可访问名称：
-
-```vue
-<MdvCheckbox v-model="checked" aria-label="Select this item" />
-```
-
----
-
 ## 颜色
 
-通过 `color` 设置选中颜色，默认使用 `primary`。标签文字保持正文色，跟随主题自动适配浅色和深色模式。
+用 `color` 设置选中时的颜色。
 
 <DemoBlock>
   <CheckboxColorDemo />
@@ -323,48 +299,9 @@ const selected = ref<MdvCheckboxValue[]>([...colors])
   </template>
 </DemoBlock>
 
-### 自定义颜色
-
-`color` 也支持 `#RGB` 或 `#RRGGBB` 格式的局部种子色。组件根据种子色生成适配当前主题的配色，最终填充色不保证与输入色号完全相同。
-
-<DemoBlock>
-  <CheckboxColorCustomDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvCheckboxColor, MdvCheckboxValue } from '@mdv-ui/mdv'
-
-const colors: MdvCheckboxColor[] = ['#6750A4', '#00796B', '#00ACC1']
-const selected = ref<MdvCheckboxValue[]>([...colors])
-</script>
-
-<template>
-  <div class="flex flex-wrap gap-x-6 gap-y-3">
-    <MdvCheckbox
-      v-for="color in colors"
-      :key="color"
-      v-model="selected"
-      :value="color"
-      :color="color"
-      :label="color"
-    />
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`color="error"` 只选择错误色系，不表示校验失败。需要表达错误时使用 [`error`](#错误状态)。
-
----
-
 ## 禁用状态
 
-通过 `disabled` 禁用复选框。未选中、已选中和半选状态都有对应的禁用外观；禁用项不参与原生表单提交。
+用 `disabled` 禁止修改。禁用的复选框不会随表单提交。
 
 <DemoBlock>
   <CheckboxDisabledDemo />
@@ -387,13 +324,9 @@ import { MdvCheckbox } from '@mdv-ui/mdv'
   </template>
 </DemoBlock>
 
-如需禁用一组字段，可为外层 `fieldset` 设置 `disabled`。
-
----
-
 ## 错误状态
 
-通过 `error` 表达业务错误，`error-text` 提供错误说明。取消错误后恢复 `supporting-text`。单独设置 `error-text` 不会开启错误状态。
+用 `error` 显示错误状态，用 `error-text` 设置提示。错误外观本身不会阻止原生表单提交。
 
 <DemoBlock>
   <CheckboxErrorDemo />
@@ -425,17 +358,9 @@ const checked = ref(false)
   </template>
 </DemoBlock>
 
-禁用外观优先于错误，错误色优先于 `color` 配色。错误说明依次使用 `error-text`、已报告的原生校验消息、`supporting-text`。
-
-`error` 本身不会阻止原生表单提交。需要阻止提交时，使用 `required` 或 `setCustomValidity()` 添加原生约束。
-
----
-
 ## 表单与校验
 
-为复选框设置 `name` 和 `value` 即可参与原生表单提交。只有有名称、已选中且未禁用的项会进入 `FormData`；同名多选值通过 `getAll()` 读取。
-
-下面的必选项首次显示时不会自动报错。直接点击 Submit 可查看校验反馈，选中后再提交查看表单值，Reset 恢复初始选择。
+为表单提交设置 `name` 和 `value`。`FormData` 只包含已勾选且未禁用的复选框；用 `getAll()` 读取同名字段的多个值。
 
 <DemoBlock>
   <CheckboxFormDemo />
@@ -486,20 +411,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-`required` 要求**当前这一项必须选中**，不会自动校验同名多选组是否至少选中一项。半选只是显示状态，是否提交仍由底层选中值决定；数字 `value` 提交时会转换为字符串。
-
-`form.reset()` 会恢复组件创建时的模型和半选状态，并同步 `v-model`。程序更新模型不会改变重置基线；读取重置后的 Vue 状态时等待 `nextTick()`。重置会清除已报告的原生错误，但不会清除外部 `error` 或自定义校验消息。
-
-`id`、`name`、`form`、ARIA、`data-*` 和原生事件监听会透传到实际输入；`class` 和 `style` 作用于组件最外层。选中状态由模型管理，使用 `v-model`，不要通过 `checked` 或 `defaultChecked` 竞争控制。
-
----
-
-## 键盘与无障碍
-
-- 使用 Tab 或 Shift+Tab 移动焦点，空格键切换选中状态。
-- 为相关选项提供 `fieldset` 和 `legend`，为无可见标签的选项提供可访问名称。
-- 辅助说明和错误文本自动与输入关联，动态说明使用礼貌播报。组件遵循系统减少动态效果的偏好。
 
 ---
 

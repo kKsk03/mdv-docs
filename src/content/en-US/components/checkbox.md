@@ -9,7 +9,6 @@ import CheckboxIndeterminateDemo from '@/components/docs/demos/checkbox/indeterm
 import CheckboxSelectAllDemo from '@/components/docs/demos/checkbox/selectAll.vue'
 import CheckboxLabelDemo from '@/components/docs/demos/checkbox/label.vue'
 import CheckboxColorDemo from '@/components/docs/demos/checkbox/color.vue'
-import CheckboxColorCustomDemo from '@/components/docs/demos/checkbox/colorCustom.vue'
 import CheckboxDisabledDemo from '@/components/docs/demos/checkbox/disabled.vue'
 import CheckboxErrorDemo from '@/components/docs/demos/checkbox/error.vue'
 import CheckboxFormDemo from '@/components/docs/demos/checkbox/form.vue'
@@ -82,14 +81,13 @@ const checkboxSlots: SlotTableItem[] = [
   { name: 'default', description: 'Custom label content, replacing label. Can contain emphasis or links; interactive elements retain their own behavior.' },
 ]
 </script>
-
 # Checkbox
 
-Checkboxes let users select one or more options or toggle an independent choice. `MdvCheckbox` uses a native `input[type="checkbox"]` and supports keyboard interaction, form validation, and reset.
+Use `MdvCheckbox` for independent choices or to select items in a list.
 
 ## Basic usage
 
-Import `MdvCheckbox` and bind a boolean with `v-model`. Clicking either the box or its label toggles the selection.
+Bind a boolean with `v-model`. Set `label` so the visible text also toggles the checkbox.
 
 <DemoBlock>
   <CheckboxBasicDemo />
@@ -114,13 +112,9 @@ const checked = ref(false)
   </template>
 </DemoBlock>
 
----
-
 ## Multiple selection
 
-Bind several checkboxes to the same array and give each option a `value`. Selecting adds its value; deselecting removes it. Each update produces a new array.
-
-Use `fieldset` and `legend` to name a related group. Values can be strings or numbers; the number `1` and the string `'1'` identify different options.
+Bind several checkboxes to the same array and assign each one a `value`. Checking adds that value; unchecking removes it.
 
 <DemoBlock>
   <CheckboxGroupDemo />
@@ -155,13 +149,9 @@ const selected = ref<MdvCheckboxValue[]>(['email'])
   </template>
 </DemoBlock>
 
----
-
 ## Indeterminate state
 
-Use `v-model:indeterminate` to synchronize the mixed state. It displays a dash and exposes `mixed` to assistive technology.
-
-The mixed state is independent of the checked value in `v-model`. Activating a mixed checkbox clears the mixed state and selects it. Activating it again deselects it; it does not cycle through three states.
+Use `v-model:indeterminate` for a mixed state, such as a Select all checkbox when only some items are selected.
 
 <DemoBlock>
   <CheckboxIndeterminateDemo />
@@ -189,10 +179,6 @@ const indeterminate = ref(true)
 
   </template>
 </DemoBlock>
-
-### Select all
-
-Derive a parent checkbox from its children: checked when all are selected, mixed when some are selected, and unchecked when none are selected.
 
 <DemoBlock>
   <CheckboxSelectAllDemo />
@@ -244,11 +230,9 @@ function selectAll(value: MdvCheckboxModelValue) {
   </template>
 </DemoBlock>
 
----
-
 ## Labels and supporting text
 
-Set the label with `label` and its description with `supporting-text`. Use the default slot to replace the label with content such as emphasis or links. Interactive elements retain their own behavior, and supporting text is outside the toggle area.
+Use `label` for the name and `supporting-text` for extra context. The default slot can replace the visible label.
 
 <DemoBlock>
   <CheckboxLabelDemo />
@@ -280,17 +264,9 @@ const priority = ref(false)
   </template>
 </DemoBlock>
 
-When a checkbox has no visible label, provide an accessible name through `aria-label` or `aria-labelledby`:
-
-```vue
-<MdvCheckbox v-model="checked" aria-label="Select this item" />
-```
-
----
-
 ## Colors
 
-Set the selection color with `color`, which defaults to `primary`. Label text keeps the normal content color. Colors adapt to the current light or dark theme.
+Use `color` to set the selection color.
 
 <DemoBlock>
   <CheckboxColorDemo />
@@ -323,48 +299,9 @@ const selected = ref<MdvCheckboxValue[]>([...colors])
   </template>
 </DemoBlock>
 
-### Custom colors
-
-`color` also accepts a local seed color in `#RGB` or `#RRGGBB` format. The seed generates colors for the current theme, so the selected fill may differ from the supplied hex value.
-
-<DemoBlock>
-  <CheckboxColorCustomDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvCheckboxColor, MdvCheckboxValue } from '@mdv-ui/mdv'
-
-const colors: MdvCheckboxColor[] = ['#6750A4', '#00796B', '#00ACC1']
-const selected = ref<MdvCheckboxValue[]>([...colors])
-</script>
-
-<template>
-  <div class="flex flex-wrap gap-x-6 gap-y-3">
-    <MdvCheckbox
-      v-for="color in colors"
-      :key="color"
-      v-model="selected"
-      :value="color"
-      :color="color"
-      :label="color"
-    />
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`color="error"` only selects an error color palette. To indicate a validation error, use [`error`](#error-state).
-
----
-
 ## Disabled state
 
-Use `disabled` to prevent interaction. Unchecked, checked, and mixed states have disabled appearances. Disabled options are excluded from native form submission.
+Set `disabled` to prevent changes. Disabled checkboxes are not submitted.
 
 <DemoBlock>
   <CheckboxDisabledDemo />
@@ -387,13 +324,9 @@ import { MdvCheckbox } from '@mdv-ui/mdv'
   </template>
 </DemoBlock>
 
-To disable a group of fields, set `disabled` on its surrounding `fieldset`.
-
----
-
 ## Error state
 
-Use `error` for an application error and `error-text` for its message. Clearing the error restores `supporting-text`. Setting `error-text` alone does not activate an error.
+Set `error` to show an error state and `error-text` for the message. Error styling alone does not block native form submission.
 
 <DemoBlock>
   <CheckboxErrorDemo />
@@ -425,17 +358,9 @@ const checked = ref(false)
   </template>
 </DemoBlock>
 
-Disabled styling takes precedence over errors, and errors take precedence over `color`. Error messages use `error-text`, then a reported native validation message, then `supporting-text`.
-
-`error` does not independently block native form submission. Use `required` or `setCustomValidity()` when a native constraint should prevent submission.
-
----
-
 ## Forms and validation
 
-Set `name` and `value` to participate in native form submission. `FormData` includes only named, checked, enabled controls. Read multiple values with the same name using `getAll()`.
-
-The required option below does not show an error initially. Click Submit before selecting it to see validation feedback, select it and submit to inspect the values, then use Reset to restore the initial selection.
+Set `name` and `value` for form submission. `FormData` includes checked, enabled boxes only. Use `getAll()` to read repeated values.
 
 <DemoBlock>
   <CheckboxFormDemo />
@@ -486,20 +411,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-`required` means **this individual option must be selected**. It does not validate that at least one option in a group is selected. The mixed state is visual; submission still depends on the underlying checked value. Numeric values become strings in form submission.
-
-`form.reset()` restores the model and mixed state from component creation and synchronizes `v-model`. Programmatic updates do not change this reset baseline; await `nextTick()` before reading the restored Vue state. Reset clears reported native validation errors but does not clear an external `error` or custom validity message.
-
-`id`, `name`, `form`, ARIA, `data-*`, and native event listeners are forwarded to the input. `class` and `style` apply to the outer component. Selection is model-driven: use `v-model` instead of competing `checked` or `defaultChecked` attributes.
-
----
-
-## Keyboard and accessibility
-
-- Move focus with Tab or Shift+Tab and toggle the selection with Space.
-- Name related options with `fieldset` and `legend`, and provide an accessible name for any checkbox without a visible label.
-- Supporting text and errors are automatically associated with the input. Dynamic descriptions use polite announcements. The component honors reduced-motion preferences.
 
 ---
 

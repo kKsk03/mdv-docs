@@ -1,6 +1,6 @@
 # Documentation Roadmap
 
-Updated: 2026-11-20. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
+Updated: 2026-11-21. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
 
 This is the local checklist for documenting MDV in this repository. Use it to select, implement, and review three component pages at a time. Read [AGENTS.md](./AGENTS.md) for project decisions and [MAINTENANCE.md](./MAINTENANCE.md) for validation procedures.
 
@@ -9,7 +9,8 @@ This is the local checklist for documenting MDV in this repository. Use it to se
 The inventory was checked against the sibling library's `src/index.ts`, `COMPONENTS.md`, `ROADMAP.md`, and playground catalog, and the installed package's public declarations and component sources.
 
 - The library exports **67 public Vue components**. All 67 are assigned exactly once to **41 documentation pages** below.
-- **35 pages are complete:** App Bar, Autocomplete, Badge, Bottom Sheet, Button, Button Group, Card, Carousel, Checkbox, Chip, Circular Progress, Date Picker, Date Range Picker, Dialog, Divider, Fab, Fab Menu, Fullscreen Dialog, Icon, Icon Button, Linear Progress, List, Loading Indicator, Menu, Navigation Bar, Navigation Drawer, Navigation Rail, Radio, Search Bar, Segmented Button, Select, Side Sheet, Slider, Snackbar, and Split Button. **6 pages remain**, arranged into **2 batches of 3**.
+- **41 of 41 component pages are complete** in English and Simplified Chinese. There are no remaining component batches for this baseline; see [guide coverage](#guide-coverage-beyond-component-batches) for follow-up work.
+- The 40 non-Button component pages follow the Button page's concise example-first style in both locales. Package baselines and integration investigations stay in maintainer documentation; only usage-relevant caveats appear in articles.
 - Related items, groups, providers, scaffolds, and variants are documented in their owning page when listed below. Each included component needs its own API coverage on that page.
 - Public types belong with the components that use them. The `useSnackbar` helper belongs on the Snackbar page. Dynamic-color functions have a separate guide task below.
 - Introduction and Setup already exist in both locales. The shared demo shell, API tables, Markdown highlighting, heading links, page outline, and page transitions are already implemented.
@@ -69,16 +70,16 @@ The leading component name identifies the public component and its sorting key. 
 - [x] **MdvSlider** — `slider`. Covers standard/centered/range variants, sizes, steps, labels, colors, disabled states, pointer/keyboard interaction, and form values.
 - [x] **MdvSnackbar** — `snackbar`. Includes `MdvSnackbarProvider` and `useSnackbar`. Covers controlled messages, provider queues, actions, placement, timing, close reasons, and overlay/focus behavior.
 - [x] **MdvSplitButton** — `split-button`. Covers variants, sizes, main/secondary actions, menu slots and accepted open state, disabled/loading behavior, and keyboard/focus behavior.
-- [ ] **MdvSwitch** — `switch`. Cover boolean models, labels/positions, state icons, colors, disabled/error states, native forms, validation, and reset.
-- [ ] **MdvTabs** — `tabs`. Includes `MdvTab` and `MdvTabPanel`. Cover primary/secondary variants, icons/badges, activation, keyboard rules, overflow, panel lifecycle, and touch navigation.
-- [ ] **MdvTextField** — `text-field`. Cover filled/outlined variants, value modifiers, input types, icons/slots, clear/password actions, supporting/error text, native constraints, and exposed methods.
-- [ ] **MdvTimePicker** — `time-picker`. Cover minute-precision values, dial/input modes, 12/24-hour cycles, orientation, limits/steps, localization, keyboard interaction, and native forms.
-- [ ] **MdvToolbar** — `toolbar`. Cover docked/floating variants, colors, orientation, placement, expansion, scrolling, keyboard behavior, and FAB composition.
-- [ ] **MdvTooltip** — `tooltip`. Includes `MdvRichTooltip`. Cover plain/rich content, trigger slots, timing, placement, hover/focus/touch interaction, actions, and overlay composition.
+- [x] **MdvSwitch** — `switch`. Covers boolean models, labels/positions, state icons, colors, disabled/error states, native forms, validation, and reset.
+- [x] **MdvTabs** — `tabs`. Includes `MdvTab` and `MdvTabPanel`. Covers primary/secondary variants, icons/badges, activation, keyboard rules, overflow, panel lifecycle, and touch navigation.
+- [x] **MdvTextField** — `text-field`. Covers filled/outlined variants, value modifiers, input types, icons/slots, clear/password actions, supporting/error text, native constraints, and exposed methods.
+- [x] **MdvTimePicker** — `time-picker`. Covers minute-precision values, dial/input modes, 12/24-hour cycles, orientation, limits/steps, localization, keyboard interaction, and native forms.
+- [x] **MdvToolbar** — `toolbar`. Covers docked/floating variants, colors, orientation, placement, expansion, scrolling, keyboard behavior, and FAB composition.
+- [x] **MdvTooltip** — `tooltip`. Includes `MdvRichTooltip`. Covers plain/rich content, trigger slots, timing, placement, hover/focus/touch interaction, actions, and overlay composition.
 
 ## Planned batches
 
-This schedule follows the unchecked A-Z entries above. The component checklist is the completion record; update this schedule if inventory or user priorities change.
+This schedule records the completed A-Z component batches. The component checklist is the completion record; update this schedule if inventory or user priorities change.
 
 | Batch | Pages |
 | --- | --- |
@@ -93,20 +94,20 @@ This schedule follows the unchecked A-Z entries above. The component checklist i
 | 9 — complete | `MdvNavigationRail`, `MdvRadio`, `MdvSearchBar` |
 | 10 — complete | `MdvSegmentedButton`, `MdvSelect`, `MdvSideSheet` |
 | 11 — complete | `MdvSlider`, `MdvSnackbar`, `MdvSplitButton` |
-| **12 — next** | `MdvSwitch`, `MdvTabs`, `MdvTextField` |
-| 13 | `MdvTimePicker`, `MdvToolbar`, `MdvTooltip` |
+| 12 — complete | `MdvSwitch`, `MdvTabs`, `MdvTextField` |
+| 13 — complete | `MdvTimePicker`, `MdvToolbar`, `MdvTooltip` |
 
 ## Latest completed batch
 
-Batch 11 adds aligned English and Chinese articles for Slider, Snackbar, and Split Button, with nine shared demos and all 18 displayed-source fences synchronized with their live components. Navigation now includes all 35 pages, sorted A-Z without the Mdv prefix, with localized badges and distinct icons.
+Batch 13 adds English and Simplified Chinese guides for Time Picker, Toolbar, and Tooltip (including Rich Tooltip). Both locales share nine interactive demos and a Time Picker label map, with synchronized displayed source. The drawer now lists all 41 component pages in A-Z order with localized badges and distinct icons.
 
-- Slider covers standard/centered/range models, normalization and step behavior, formatted values, sizes/stops/colors, pointer and keyboard interaction, disabled state, named native form submission, range handle naming, and reset. Its article examples provide explicit per-handle accessible names.
-- Snackbar covers declarative and provider APIs, queued messages, update/close/clear operations, placements and durations, close reasons, async actions and errors, pause/resume methods, slots, and focus/overlay considerations. The provider demo uses the public `useSnackbar` helper.
-- Split Button covers variants/sizes, independent primary and menu actions, action/menu attributes, accepted menu state with `MdvMenu`, disabled/loading states, exposed focus methods, and the public types.
-- Added nine behavioral tests plus route, navigation, and displayed-source parity coverage. Focused validation passed (16 tests); `pnpm type-check` passed; the full unit suite passed (21 files, 192 tests); and `pnpm build-only` passed (744 modules). The generated main JavaScript chunk is 671.74 kB (209.95 kB gzip), above Vite's existing 500 kB warning threshold. The combined `pnpm check` command failed to launch its stages with `spawn EPERM`; running each stage separately succeeded.
-- Browser validation was not performed for the six localized routes. Desktop/mobile layout, theme variants, direct-route loading, pointer/touch behavior, reduced motion, and visual focus remain unverified and must not be inferred from jsdom tests or the production build.
+- Time Picker covers draft confirmation and cancellation, dial/text modes, 12/24-hour display, overnight availability, controlled updates, localization, and native form validation and reset.
+- Toolbar covers docked keyboard navigation, floating expansion and FAB pairing, logical placement, active scroll regions, and focus when action groups collapse.
+- Tooltip covers plain descriptions, persistent Rich help, and temporary hints inside a dialog. It documents trigger bindings, ARIA relationships, Popover support, touch delays, and overlay dismissal and focus behavior.
+- The focused checks passed (19 tests), covering demo interactions, six localized routes and articles, heading permalinks, source parity, and drawer ordering and badges. `pnpm check` stopped with `spawn EPERM` and the approval service could not complete a retry. The separate `pnpm type-check`, `pnpm test:unit` (23 files, 220 tests), and `pnpm build-only` (819 modules) all passed. Vite still warns about chunks over 500 kB; the main JavaScript chunk is 728.58 kB (226.71 kB gzip).
+- Browser checks remain open: direct loading and language switching, heading scrolling, desktop/mobile layout, light/dark and scoped themes, visual focus, physical pointer and touch input, native overlay stacking, and reduced motion. The DOM tests use minimal Dialog and Popover mocks and do not verify those browser behaviors.
 
-Next batch: **MdvSwitch**, **MdvTabs** (including Tab and TabPanel), and **MdvTextField**.
+Next: **Review Setup** against the installed package. This is a follow-up guide task, not another component batch.
 
 ## Open MDV integration feedback
 
@@ -117,6 +118,7 @@ Next batch: **MdvSwitch**, **MdvTabs** (including Tab and TabPanel), and **MdvTe
 - **Search View internal region localization (MDV 0.1.5, source- and browser-confirmed):** open an English SearchView with English placeholder/label, clearLabel, backLabel, and statusText. Its internal results region still has the fixed Chinese accessible name 搜索建议与结果. Expected: applications can localize this internal accessible name through an agreed library API or locale capability. Existing props do not change it. Articles distinguish this limitation from the configurable Chinese defaults; a library API decision remains open.
 - **Slider range-handle default localization (MDV 0.1.5, source-confirmed):** omit both `startAriaLabel` and `endAriaLabel` on a range Slider. The default accessible-name suffixes are hard-coded as 下限 and 上限, including in English content. Expected: defaults follow the active locale or an agreed locale API. Both localized articles provide explicit per-handle names; no library API change was made in this batch.
 - **Select empty-list localization (MDV 0.1.5, source-confirmed):** open a Select whose options array is empty in an English application. The shared control's fallback status is 没有匹配项, while the public MdvSelectProps/MdvSelectBaseProps do not expose noOptionsText (it is public only on Autocomplete). Expected: the empty status has an agreed localization API. The articles describe the limitation and the option-loading example supplies application-owned status/disabled policy. No undocumented pass-through prop or CSS workaround is used; a library API decision remains open.
+- **Text Field built-in action localization (MDV 0.1.5, source- and DOM-confirmed):** render an editable `MdvTextField` with a nonempty value and `clearable`, or a password field with `password-toggle`, in an English application. The clear, show, and hide buttons are named `清除输入`, `显示密码`, and `隐藏密码`, with no public props to override those names. Expected: an application can localize the built-in accessible names without reimplementing the actions. Both guides explain that a custom `trailing` slot replaces the built-in actions and can supply localized controls. No library fix or styling override is included.
 
 ## Review checklist for each batch
 
@@ -135,12 +137,16 @@ Use these checks for every page in the active batch. Mark the component entry co
 
 These are follow-up documentation tasks, separate from the component-page count. Introduction and Setup remain the existing starting points.
 
-- [ ] Expand Introduction with the supported library scope, component categories, and links to setup and examples.
+- [x] Expand Introduction with the supported library scope, component categories, and links to setup and examples.
 - [ ] Review Setup against the installed package, including optional icon data, individual component imports, CSS order, consumer-side Tailwind generation, and font behavior.
 - [ ] Add theme/style guidance covering light/dark/system and local scopes, MDV color roles, CSS variables and Tailwind mappings, typography/fonts, shapes, elevation, motion, and reduced motion.
 - [ ] Add dynamic-color guidance for `createMdvColorScheme`, `applyMdvColorScheme`, their public types, seed requirements, scoped application, cleanup, and server/browser boundaries.
 - [ ] Add integration guidance for native forms, accessible names and keyboard interaction, IME, overlay composition, routing, SSR/hydration limits, and individual imports/bundle considerations.
 - [ ] Establish a visible documented-version policy and keep it aligned with the installed package before publishing the site.
+
+Introduction validation: Checked all 14 links per locale against the registry and production output, including the Button variants and Text Field validation anchors. `pnpm type-check`, `pnpm test:unit` (23 files, 220 tests), and `pnpm build-only` passed separately. `pnpm check` stopped with `spawn EPERM`, and approval for a retry was unavailable. The Vite chunk-size warning remains. The approval service also blocked the browser preview, so direct page loads, anchor scrolling, and demo interactions remain unverified in a browser.
+
+Component editorial review validation: `pnpm check` passed (23 files, 220 tests, and a production build). All internal article links and fragments resolved, and retained demos and displayed source matched across locales. Production preview spot checks covered the Chinese Navigation Rail outline, rail expansion and example code, and the English Date Range Picker link to Date Picker localization. With both sidebars visible at 1280px, the unchanged Date Range Picker text-entry demo clipped the end field on the right; investigate its container layout separately. Broader browser coverage and the existing Vite chunk-size warning remain open.
 
 ## Maintaining this file
 

@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import RadioBasicDemo from '@/components/docs/demos/radio/basic.vue'
 import RadioStandaloneDemo from '@/components/docs/demos/radio/standalone.vue'
 import RadioStateDemo from '@/components/docs/demos/radio/state.vue'
-import RadioColorDemo from '@/components/docs/demos/radio/color.vue'
-import RadioControlledDemo from '@/components/docs/demos/radio/controlled.vue'
 import RadioFormDemo from '@/components/docs/demos/radio/form.vue'
 
 const radioProps: ApiTableItem[] = [
@@ -40,16 +38,13 @@ const groupSlots: SlotTableItem[] = [
   { name: 'label', description: '替换 legend 内容，无参数。保留有意义的组名称。' },
 ]
 </script>
-
 # 单选框
 
-`MdvRadio` 从互斥选项中选择一个标量值。`MdvRadioGroup` 提供共享模型、可访问分组、键盘选择与校验。本页对应 **MDV 0.1.5**。独立多选使用 Checkbox，立即生效的开关设置使用 Switch。
+用 `MdvRadioGroup` 和 `MdvRadio` 从一组选项中选择一项。各选项可独立勾选时，请用[复选框](./checkbox)。
 
-## 分组、方向与严格值
+## 单选组
 
-将模型绑定在组上，并为每个子项提供唯一 `value`，不要分别给组内子项绑定模型。值支持字符串和数字，`null` 表示未选择。数字 `1` 与字符串 `'1'` 对应不同选项。
-
-水平布局在空间不足时会换行。Tab 进入已选可用项，或首个可用项；方向键同时移动焦点并选择，跳过禁用项。再次点击已选项不会取消；需要清空时提供单独的重置操作。
+在组上绑定 `v-model`，为每项设置不同的 `value`。字符串和数字不会相互转换；用 `null` 表示未选中。通过 `label` 属性或同名插槽设置组标题。
 
 <DemoBlock>
   <RadioBasicDemo />
@@ -87,11 +82,9 @@ const typed = ref<MdvRadioModelValue>(1)
   </template>
 </DemoBlock>
 
-## 独立单选框与原生名称
+## 独立单选按钮
 
-独立 Radio 可以共享模型及原生 `name`。不同选择集合应使用唯一名称，避免浏览器将页面中无关输入组成一组。示例用原生 `fieldset` 和 `legend` 提供分组语义。需要统一键盘、必选与校验逻辑时，优先使用 `MdvRadioGroup`。
-
-即使应用使用数字值，原生表单提交值仍是字符串。示例重置后恢复挂载时的初始模型。
+不使用单选组组件时，为同一组选项绑定相同的模型和原生 `name`。不同的选项组应使用不同的 `name`。
 
 <DemoBlock>
   <RadioStandaloneDemo />
@@ -131,13 +124,9 @@ function submit(event: Event) {
   </template>
 </DemoBlock>
 
-## 标签、禁用与错误
+## 标签与状态
 
-普通文字使用 `label`，富文本使用默认插槽。辅助文字会关联原生输入。Radio 默认插槽替换当前标签，Group 的 `label` 插槽替换 legend。
-
-Group 的 `disabled` 和上级禁用 `fieldset` 通过原生语义禁用子项。子项可自行禁用，但不能覆盖上级禁用状态。组错误传递到选项，单项辅助文字仍说明当前选项；共享错误文案由组显示，应设置在组的 `error-text` 上。
-
-`error` 和 `error-text` 表示应用错误。需要阻止原生提交时，还要使用原生约束或 `setCustomValidity()`。仅提供 `error-text` 不会激活错误状态。
+用 `supporting-text` 提供提示，用 `disabled` 禁用不可选项。通过单选组的 `error` 和 `error-text` 显示整组的错误提示。
 
 <DemoBlock>
   <RadioStateDemo />
@@ -171,90 +160,9 @@ const value = ref<MdvRadioModelValue>('standard')
   </template>
 </DemoBlock>
 
-## 颜色、局部主题与 RTL
+## 表单与校验
 
-支持 `primary`、`secondary`、`tertiary`、`success`、`warning`、`error`、`info`，或合法的 `#RGB`/`#RRGGBB` 种子色。组提供默认颜色，单项可以覆盖。错误和禁用外观遵循 MDV 状态规则。自定义颜色参与深浅色方案生成，不是直接为控件涂上固定十六进制颜色。
-
-<DemoBlock>
-  <RadioColorDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvRadio, MdvRadioGroup } from '@mdv-ui/mdv'
-import type { MdvRadioColor, MdvRadioModelValue } from '@mdv-ui/mdv'
-
-const selected = ref<MdvRadioModelValue>('primary')
-const colors: MdvRadioColor[] = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error', 'info', '#006c4c']
-const preference = ref<MdvRadioModelValue>('inherited')
-</script>
-
-<template>
-  <div class="grid gap-5">
-    <MdvRadioGroup v-model="selected" label="Theme roles and seed colors" orientation="horizontal">
-      <MdvRadio v-for="color in colors" :key="color" :value="color" :color="color" :label="color" />
-    </MdvRadioGroup>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div v-for="theme in ['light', 'dark'] as const" :key="theme" :data-mdv-theme="theme" :dir="theme === 'dark' ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface-container-low p-4 text-mdv-on-surface">
-        <MdvRadioGroup v-model="preference" color="tertiary" :label="`${theme} theme${theme === 'dark' ? ' · RTL' : ''}`">
-          <MdvRadio value="inherited" label="Inherited tertiary" />
-          <MdvRadio value="override" color="#006c4c" label="Local seed override" />
-          <MdvRadio value="disabled" label="Disabled" disabled />
-        </MdvRadioGroup>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 父级控制更新
-
-显式传入模型后，由父级决定是否接受 `update:modelValue`。拒绝请求后，原生选中状态会恢复到已接受的模型。焦点仍可能移到尝试选择的项目，焦点和选中是不同状态。示例默认不接受选择请求。
-
-<DemoBlock>
-  <RadioControlledDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvRadio, MdvRadioGroup } from '@mdv-ui/mdv'
-import type { MdvRadioModelValue } from '@mdv-ui/mdv'
-
-const value = ref<MdvRadioModelValue>('basic')
-const accept = ref(false)
-const requested = ref<MdvRadioModelValue>(null)
-function update(next: MdvRadioModelValue) {
-  requested.value = next
-  if (accept.value) value.value = next
-}
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="accept" label="Accept selection requests" />
-    <MdvRadioGroup :model-value="value" label="Controlled plan" @update:model-value="update">
-      <MdvRadio value="basic" label="Basic plan" /><MdvRadio value="pro" label="Pro plan" />
-    </MdvRadioGroup>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Accepted: {{ value }} · Requested: {{ requested ?? 'none' }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 原生表单、校验与重置
-
-设置组 `name` 后，仅提交已选且未禁用的输入，不会额外创建隐藏字段。不设置名称时仍可选择与校验，但不会进入 `FormData`。同一个协作组内避免覆盖子项名称，独立选择集合应另建一组。
-
-Group 的 `form` 可关联外部表单，并传递到子输入。单个 Radio 也可接收 `id`、`form`、ARIA 与原生监听。子项显式指定的 `name` 或 `form` 优先于继承值。
-
-示例将选项放在 form 外，演示必选、整组禁用、真实 `FormData` 和校验方法。服务端错误通过 `setCustomValidity()` 设置，空字符串清除。重置会恢复初始模型并清理已报告的校验状态；原生 reset 不会清除 custom validity，因此示例在 reset 监听中显式清理自己设置的服务端错误。
+设置 `name` 后，表单会提交已选中且未禁用的选项。用 `required` 要求用户选择，用 `form` 关联外部表单。原生重置会恢复初始选择。
 
 <DemoBlock>
   <RadioFormDemo />
@@ -309,25 +217,9 @@ function reset(event: Event) {
   </template>
 </DemoBlock>
 
-MDV 0.1.5 存在一个库侧问题：空必选组报告错误后，改选另一个有效选项，组错误已清除，但原先报错项可能仍保持红色和 `aria-invalid="true"`，即使其原生校验已经有效。此问题已记录，示例保留组件原始外观，便于检查实际集成行为。
+必填校验失败后，即使新选项已通过原生校验，原先报错的选项仍可能显示为错误状态。
 
-## 无障碍与键盘操作
-
-<DocsTable label="单选框组键盘操作">
-
-| 按键 | 行为 |
-| --- | --- |
-| Tab / Shift+Tab | 在当前已选可用项或首个可用项处进入/离开组。 |
-| 右 / 下方向键 | 循环选择并聚焦下一个可用项。 |
-| 左 / 上方向键 | 循环选择并聚焦上一个可用项。 |
-| Home / End | 选择并聚焦首个或最后一个可用项。 |
-| Space | 选中当前原生 Radio。 |
-
-</DocsTable>
-
-Radio 使用真实 `input[type="radio"]`，交互区域最小为 48px。Group 使用 `fieldset`、`legend` 和 `role="radiogroup"`。不显示标签时应提供 `aria-label` 或 `aria-labelledby`，不要替换为按钮或菜单角色。原生 `input`、`change`、`invalid`、focus、blur 事件作用于输入；组件模型更新携带具有原始类型的选项值。
-
-MDV 提供减少动态效果与强制颜色样式。读屏播报、最终布局中的触摸区域、浏览器校验 UI 及跨浏览器表单行为仍需验证。上级 fieldset 禁用保留浏览器对首个 legend 的原生例外。
+---
 
 ## API
 
@@ -375,5 +267,3 @@ import type {
   MdvRadioOrientation,  // 'vertical' | 'horizontal'
 } from '@mdv-ui/mdv'
 ```
-
-MDV 0.1.5 没有导出 `MdvRadioProps` 或 `MdvRadioGroupProps` 接口。为模板 ref 标注类型时使用实际组件类型。

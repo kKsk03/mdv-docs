@@ -31,14 +31,13 @@ const sliderSlots: SlotTableItem[] = [
   { name: 'inset-icon', description: 'An optional decorative icon for standard variant at sizes m, l, or xl. Receives { value }; use the local MdvIcon and icon data.' },
 ]
 </script>
-
 # Slider
 
-`MdvSlider` provides a labeled range control for selecting one value, an offset around a center, or two endpoints. This page describes **MDV 0.1.5**. Use a slider for relative adjustment; use a text field alongside it when users need precise entry.
+Use `MdvSlider` to choose a number or a range of numbers.
 
-## Standard, centered, and range values
+## Slider variants
 
-A standard slider uses a number, a centered slider highlights `centerValue`, and a range slider uses an ordered two-number tuple. The formatter is used both by the transient value indicator and by assistive technology. Range handles need distinct, localized names.
+Bind a number for a standard or centered slider, or a two-number tuple for a range. Name a single handle with `label` or `aria-label`; name range handles with `start-aria-label` and `end-aria-label`.
 
 <DemoBlock>
   <VariantsDemo />
@@ -74,11 +73,9 @@ function recordChange() { changeCount.value++ }
   </template>
 </DemoBlock>
 
-Range values are normalized for display and form submission. Values are clamped to the current bounds and snapped to the configured step; a range is shown in ascending order, and its handles cannot cross. The component does not mutate a supplied tuple. It emits a new tuple when the user changes a handle.
+## Sizes and stops
 
-## Sizes, stops, and disabled state
-
-There are five visual sizes. `step` and `stops` are independent: a slider can be quantized without drawing marks, or draw marks for an existing step. The final value `max` remains reachable even if it is not an even multiple of `step`.
+Use `size` for appearance, `step` for the increment, and `stops` to display tick marks. Set `disabled` to prevent changes.
 
 <DemoBlock>
   <SizesDemo />
@@ -107,9 +104,9 @@ const disabled = ref(true)
   </template>
 </DemoBlock>
 
-## Native forms and reset
+## Forms and reset
 
-The component renders native `input[type="range"]` controls. Pass `name` and, when needed, an external `form` ID to associate them with a form. A named range slider contributes two values with the same name. A disabled slider is not submitted. Reset returns to the component's initial model snapshot, not a later programmatic assignment.
+Set `name` to submit the slider value. A range submits two entries with that name. Native reset restores the initial model.
 
 <DemoBlock>
   <FormDemo />
@@ -146,13 +143,7 @@ function submit(event: SubmitEvent) {
   </template>
 </DemoBlock>
 
-Use `FormData.getAll(name)` for the two range values. Since a range input always has a value, this component does not provide empty-value or `required` validation. Native `input`, `change`, `focus`, and `blur` listeners are forwarded to the actual range input. Pointer movement produces input events while dragging and one change on a completed value change; keyboard steps produce both. Programmatic model changes and form reset do not synthesize those events.
-
-## Accessibility and keyboard interaction
-
-Provide a visible `label` or an explicit `aria-label`/`aria-labelledby`. For range variant, set `start-aria-label` and `end-aria-label` so both handles are clearly named in the application's language. Supporting text is associated with each native input, and `formatValue` supplies localized `aria-valuetext` when present.
-
-Tab reaches each handle. Arrow keys move by one step; horizontal left/right follow the inherited text direction while up/down keep their usual increase/decrease direction. Home and End move to the active handle's permitted boundary. PageUp/PageDown or holding Space while pressing an arrow changes ten steps. Pointer cancellation ends the gesture without manufacturing a final change event. Reduced motion disables the stop transition.
+---
 
 ## API
 

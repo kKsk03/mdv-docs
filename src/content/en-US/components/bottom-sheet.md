@@ -5,9 +5,7 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import BottomSheetBasicDemo from '@/components/docs/demos/bottomSheet/basic.vue'
-import BottomSheetStateDemo from '@/components/docs/demos/bottomSheet/state.vue'
 import BottomSheetClosePolicyDemo from '@/components/docs/demos/bottomSheet/closePolicy.vue'
-import BottomSheetFormDemo from '@/components/docs/demos/bottomSheet/form.vue'
 import BottomSheetScaffoldDemo from '@/components/docs/demos/bottomSheet/scaffold.vue'
 import BottomSheetAppearanceDemo from '@/components/docs/demos/bottomSheet/appearance.vue'
 
@@ -50,14 +48,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'actions', description: 'Sheet actions after the body, in the shared scroll area. Receives the shared sheet slot props.' },
 ]
 </script>
-
 # Bottom Sheet
 
-Bottom sheets reveal related actions or supporting content from the bottom of a surface. `MdvBottomSheet` is modal and blocks the background. `MdvBottomSheetScaffold` places a standard sheet inside a page that remains interactive.
+Use a Bottom Sheet to show content or actions from the bottom edge. Use `MdvBottomSheet` for a modal or `MdvBottomSheetScaffold` for an in-page sheet.
 
 ## Modal sheet
 
-Bind visibility with `v-model`. Supply a title and use the `actions` slot to close with an optional result. Short content uses its natural height: opening does not force it to occupy half the screen.
+Bind visibility with `v-model` and give the sheet a title. Use `#actions` to provide a close action with an optional result.
 
 <DemoBlock>
   <BottomSheetBasicDemo />
@@ -102,76 +99,9 @@ function onClose(detail: MdvBottomSheetCloseDetail) {
   </template>
 </DemoBlock>
 
-The modal uses a native `<dialog>` in the browser's top layer. It stays in its original DOM location, inherits local theme tokens, traps focus, restores focus when closed, and locks background scrolling.
-
-### Height states and scrolling
-
-Use `partial` for the partially visible height and `v-model:expanded` when the application needs to control expansion. Drag the handle or use the actions in this example. The header, body, and actions share one scroll area beneath the handle; on long sheets, scroll to reach the bottom actions.
-
-<DemoBlock>
-  <BottomSheetStateDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBottomSheet, MdvButton, MdvCheckbox } from '@mdv-ui/mdv'
-import type { MdvBottomSheetChangeDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const expanded = ref(false)
-const status = ref('Open the sheet to inspect its height states.')
-
-function onChange(detail: MdvBottomSheetChangeDetail) {
-  status.value = `${detail.previousState} → ${detail.state} (${detail.reason})`
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvCheckbox v-model="expanded" label="Start expanded" />
-    <MdvButton @click="open = true">Browse destinations</MdvButton>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ status }}</p>
-    <MdvBottomSheet
-      v-model="open"
-      v-model:expanded="expanded"
-      :partial="0.45"
-      title="Plan your next trip"
-      expand-label="Expand sheet"
-      collapse-label="Collapse sheet"
-      close-label="Close sheet"
-      @change="onChange"
-    >
-      <div class="grid gap-5">
-        <p>Drag the handle upward, or use the buttons below. The list scrolls inside the sheet.</p>
-        <div v-for="city in ['London', 'Paris', 'Tokyo', 'Seoul', 'Singapore', 'Sydney', 'Lisbon', 'Oslo', 'Rome', 'Helsinki', 'Vienna', 'Prague']" :key="city">
-          <p class="font-medium">{{ city }}</p>
-          <p class="text-sm text-mdv-on-surface-variant">Explore local museums, parks, and independent cafés.</p>
-        </div>
-      </div>
-      <template #actions="{ expand, collapse, close, expanded: isExpanded }">
-        <MdvButton variant="text" @click="isExpanded ? collapse() : expand()">
-          {{ isExpanded ? 'Collapse' : 'Expand' }}
-        </MdvButton>
-        <MdvButton @click="close()">Done</MdvButton>
-      </template>
-    </MdvBottomSheet>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`partial` means 50% of the available visible viewport; bind a number such as `:partial="0.45"` for another ratio. Use `:partial="false"` to start expanded without a partial anchor. Expanded still respects the top gap and `max-height`; it does not mean fullscreen.
-
-If content is too short for two distinct anchors, partial and expanded merge. Read `change` or the slot's `state` to observe the actual resolved state. When `expanded` is omitted, expansion is internal and resets on reopening; when supplied, the parent must accept `update:expanded`.
-
----
-
 ## Closing policy
 
-`close-on-esc`, `close-on-scrim`, and `close-on-swipe` control individual dismissal paths. The guard receives `{ reason, returnValue }`; returning `false` or rejecting/throwing keeps the modal open. It also accepts a promise, for example when awaiting a confirmation dialog.
+Set `before-close` to confirm dismissal. Return `false` or a promise for the decision. Closing by changing the model directly bypasses this guard.
 
 <DemoBlock>
   <BottomSheetClosePolicyDemo />
@@ -221,68 +151,9 @@ const beforeClose: MdvBottomSheetBeforeClose = (detail) => {
   </template>
 </DemoBlock>
 
-Escape, scrim, handle, swipe, action, and `method="dialog"` form requests pass through `before-close`. Setting `open = false` directly bypasses it. Concurrent close requests share the pending result; an old asynchronous request cannot close a reopened sheet.
-
-The modal handle expands from partial; clicking it when expanded requests **closing**. `:close-on-swipe="false"` blocks swipe dismissal only. Keep an explicit close action when restricting gestures or hiding the handle.
-
-### Forms and retained state
-
-A native `method="dialog"` form submits its button's `value` as `returnValue` with reason `form`. Required fields validate normally. This example keeps its draft model outside the sheet so it survives closing and reopening.
-
-<DemoBlock>
-  <BottomSheetFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBottomSheet, MdvButton, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvBottomSheetCloseDetail } from '@mdv-ui/mdv'
-
-const open = ref(false)
-const draft = ref('Weekend reading')
-const result = ref('The draft is preserved when the sheet closes.')
-
-function onClose(detail: MdvBottomSheetCloseDetail) {
-  result.value = detail.returnValue === 'save' ? `Saved: ${draft.value}` : 'Closed without saving.'
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvButton @click="open = true">Edit collection</MdvButton>
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">{{ result }}</p>
-    <MdvBottomSheet
-      v-model="open"
-      title="Collection details"
-      :partial="false"
-      expand-label="Expand sheet"
-      collapse-label="Collapse sheet"
-      close-label="Close sheet"
-      @close="onClose"
-    >
-      <form method="dialog" class="grid gap-5">
-        <MdvTextField v-model="draft" label="Collection name" name="collection" required full-width />
-        <div class="flex flex-wrap justify-end gap-3">
-          <MdvButton type="submit" value="cancel" variant="text" formnovalidate>Cancel</MdvButton>
-          <MdvButton type="submit" value="save">Save</MdvButton>
-        </div>
-      </form>
-    </MdvBottomSheet>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`destroy-on-close` defaults to `false`, preserving mounted controls. Enabling it unmounts content after closing; it does not clear external refs. Use ordinary submit handlers for server requests, then call the slot's `close()` after success.
-
----
-
 ## Standard sheet with Scaffold
 
-Give the parent an explicit height. Put the main page in the default slot and panel content in `#sheet`. At the partial anchor the main area reserves `peek-height`; expanded content covers more of the page without turning it into a modal.
+Give the scaffold a definite height. Put the page in the default slot and the panel in `#sheet`; the collapsed sheet reserves `peek-height` in the layout.
 
 <DemoBlock>
   <BottomSheetScaffoldDemo />
@@ -337,15 +208,9 @@ const visits = ref(0)
   </template>
 </DemoBlock>
 
-The Scaffold uses a named region. It does not trap focus, lock page scrolling, or globally consume Escape. Main-page controls remain available. A hidden sheet needs an application-provided way to reopen it, such as Show places above.
-
-`hideable` defaults to `false`. It restricts user dragging/handle dismissal, while setting the model to `'hidden'` or calling `close()` still works. With `:hideable="false"`, the expanded handle collapses; with it enabled, the handle can hide the sheet. Very small peek heights may make body/actions inert until expansion, while preserving the handle.
-
----
-
 ## Handle and sizing
 
-Hide the drag handle with `:show-handle="false"`, and disable dragging independently with `:draggable="false"`. When two height anchors exist, a separate expand/collapse action remains available. It is not an automatic close button.
+Use `show-handle` for the visible handle and `draggable` to control dragging separately. Add `data-mdv-sheet-no-drag` to custom controls that should not start a drag.
 
 <DemoBlock>
   <BottomSheetAppearanceDemo />
@@ -389,16 +254,6 @@ const showHandle = ref(false)
 
   </template>
 </DemoBlock>
-
-The default panel uses `surface-container-low`, elevation level 1, 28px top corners, and a 640px maximum width. Responsive top/side gaps and safe areas follow the viewport for the modal and the container for Scaffold. Theme colors and reduced-motion behavior come from MDV; no documentation styles override the panel.
-
-## Gestures and accessibility
-
-- Mouse dragging starts on the handle. Touch dragging may start on noninteractive body content; horizontal gestures, text selection, and interactive controls retain their own behavior.
-- Add `data-mdv-sheet-no-drag` to custom interactive areas that must not start sheet dragging.
-- The handle is a native button, usable with Enter and Space. Explicit expand/collapse/close actions provide gesture alternatives.
-- Provide a visible `title` or an accessible name for custom modal content. Localize all three action labels; their component defaults are Chinese.
-- The modal manages focus and nested overlays. Scaffold leaves focus management to the application; use its `focus()` method only when the interaction calls for it.
 
 ---
 

@@ -30,14 +30,13 @@ const splitButtonSlots: SlotTableItem[] = [
   { name: 'leading / trailing', description: '主标签旁的装饰图标；加载时隐藏。' },
 ]
 </script>
-
 # Split Button
 
-`MdvSplitButton` 将一个主要操作与相关的其他选择拆分成独立入口。它不管理菜单或菜单选择模型。本页对应 **MDV 0.1.5**；若没有明确相关的次要操作集合，请使用普通 Button。
+用 `MdvSplitButton` 提供一个主操作，以及菜单中的相关备选操作。
 
 ## 与 MdvMenu 组合
 
-将 Menu 触发器插槽提供的完整 `triggerProps` 绑定至 `menu-button-attrs`，并将该插槽已接受的 `open` 布尔值绑定到 `expanded`。主操作与菜单入口互相独立；菜单键盘导航、关闭、选择和焦点返回仍由 `MdvMenu` 管理。
+将 `MdvMenu` 触发插槽的 `triggerProps` 传给 `menu-button-attrs`，把 `open` 状态传给 `expanded`。主按钮的点击单独处理。
 
 <DemoBlock>
   <MenuDemo />
@@ -69,11 +68,9 @@ function save() { result.value = 'The document was saved.' }
   </template>
 </DemoBlock>
 
-不要把 `triggerProps` 绑定到拆分按钮组根节点。绑定到实际尾部按钮才能保留它的 ID、ref、ARIA 关系和监听器。受控 Menu 拒绝展开请求时，`expanded` 保持 false，拆分按钮外观也继续反映已接受状态。
+## 变体与尺寸
 
-## 外观、尺寸与独立操作
-
-组件提供四种 Button 外观和五档尺寸。主侧与菜单侧是两个独立原生控件，可分别禁用。加载指示器属于主操作，不会禁用菜单按钮。
+用 `variant` 和 `size` 同时设置两部分的外观与尺寸。
 
 <DemoBlock>
   <VariantsDemo />
@@ -112,9 +109,9 @@ const result = ref('Each half has its own action and focus target.')
   </template>
 </DemoBlock>
 
-## 加载、禁用与焦点
+## 加载与禁用状态
 
-Tab 顺序会分别访问两侧。`focus()` 聚焦主控件，`focusMenu()` 聚焦尾部菜单按钮，`blur()` 同时移除两侧焦点。组根节点不会额外占用 Tab 位。使用 `iconOnly` 时，通过 `actionAttrs` 为主操作提供可访问名称，并为 `menuButtonLabel` 提供有意义的名称。
+加载状态只影响主操作。两部分可以分别禁用。主操作只有图标时，在 `action-attrs` 中提供无障碍名称。
 
 <DemoBlock>
   <StateDemo />
@@ -149,7 +146,7 @@ function submit() { result.value = 'The native submit action ran.' }
   </template>
 </DemoBlock>
 
-未配置 `href` 时主侧是原生按钮；`href` 或 `actionAttrs.href` 会采用原生链接语义。菜单侧始终是按钮。只有主按钮使用 `type`；组根和菜单入口不会提交表单。主控件原生表单属性应放在 `actionAttrs`，次级按钮属性放在 `menuButtonAttrs`。
+---
 
 ## API
 

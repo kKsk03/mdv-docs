@@ -28,14 +28,13 @@ const snackbarSlots: SlotTableItem[] = [
   { name: 'action', description: '替换内置操作控件，收到 { close, pending }；待处理时应禁用操作。' },
 ]
 </script>
-
 # Snackbar
 
-`MdvSnackbar` 用于宣布简短、非模态的消息，并可提供一个相关操作。本页对应 **MDV 0.1.5**。Snackbar 用于反馈，不应用于要求用户作出决定的场景；需要用户回应后才能继续时应使用 Dialog。
+用 `MdvSnackbar` 提供简短反馈，例如告知保存成功或提供撤销。如果用户必须先作出决定，请用[对话框](./dialog)。
 
-## 受控消息与关闭原因
+## 显示消息
 
-在应用外壳附近挂载组件，并用 `v-model` 管理可见状态。关闭按钮、操作、Escape 或计时结束都会请求将模型设为 `false`；父组件可接受或拒绝。事件详情包含关闭原因，并区分关闭开始和退场完成。
+用 `v-model` 控制显示并提供消息。通过 `close` 获取关闭原因；需要等待退出动效结束时，监听 `closed`。
 
 <DemoBlock>
   <DirectDemo />
@@ -72,11 +71,9 @@ function closed(detail: MdvSnackbarCloseDetail) { result.value = `Closed: ${deta
   </template>
 </DemoBlock>
 
-无操作的消息默认显示四秒；包含操作时默认常驻，以便用户有时间执行操作。请明确设置 `duration`、`closable`，并本地化 `closeLabel`。
+## 异步操作
 
-## 异步操作与计时
-
-操作可返回 Promise。等待期间 MDV 会禁用内置操作并暂停计时。成功后会请求关闭，除非监听 `action` 时同步调用了 `preventDefault()`；失败时发出 `actionError` 并保持消息打开。Provider API 不转发 `actionError`；使用调用式 API 时，请在应用操作回调中自行捕获业务错误。
+操作可以返回 Promise，执行期间会暂停计时。操作成功后会关闭提示，除非取消了 `action` 事件；失败会触发 `actionError` 并保留提示。
 
 <DemoBlock>
   <ActionDemo />
@@ -118,11 +115,9 @@ function actionError(error: unknown) { result.value = error instanceof Error ? e
   </template>
 </DemoBlock>
 
-计时从消息入场后开始。指针悬停、消息内部焦点、页面隐藏、手动暂停、MDV Dialog 遮挡、KeepAlive 停用及内置异步操作期间都会暂停并保留剩余时间。消息、操作标签或持续时长变化后会重新计时。
+## 消息队列
 
-## Provider 队列与组合式函数
-
-在应用中相对稳定的区域放置一个 `MdvSnackbarProvider`，再从其后代组件的 `setup` 中调用 `useSnackbar()`。Provider 维护独立的 FIFO 队列；排队消息在真正显示前不会开始计时。除非应用显式协调，否则请避免多个 Provider 或独立 Snackbar 同时显示。
+用 `MdvSnackbarProvider` 包裹需要显示提示的区域，在后代组件中调用 `useSnackbar()`。消息按队列显示，计时在显示时开始。使用 Provider 时，请在操作回调中处理失败。
 
 <DemoBlock>
   <ProviderDemo />
@@ -184,13 +179,7 @@ const ProviderControls = defineComponent({
   </template>
 </DemoBlock>
 
-`show()` 接收字符串或选项并返回 ID；`update()` 更新当前或等待中的条目；`close()` 关闭当前项或移除等待项；`clear()` 清空等待项并请求关闭当前消息。传入 `key` 会复用并更新相同 key 的当前或排队消息，而不是重复入队。Provider 卸载时会清空队列。
-
-## 无障碍、位置与主题
-
-消息使用 polite `role="status"` 实时区域，打开时不会移动焦点或限制 Tab。默认快捷键 `Alt+G` 会聚焦到第一个可用控件；若没有控件则聚焦消息容器。只有焦点在 Snackbar 内部时，Escape 才会被处理，因此不会从其他位置关闭父级 Dialog。关闭时，仅当消息实际拥有焦点才尝试恢复原焦点。对于定时消失的提示，也应在触发操作的位置提供上下文反馈；实际读屏播报受浏览器和辅助技术组合影响。
-
-位置遵循逻辑方向，考虑底部安全区并支持减少动态效果。`offset` 可用于避开应用自有导航或悬浮控件。默认颜色使用 inverse-surface 角色；显式主题色或种子色仅影响 Snackbar。支持 Popover API 的浏览器会将其置于原 DOM 位置对应的顶层，以保留局部主题继承；回退为 fixed 定位时，仍可能受祖先层叠上下文影响。
+---
 
 ## API
 

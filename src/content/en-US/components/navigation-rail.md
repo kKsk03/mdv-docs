@@ -7,8 +7,6 @@ import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.ty
 import RailBasicDemo from '@/components/docs/demos/navigationRail/basic.vue'
 import RailLinksDemo from '@/components/docs/demos/navigationRail/links.vue'
 import RailModalDemo from '@/components/docs/demos/navigationRail/modal.vue'
-import RailPolicyDemo from '@/components/docs/demos/navigationRail/policy.vue'
-import RailThemeDemo from '@/components/docs/demos/navigationRail/theme.vue'
 
 const railProps: ApiTableItem[] = [
   { name: 'expanded', attribute: 'v-model:expanded', type: 'boolean', default: 'false', description: 'Controlled expansion state. Accept update:expanded in the parent; omitting the binding does not create internal expansion state.' },
@@ -40,18 +38,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'badge', description: 'Trailing notification content. Receives { active, expanded }. Supply MdvBadge when a badge surface is wanted; the rail does not clear it on selection.' },
 ]
 </script>
-
 # Navigation Rail
 
-`MdvNavigationRail` provides persistent primary destinations beside application content. `MdvModalNavigationRail` expands over content, and both use `MdvNavigationRailItem` for destinations. This page describes the installed **MDV 0.1.5** API.
+Use a navigation rail for primary destinations beside the page. `MdvNavigationRail` expands within the layout; `MdvModalNavigationRail` expands over it. Both use `MdvNavigationRailItem`.
 
-Use a collapsed rail for a small set of primary destinations, usually 3–7. Keep labels meaningful; expansion can reveal secondary destinations. The rail does not choose a responsive breakpoint or switch itself into a drawer or navigation bar.
+## Standard rail
 
-## Standard layout and expansion
-
-Give the surrounding flex/grid layout a definite height and its content `min-width: 0`. A collapsed rail occupies 96px. Standard expansion changes its real width, allowing adjacent content to resize. This preview hides its secondary explanatory pane on small screens while expanded so the live rail stays usable.
-
-The `menuAttrs` slot object contains `aria-controls`, `aria-expanded`, and `onClick`. Bind it to the menu button once. Adding a second `@click="toggle"` would toggle twice. The FAB slot owns no creation behavior; this example counts draft actions in the application.
+Bind `v-model:expanded` and mark the current item with `active`. Give the layout a definite height and set `min-width: 0` on the content so it can shrink when the rail widens.
 
 <DemoBlock>
   <RailBasicDemo />
@@ -120,11 +113,69 @@ const destinations = [{ label: 'Home', icon: homeOutlineIcon }, { label: 'Explor
   </template>
 </DemoBlock>
 
-## Controlled requests, links, and keyboard focus
+Bind `menuAttrs` to the menu button. It already includes the click handler; do not also call `toggle` on click.
 
-`expanded` is controlled: accepting `update:expanded` is what changes the rail. Item `active` is also application state. Focus movement does not select a destination, and selection does not automatically change `active`.
+## Modal rail
 
-An item with `href` renders an anchor. Native modified clicks, `target`, `rel`, and downloads keep their browser behavior. Synchronous `preventDefault()` cancels navigation and selection dismissal. Disabled items block activation callbacks. For Vue Router, bind an appropriate `href` and navigation handler from a custom `RouterLink` slot and derive `active` from the route; do not replace links with unrelated click-only elements.
+A modal rail keeps the collapsed width in the layout and opens the expanded view over the content. Use `hide-on-collapse` to remove the collapsed rail and provide an external button to open it.
+
+<DemoBlock>
+  <RailModalDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref, useId } from 'vue'
+import { MdvBadge, MdvButton, MdvCheckbox, MdvDialog, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
+import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
+import menuIcon from '@iconify-icons/material-symbols/menu'
+import homeIcon from '@iconify-icons/material-symbols/home-outline'
+import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
+import editIcon from '@iconify-icons/material-symbols/edit'
+
+const id = `modal-rail-${useId()}`
+const expanded = ref(false)
+const immersive = ref(false)
+const compose = ref(false)
+const current = ref('Home')
+const reason = ref('Not closed yet')
+function closed(detail: MdvNavigationRailCloseDetail) { reason.value = detail.reason }
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvCheckbox v-model="immersive" label="Hide the collapsed rail" />
+    <div class="flex h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
+      <MdvModalNavigationRail :id="id" v-model:expanded="expanded" :hide-on-collapse="immersive" aria-label="Modal workspace navigation" @closed="closed">
+        <template #menu="{ menuAttrs, expanded: isExpanded }"><MdvIconButton v-bind="menuAttrs" variant="standard" :aria-label="isExpanded ? 'Close modal rail' : 'Expand modal rail'"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
+        <template #fab><MdvIconButton variant="tonal" size="m" shape="square" aria-label="Compose from rail" @click="compose = true"><MdvIcon :icon="editIcon" /></MdvIconButton></template>
+        <MdvNavigationRailItem label="Home" :active="current === 'Home'" @click="current = 'Home'"><template #icon><MdvIcon :icon="homeIcon" /></template></MdvNavigationRailItem>
+        <MdvNavigationRailItem label="Saved" :active="current === 'Saved'" @click="current = 'Saved'">
+          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
+          <template #badge><MdvBadge variant="large" content="5" aria-label="5 saved updates" /></template>
+        </MdvNavigationRailItem>
+      </MdvModalNavigationRail>
+      <div class="min-w-0 flex-1 overflow-auto p-4">
+        <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open modal rail</MdvButton>
+        <p class="mt-4 text-sm text-mdv-on-surface-variant">Modal expansion overlays the page. The external trigger also works when the collapsed rail is hidden.</p>
+      </div>
+    </div>
+    <p role="status" class="text-sm text-mdv-on-surface-variant">Destination: {{ current }} · Last close: {{ reason }}</p>
+    <MdvDialog v-model="compose" title="New draft" description="This dialog is declared outside the rail slots so only one instance exists.">
+      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
+    </MdvDialog>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+Name the navigation with `aria-label` or `aria-labelledby`. Modal slots render in both views, so avoid duplicate IDs or separate dialog instances inside them.
+
+## Links and keyboard navigation
+
+Use `href` for destinations. With Vue Router, derive `active` from the current route and use the custom `RouterLink` slot for `href` and navigation. Arrow keys move focus without changing the active destination.
 
 <DemoBlock>
   <RailLinksDemo />
@@ -182,191 +233,7 @@ function cancel(event: MouseEvent) {
   </template>
 </DemoBlock>
 
-## Modal expansion and immersive presentation
-
-Modal expansion leaves the collapsed 96px layout space unchanged while the expanded panel enters the native dialog top layer. Its scrim, modal focus containment, Escape handling, and focus restoration are provided by MDV. Name each navigation with `aria-label` or `aria-labelledby`; the built-in fallback is Chinese.
-
-`hide-on-collapse` removes the collapsed rail and its reserved space. Keep an accessible external menu button with matching `aria-controls` and `aria-expanded`. The example's external button works in either presentation.
-
-Modal slots normally render twice: once for the collapsed rail and once for the expanded panel, receiving different `expanded` values. Avoid fixed duplicate IDs or duplicated independent overlays inside those slots. Declare the nested Dialog outside the rail, as shown here.
-
-<DemoBlock>
-  <RailModalDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId } from 'vue'
-import { MdvBadge, MdvButton, MdvCheckbox, MdvDialog, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
-import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import homeIcon from '@iconify-icons/material-symbols/home-outline'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-import editIcon from '@iconify-icons/material-symbols/edit'
-
-const id = `modal-rail-${useId()}`
-const expanded = ref(false)
-const immersive = ref(false)
-const compose = ref(false)
-const current = ref('Home')
-const reason = ref('Not closed yet')
-function closed(detail: MdvNavigationRailCloseDetail) { reason.value = detail.reason }
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <MdvCheckbox v-model="immersive" label="Hide the collapsed rail" />
-    <div class="flex h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
-      <MdvModalNavigationRail :id="id" v-model:expanded="expanded" :hide-on-collapse="immersive" aria-label="Modal workspace navigation" @closed="closed">
-        <template #menu="{ menuAttrs, expanded: isExpanded }"><MdvIconButton v-bind="menuAttrs" variant="standard" :aria-label="isExpanded ? 'Close modal rail' : 'Expand modal rail'"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-        <template #fab><MdvIconButton variant="tonal" size="m" shape="square" aria-label="Compose from rail" @click="compose = true"><MdvIcon :icon="editIcon" /></MdvIconButton></template>
-        <MdvNavigationRailItem label="Home" :active="current === 'Home'" @click="current = 'Home'"><template #icon><MdvIcon :icon="homeIcon" /></template></MdvNavigationRailItem>
-        <MdvNavigationRailItem label="Saved" :active="current === 'Saved'" @click="current = 'Saved'">
-          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
-          <template #badge><MdvBadge variant="large" content="5" aria-label="5 saved updates" /></template>
-        </MdvNavigationRailItem>
-      </MdvModalNavigationRail>
-      <div class="min-w-0 flex-1 overflow-auto p-4">
-        <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open modal rail</MdvButton>
-        <p class="mt-4 text-sm text-mdv-on-surface-variant">Modal expansion overlays the page. The external trigger also works when the collapsed rail is hidden.</p>
-      </div>
-    </div>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">Destination: {{ current }} · Last close: {{ reason }}</p>
-    <MdvDialog v-model="compose" title="New draft" description="This dialog is declared outside the rail slots so only one instance exists.">
-      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
-    </MdvDialog>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Closing policy and content lifetime
-
-`closeOnEsc`, `closeOnScrim`, and `closeOnSelect` control their respective requests. The menu action and exposed `close()` still request closing. The parent can refuse a request by keeping `expanded` unchanged; no accepted close lifecycle is emitted. Navigation Rail has **no `beforeClose` prop**. If an application needs confirmation, manage whether it accepts the update request.
-
-`close(): Promise<boolean>` reports whether the parent accepted closing, rather than waiting for the animation to end. Observe `closed` for the finished transition. Calling it uses reason `menu`; setting the model directly closes with reason `model`.
-
-The note below belongs to its TextField instance. It survives ordinary closing, but is recreated after closing with `destroy-on-close`. Models stored outside the rail are not reset by destruction. A “Close directly” button remains available inside the modal even when the parent refuses requested closes.
-
-<DemoBlock>
-  <RailPolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useId, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvIcon, MdvIconButton, MdvModalNavigationRail, MdvNavigationRailItem, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvNavigationRailCloseDetail } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const id = `rail-policy-${useId()}`
-const rail = useTemplateRef<InstanceType<typeof MdvModalNavigationRail>>('rail')
-const expanded = ref(false)
-const acceptClose = ref(true)
-const closeOnEsc = ref(true)
-const closeOnScrim = ref(true)
-const closeOnSelect = ref(true)
-const destroy = ref(false)
-const message = ref('No close request yet.')
-function update(value: boolean) {
-  if (value || acceptClose.value) expanded.value = value
-  else message.value = 'Parent rejected closing.'
-}
-async function close() { message.value = `close() accepted: ${await rail.value?.close()}` }
-function closed(detail: MdvNavigationRailCloseDetail) { message.value = `Closed: ${detail.reason}` }
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="closeOnEsc" label="Escape closes" />
-      <MdvCheckbox v-model="closeOnScrim" label="Scrim closes" />
-      <MdvCheckbox v-model="closeOnSelect" label="Selection closes" />
-      <MdvCheckbox v-model="destroy" label="Destroy expanded content on close" />
-    </div>
-    <MdvButton :aria-controls="id" :aria-expanded="expanded" @click="expanded = true">Open policy example</MdvButton>
-    <MdvModalNavigationRail :id="id" ref="rail" :expanded="expanded" hide-on-collapse :close-on-esc="closeOnEsc" :close-on-scrim="closeOnScrim" :close-on-select="closeOnSelect" :destroy-on-close="destroy" aria-label="Rail close policy" @update:expanded="update" @closed="closed">
-      <template #menu="{ menuAttrs }"><MdvIconButton v-bind="menuAttrs" variant="standard" aria-label="Request policy close"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-      <MdvNavigationRailItem label="Saved"><template #icon><MdvIcon :icon="bookmarkIcon" /></template></MdvNavigationRailItem>
-      <div class="grid gap-3 px-5 py-4">
-        <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-        <MdvTextField label="Local note" placeholder="Type, close, then reopen" />
-        <MdvButton variant="outlined" @click="close">Request close()</MdvButton>
-        <MdvButton variant="text" @click="expanded = false">Close directly</MdvButton>
-        <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-      </div>
-    </MdvModalNavigationRail>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Scrolling, long labels, local themes, and RTL
-
-Labels wrap in both presentations. Expanded width is measured from labels and badges or from `expanded-width`, constrained by available space. Keep navigation height bounded so the item area can scroll independently of its menu and FAB. MDV handles theme roles, logical edges, focus rings, and reduced motion; the example changes only its local container theme and direction.
-
-<DemoBlock>
-  <RailThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvBadge, MdvCheckbox, MdvIcon, MdvIconButton, MdvNavigationRail, MdvNavigationRailItem } from '@mdv-ui/mdv'
-import menuIcon from '@iconify-icons/material-symbols/menu'
-import bookmarkIcon from '@iconify-icons/material-symbols/bookmark-outline'
-
-const expanded = ref(true)
-const dark = ref(false)
-const rtl = ref(false)
-const current = ref('A shared workspace with a long destination label')
-const labels = ['A shared workspace with a long destination label', 'Reading list', 'Project drafts', 'Notifications', 'Recent activity', 'Archive', 'Account settings']
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-4"><MdvCheckbox v-model="dark" label="Local dark theme" /><MdvCheckbox v-model="rtl" label="Right to left" /></div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="flex h-[27rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low text-mdv-on-surface">
-      <MdvNavigationRail v-model:expanded="expanded" expanded-width="280px" show-divider aria-label="Scrollable themed destinations">
-        <template #menu="{ menuAttrs }"><MdvIconButton v-bind="menuAttrs" variant="standard" aria-label="Toggle themed rail"><MdvIcon :icon="menuIcon" /></MdvIconButton></template>
-        <MdvNavigationRailItem v-for="(label, index) in labels" :key="label" :label="label" :active="current === label" @click="current = label">
-          <template #icon><MdvIcon :icon="bookmarkIcon" /></template>
-          <template v-if="index === 0" #badge><MdvBadge variant="large" content="99+" aria-label="More than 99 updates" /></template>
-        </MdvNavigationRailItem>
-      </MdvNavigationRail>
-      <p class="min-w-0 flex-1 overflow-auto p-4 text-sm" :class="expanded ? 'hidden sm:block' : ''">Long labels wrap. Only the destinations scroll; the menu remains reachable.</p>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## Accessibility and integration
-
-<DocsTable label="Navigation Rail keyboard interaction">
-
-| Key or action | Behavior |
-| --- | --- |
-| Tab / Shift+Tab | Visits enabled destinations and other ordinary controls. |
-| Arrow Up / Arrow Down | Moves destination focus, wrapping and skipping disabled or hidden items; selection stays unchanged. |
-| Home / End | Focuses the first/last available destination. |
-| Enter / Space | Uses native button/link activation; Space activates buttons. |
-| Escape in Modal | Requests closing when enabled; only the topmost modal handles it. |
-| Exposed Standard `focus(options?)` | Focuses the active enabled item or the first available item. |
-
-</DocsTable>
-
-Use the provided accessible label rather than putting a second interactive link inside an item. Badge content should describe counts when that information matters. A router or view switch is responsible for updating destination state and moving focus into newly loaded content as needed. Rail resizing is separate from page transitions.
-
-The component uses `nav` and native buttons/anchors rather than `menu` semantics. It does not add swipe gestures, hidden-label modes, density variants, or an automatic mobile replacement. Modal content inherits the surrounding theme and direction without requiring application Teleport code. Real touch, screen readers, forced colors, and SSR/hydration need application-level verification.
+---
 
 ## API
 

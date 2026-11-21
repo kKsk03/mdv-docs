@@ -6,10 +6,8 @@ import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import ModalDemo from '@/components/docs/demos/sideSheet/modal.vue'
 import StandardDemo from '@/components/docs/demos/sideSheet/standard.vue'
-import PolicyDemo from '@/components/docs/demos/sideSheet/policy.vue'
 import GuardDemo from '@/components/docs/demos/sideSheet/guard.vue'
 import FormDemo from '@/components/docs/demos/sideSheet/form.vue'
-import CompositionDemo from '@/components/docs/demos/sideSheet/composition.vue'
 
 const commonProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'false', description: '受控可见状态，父级需接受 update:modelValue，内置关闭操作才会生效。' },
@@ -43,16 +41,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'actions', description: '面板操作，接收 { close }。' },
 ]
 </script>
-
 # 侧边面板
 
-`MdvSideSheet` 以模态面板显示补充内容，`MdvSideSheetScaffold` 为 Standard 面板在主内容旁预留空间。本文对应 **MDV 0.1.5**。导航目的地适合 Navigation Drawer；与当前页面相关的详情或任务适合 Side Sheet。
+侧边面板用于显示与当前页面相关的详情或操作。`MdvSideSheet` 打开模态面板，`MdvSideSheetScaffold` 在正文旁为标准面板预留空间。
 
-## 模态外观、方向与返回
+## 模态面板
 
-Modal 使用原生 dialog 顶层、遮罩及焦点约束。`placement` 表示逻辑起始或末尾方向，RTL 时镜像。贴边面板只在朝向内容一侧使用圆角，`detached` 增加四周边距并将四角圆角化。默认宽度 256px，最大 400px，且不超出可用区域。
-
-关闭操作始终存在。`show-back` 添加独立操作，只发出 `back`，不会自动关闭。示例用它从项目历史返回详情。英文界面请覆盖 `close-label`、`back-label`，因为组件默认文案为中文。
+用 `v-model` 控制模态面板。通过 `placement` 选用 `start` 或 `end`，用 `detached` 添加面板外边距。请为面板提供标题或无障碍名称。
 
 <DemoBlock>
   <ModalDemo />
@@ -104,11 +99,9 @@ function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${eve
   </template>
 </DemoBlock>
 
-## Standard 布局与独立滚动
+## 标准面板
 
-Scaffold 需要高度明确的父容器。默认插槽是主区域，`sheet` 是侧边正文。面板打开时真正缩小主内容宽度，关闭后恢复；两边独立滚动。`show-divider` 控制外侧竖直边界，`dividers` 控制内部水平分隔线。
-
-示例使用容器相对长度约束自定义宽度，给窄屏嵌入式预览留出主内容空间。正式应用在主内容无法容纳时通常切换为 Modal。MDV 不会自动选择断点，也不会自动在两种组件间切换。
+将正文放在默认插槽中，面板放在 `#sheet`。给 Scaffold 设置明确的高度，让正文与面板各自滚动。
 
 <DemoBlock>
   <StandardDemo />
@@ -163,69 +156,9 @@ function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${eve
   </template>
 </DemoBlock>
 
-Standard 不进入模态状态：主内容仍可交互，打开不抢焦点，Tab 可以离开面板，也不全局拦截 Escape。实例 `focus()` 可明确聚焦面板容器。关闭时，仅当焦点仍在该面板内且没有嵌套模态占用焦点，才尝试恢复先前焦点。
+## 关闭前确认
 
-## 关闭策略、受控接受与保留
-
-Modal 可以分别关闭各入口策略，内置关闭按钮仍可用。实例及插槽 `close()` 都请求父级接受；返回 `true` 只表示父级接受，退出动画可能尚未结束。依赖完全关闭的逻辑应等待 `closed`。
-
-`destroy-on-close` 在退出结束后移除子树，再打开时未绑定模型的子字段会重置，但父级保存的状态不受影响。父级直接把模型改为 false 是程序关闭，不经过 `before-close`。
-
-<DemoBlock>
-  <PolicyDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
-import { MdvButton, MdvCheckbox, MdvSideSheet, MdvTextField } from '@mdv-ui/mdv'
-import type { MdvSideSheetCloseDetail } from '@mdv-ui/mdv'
-
-const sheet = useTemplateRef<InstanceType<typeof MdvSideSheet>>('sheet')
-const open = ref(false)
-const acceptClose = ref(true)
-const escape = ref(true)
-const scrim = ref(true)
-const swipe = ref(true)
-const destroy = ref(false)
-const message = ref('No close request yet.')
-function update(value: boolean) {
-  if (value || acceptClose.value) open.value = value
-  else message.value = 'Parent rejected closing.'
-}
-async function requestClose() { message.value = `close() accepted: ${await sheet.value?.close('requested')}` }
-function closed(event: MdvSideSheetCloseDetail) { message.value = `Closed: ${event.reason} · Result: ${event.returnValue || '(empty)'}` }
-</script>
-
-<template>
-  <div class="grid gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="escape" label="Escape closes" />
-      <MdvCheckbox v-model="scrim" label="Scrim closes" />
-      <MdvCheckbox v-model="swipe" label="Edge swipe closes" />
-      <MdvCheckbox v-model="destroy" label="Destroy content on close" />
-    </div>
-    <div><MdvButton @click="open = true">Open close policy</MdvButton></div>
-    <MdvSideSheet ref="sheet" :model-value="open" title="Close policy" width="360px" :close-on-esc="escape" :close-on-scrim="scrim" :close-on-swipe="swipe" :destroy-on-close="destroy" close-label="Request policy close" @update:model-value="update" @closed="closed">
-      <div class="grid gap-4">
-        <MdvCheckbox v-model="acceptClose" label="Accept close requests" />
-        <MdvTextField label="Local draft" placeholder="Close and reopen to compare retention" full-width />
-        <MdvButton variant="outlined" @click="requestClose">Request close()</MdvButton>
-        <MdvButton variant="text" @click="open = false">Close directly</MdvButton>
-        <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-      </div>
-    </MdvSideSheet>
-    <p role="status" class="text-sm text-mdv-on-surface-variant">{{ message }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 异步处理未保存内容
-
-`before-close` 接收只读关闭详情，可以返回 Promise。并发关闭请求共用当前决定，返回 false 会保留面板。示例在活动面板内展示确认，Keep/Discard 后完成决定，外部关闭或卸载时取消等待；Save 先保存草稿，再请求关闭。
+用 `before-close` 确认未保存的修改。返回 `false` 会阻止关闭，也可以返回 Promise 等待用户决定。直接把模型设为 `false` 会绕过拦截。
 
 <DemoBlock>
   <GuardDemo />
@@ -288,11 +221,9 @@ onBeforeUnmount(() => decide(false))
   </template>
 </DemoBlock>
 
-同步策略可以直接返回 `false`。异常或拒绝的 Promise 会保留面板，并由 MDV 记录错误，不应把异常当成普通取消方式。
+## 对话框表单
 
-## 原生 dialog 表单
-
-Modal 内的 `form method="dialog"` 先遵循原生字段校验，通过后的提交由 MDV 处理，以 `form` 原因请求关闭。提交按钮的 `value` 成为 `returnValue`。在 submit 监听中读取 FormData；希望走内置 dialog 表单关闭流程时，不要添加 `.prevent`。取消按钮可以使用 `formnovalidate`。
+模态面板中的表单可使用 `method="dialog"`，先通过原生校验，再请求关闭。提交按钮的 `value` 成为 `returnValue`；需要保留此行为时，不要阻止提交事件。
 
 <DemoBlock>
   <FormDemo />
@@ -334,76 +265,7 @@ function closed(detail: MdvSideSheetCloseDetail) { result.value = `Closed: ${det
   </template>
 </DemoBlock>
 
-Standard 没有原生模态 dialog，不拦截 dialog 表单提交。请使用普通表单，由应用处理提交，并在保存成功后调用插槽 `close('saved')`。
-
-## 局部主题、RTL 与嵌套浮层
-
-面板保留在原始 DOM 树中，继承局部 MDV 主题变量和方向。示例把 Side Sheet 嵌入 Dialog，再在面板中打开 Select 列表框。应先关闭当前弹层或模态，再关闭父级，并确保关闭操作有名称且可访问。
-
-<DemoBlock>
-  <CompositionDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvDialog, MdvSelect, MdvSideSheet } from '@mdv-ui/mdv'
-import type { MdvSelectValue } from '@mdv-ui/mdv'
-
-const dialogOpen = ref(false)
-const sheetOpen = ref(false)
-const dark = ref(false)
-const rtl = ref(false)
-const access = ref<MdvSelectValue | null>('team')
-</script>
-
-<template>
-  <div class="grid gap-3">
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      <MdvCheckbox v-model="dark" label="Local dark theme" />
-      <MdvCheckbox v-model="rtl" label="Right to left" />
-    </div>
-    <div :data-mdv-theme="dark ? 'dark' : 'light'" :dir="rtl ? 'rtl' : 'ltr'" class="rounded-xl bg-mdv-surface p-4 text-mdv-on-surface">
-      <MdvButton @click="dialogOpen = true">Open document dialog</MdvButton>
-      <MdvDialog v-model="dialogOpen" title="Shared document">
-        <div class="grid gap-4">
-          <p>Open supplemental settings, then dismiss the topmost overlay first.</p>
-          <MdvButton variant="outlined" @click="sheetOpen = true">Edit access settings</MdvButton>
-          <MdvSideSheet v-model="sheetOpen" title="Access settings" width="360px" detached placement="end" close-label="Close access settings">
-            <MdvSelect v-model="access" label="Who can read" :options="[{ value: 'team', label: 'Team members' }, { value: 'public', label: 'Anyone with the link' }]" full-width />
-            <template #actions="{ close }"><MdvButton variant="text" @click="close('done')">Apply access</MdvButton></template>
-          </MdvSideSheet>
-          <p role="status">Access: {{ access }}</p>
-        </div>
-        <template #actions="{ close }"><MdvButton variant="text" @click="close('done')">Done</MdvButton></template>
-      </MdvDialog>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-## 无障碍、手势与动画
-
-Modal 使用 `dialog` 和 `aria-modal=true`，约束焦点、锁定背景滚动，并在关闭后恢复焦点。Standard 使用布局内的非模态 `section role="dialog"`。标题或 header 提供面板名称；否则传入 `aria-label` 或 `aria-labelledby`。仅在没有正文插槽时，默认 description 自动关联为说明。
-
-<DocsTable label="侧边面板交互">
-
-| 交互 | Modal | Standard |
-| --- | --- | --- |
-| Tab / Shift+Tab | 保留在当前活动模态内。 | 在面板、主内容和外围界面间正常移动。 |
-| Escape | 启用时请求关闭最上层面板。 | 不提供全局 Escape 关闭。 |
-| 关闭操作 | 经过守卫的 close-button 请求。 | 经过守卫的 close-button 请求。 |
-| 返回操作 | 发出 back，不自动关闭。 | 发出 back，不自动关闭。 |
-| 边缘滑动 | 默认启用，遵循守卫与父级拒绝。 | 不提供。 |
-
-</DocsTable>
-
-Modal 朝向内容的 12px 内边缘可接受横向拖动，向隐藏方向松手即可请求关闭，方向结合 placement 与 RTL 计算。距离不足、取消或拒绝会回弹；纵向滚动及普通正文交互保留原生行为。拖动用于关闭，不是改变宽度；需要调整尺寸时，由应用修改 `width`。
-
-面板横移、Standard 占位宽度和遮罩分别执行，不缩放正文。减少动态效果时直接定位到已接受状态。真实触摸与滑动、嵌套焦点和 Escape、读屏、强制颜色及最终响应式布局仍需独立验证。
+---
 
 ## API
 

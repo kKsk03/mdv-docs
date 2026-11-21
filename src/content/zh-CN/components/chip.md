@@ -10,7 +10,6 @@ import ChipIndependentDemo from '@/components/docs/demos/chip/independent.vue'
 import ChipRemovalDemo from '@/components/docs/demos/chip/removal.vue'
 import ChipAppearanceDemo from '@/components/docs/demos/chip/appearance.vue'
 import ChipLayoutDemo from '@/components/docs/demos/chip/layout.vue'
-import ChipFormDemo from '@/components/docs/demos/chip/form.vue'
 
 const chipProps: ApiTableItem[] = [
   { name: 'variant', type: "'assist' | 'filter' | 'input' | 'suggestion'", default: "'assist'", description: '纸片用途。Filter 默认可选择；Input 表示已输入内容，默认可删除。' },
@@ -44,14 +43,13 @@ const setSlots: SlotTableItem[] = [
   { name: 'label', description: '替代可见组标签，无插槽参数。' },
 ]
 </script>
-
 # 纸片
 
-`MdvChip` 以紧凑形式呈现上下文操作、建议、筛选或已输入内容。`MdvChipSet` 排列相关纸片、管理键盘焦点，也可以统一管理 Filter 选择。
+用 `MdvChip` 展示紧凑的操作、筛选项、建议或标签。用 `MdvChipSet` 组织相关条目。
 
 ## 用途与变体
 
-Assist 执行上下文操作，Suggestion 提供回复或操作建议，Filter 切换筛选条件，Input 表示附件、标签或联系人等内容。Input 的主操作与删除操作相互独立。
+Assist 用于操作，Filter 用于筛选条件，Input 用于已输入的内容，Suggestion 用于建议回复或操作。
 
 <DemoBlock>
   <ChipVariantDemo />
@@ -87,24 +85,9 @@ const message = ref('Try an action, a filter, or a removable input chip.')
   </template>
 </DemoBlock>
 
-<DocsTable label="纸片变体行为" min-width="32rem">
-
-| 变体 | 默认主操作 | 默认删除 | 链接支持 |
-| --- | --- | --- | --- |
-| `assist` | 业务操作 | 无 | 支持 |
-| `suggestion` | 业务操作 | 无 | 支持 |
-| `filter` | 切换选择，内置选中勾选符号 | 无，可开启 | 不支持 |
-| `input` | 业务操作，可开启选择 | 有 | 不支持 |
-
-</DocsTable>
-
-只有 Assist/Suggestion 接受 `href`，原生 `target`、`rel`、`download` 会透传。按钮纸片的类型固定为 `type="button"`。不要把 Filter/Input 当作链接使用。
-
----
-
 ## 组选择
 
-将 ChipSet 的 `selection` 设置为 `single` 或 `multiple`，并绑定 `v-model`。可选择 Filter 需要唯一 `value`。单选可再次点击已选项取消，多选使用数组。
+将 ChipSet 的 `selection` 设为 `single` 或 `multiple`，绑定 `v-model`，并为每个可选筛选项设置唯一的 `value`。请为分组提供名称。
 
 <DemoBlock>
   <ChipSelectionDemo />
@@ -144,14 +127,6 @@ const multiple = ref<MdvChipSetModelValue>(['images'])
   </template>
 </DemoBlock>
 
-组选择只作用于可选择的 Filter。Input、Assist、Suggestion 和 `:selectable="false"` 不加入组模型。被组管理的 Filter 不再单独绑定 `selected`。数字与字符串严格区分，多选更新创建新数组，不修改传入数组。
-
-父级接受的模型决定 `aria-pressed` 与外观；拒绝更新时保留原状态。原生 click 监听先于选择运行，`event.preventDefault()` 可取消切换请求。组件没有 `selection-required` 属性。
-
-### 独立选择与头像
-
-ChipSet 默认 `selection="none"`，各纸片可以分别绑定布尔 `v-model:selected`，未绑定时内部管理。Input 需要显式开启 `selectable` 才会切换；选中本身不会自动添加 Filter 的勾选符号。
-
 <DemoBlock>
   <ChipIndependentDemo />
   <template #source>
@@ -184,13 +159,9 @@ const person = ref(false)
   </template>
 </DemoBlock>
 
-Input 的 `#avatar` 可以显示联系人缩写等内容，优先于 `#leading`。默认标签及装饰插槽接收 `{ selected }`。头像/图标槽对辅助技术隐藏并设为 inert，因此纸片文字必须准确标识操作。不要在插槽内再放按钮、输入框或链接。
-
----
-
 ## 删除已输入内容
 
-`remove` 是请求事件，需要修改数据数组才会移除纸片，组件不会自行删除节点。使用稳定的 Vue `:key`，ChipSet 才能在实际删除后将焦点移到可用邻项。
+收到 `remove` 后从数据中删除对应项。使用稳定的 Vue `key`，让分组能将焦点移到其他项。
 
 <DemoBlock>
   <ChipRemovalDemo />
@@ -231,15 +202,9 @@ function remove(tag: string) {
   </template>
 </DemoBlock>
 
-独立删除按钮不会触发主操作 click，也不会修改选择。聚焦 Input 主体或删除按钮后，Delete/Backspace 可请求删除；重复 keydown 与 Ctrl/Alt/Meta 组合不重复请求。上面的 trailing 插槽替换图标，按钮和名称仍由组件保留。
-
-整颗 Input 都应只删除内容时，开启 `remove-only`，将操作合并为一个有名称的焦点目标并忽略选中。它只作用于 Input，且必须允许删除。
-
-需要时始终提供本地化 `remove-label`。默认中文名称是“删除”加标签/文字，或“删除此项”。复杂默认槽应提供准确的 `label` 或显式删除名称，确保服务端输出就已有正确名称。
-
 ## 外观与颜色
 
-Assist、Filter、Suggestion 支持 `elevated`，Input 保持普通外观。`color` 接受与 Button 相同的预设角色及十六进制局部种子色，不改写周围主题。
+在支持的变体上使用 `elevated`，也可以用 `color` 设置主题色或十六进制种子色。
 
 <DemoBlock>
   <ChipAppearanceDemo />
@@ -273,11 +238,9 @@ const message = ref('Try the elevated actions or toggle a color filter.')
   </template>
 </DemoBlock>
 
-默认纸片可见高度 32px、圆角 8px、图标 18px，交互目标至少 48px。包含主操作和删除操作时分别预留命中区域，不应通过局部 CSS 压缩。默认已选 Filter/Input 使用 `secondary-container` 与 `on-secondary-container`。浅深色、局部令牌、焦点框、状态层及减少动态效果由 MDV 提供。
+## 换行与滚动
 
-## 换行、滚动与禁用
-
-ChipSet 默认自动换行，开启 `scrollable` 后使用单行水平滚动。可在窄行内尝试键盘导航，或禁用整个组。
+ChipSet 默认换行。使用 `scrollable` 可保持单行并横向滚动。
 
 <DemoBlock>
   <ChipLayoutDemo />
@@ -312,69 +275,9 @@ const topics = ['Design', 'Research', 'Engineering', 'Accessibility', 'Typograph
   </template>
 </DemoBlock>
 
-组的 `disabled` 禁用全部主操作和删除操作；纸片自己的 `disabled` 仅控制该项。禁用链接移除 `href`、设置 `aria-disabled`、退出 Tab 并阻止激活。标签应简短，窄容器可视觉省略，但 DOM 中保留完整文字。
-
----
-
 ## 表单组合
 
-Chip 和 ChipSet 不生成隐藏表单字段，不实现原生 required 校验或表单重置。可以直接提交业务模型，也可以在原生表单中显式增加字段和重置处理。
-
-<DemoBlock>
-  <ChipFormDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { computed, ref } from 'vue'
-import { MdvButton, MdvChip, MdvChipSet } from '@mdv-ui/mdv'
-import type { MdvChipSetModelValue } from '@mdv-ui/mdv'
-
-const topics = ref<MdvChipSetModelValue>(['design'])
-const values = computed(() => Array.isArray(topics.value) ? topics.value : [])
-const result = ref('Selected chips are submitted through explicit hidden inputs.')
-
-function submit(event: Event) {
-  const data = new FormData(event.currentTarget as HTMLFormElement)
-  result.value = JSON.stringify({ topic: data.getAll('topic') })
-}
-
-function reset() {
-  topics.value = ['design']
-  result.value = 'Form reset by the application.'
-}
-</script>
-
-<template>
-  <form class="grid gap-4" @submit.prevent="submit" @reset="reset">
-    <MdvChipSet v-model="topics" selection="multiple" label="Newsletter topics">
-      <MdvChip variant="filter" value="design" label="Design" />
-      <MdvChip variant="filter" value="engineering" label="Engineering" />
-      <MdvChip variant="filter" value="research" label="Research" />
-    </MdvChipSet>
-    <input v-for="value in values" :key="value" type="hidden" name="topic" :value="value" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton type="submit">Submit</MdvButton>
-      <MdvButton type="reset" variant="outlined">Reset</MdvButton>
-    </div>
-    <p class="break-words text-sm text-mdv-on-surface-variant" role="status">{{ result }}</p>
-  </form>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-本例提交重复的 `topic` 字段，并显式重置模型。如果组可以禁用，也应按表单策略禁用自己增加的字段。单纯给 ChipSet 添加 `name` 不会序列化其模型。
-
-## 键盘与无障碍
-
-- ChipSet 使用水平 `toolbar`，不是 listbox 或 radio group。通过 `label`、`#label`、`aria-label`、`aria-labelledby` 提供名称。
-- Tab 进入唯一记忆入口，初始优先选中项。左/右键按 DOM 顺序经过主操作及删除操作，跳过不可用目标，可循环并随 RTL 镜像。Home/End 到首尾，移焦不修改选择。
-- Enter/Space 激活原生按钮，链接保留 Enter 行为。独立使用时两个操作分别采用原生 Tab 顺序，切换项使用 `aria-pressed`。
-- 删除后优先聚焦后方可用纸片，末尾则退到前项；全部删除后聚焦空组。如果应用已主动将焦点移到其他位置，组件会尊重该决定。
-
-组件不实现文字输入、标签编辑器、菜单、加载、错误校验或拖拽排序，这些业务行为需要明确组合。
+ChipSet 不会自动提交表单值。请由应用提交其模型，或添加带 `name` 的表单控件。
 
 ---
 

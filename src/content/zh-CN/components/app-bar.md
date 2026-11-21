@@ -8,7 +8,6 @@ import AppBarBasicDemo from '@/components/docs/demos/appBar/basic.vue'
 import AppBarVariantDemo from '@/components/docs/demos/appBar/variant.vue'
 import AppBarAppearanceDemo from '@/components/docs/demos/appBar/appearance.vue'
 import AppBarAlignmentDemo from '@/components/docs/demos/appBar/alignment.vue'
-import AppBarImageDemo from '@/components/docs/demos/appBar/image.vue'
 import AppBarScrollDemo from '@/components/docs/demos/appBar/scroll.vue'
 
 const appBarProps: ApiTableItem[] = [
@@ -39,14 +38,13 @@ const scaffoldSlots: SlotTableItem[] = [
   { name: 'default', description: '正文内容。不会自动添加 main 地标或正文 padding。' },
 ]
 </script>
-
 # 应用栏
 
-应用栏展示页面标题、导航入口和常用操作。`MdvAppBar` 提供 Small、Medium flexible 和 Large flexible，并可配合 `MdvAppBarScaffold` 管理独立的正文滚动区。
+用 `MdvAppBar` 展示页面标题、导航控件和常用操作。
 
 ## 基本用法
 
-通过 `title` 设置标题，用 `leading` 和 `actions` 插槽组合操作。应用栏不会自动生成导航按钮或处理路由，点击逻辑由使用方提供。
+设置 `title`，将导航放在 `#leading`，其他操作放在 `#actions`。只有图标的按钮需要提供无障碍名称。
 
 <DemoBlock>
   <AppBarBasicDemo />
@@ -84,11 +82,9 @@ const message = ref('Choose an action.')
   </template>
 </DemoBlock>
 
----
-
 ## 尺寸
 
-`variant` 支持 `small`、`medium` 和 `large`。中、大款可随滚动收合为 Small；默认 Small 也可以通过 `title-alignment="center"` 获得居中标题。
+用 `variant` 选择 `small`、`medium` 或 `large`。中型和大型应用栏可在滚动时收起到小型高度。
 
 <DemoBlock>
   <AppBarVariantDemo />
@@ -125,13 +121,9 @@ const variants: MdvAppBarVariant[] = ['small', 'medium', 'large']
 
 </DocsTable>
 
-这些是标准单行标题的默认高度。中、大款会根据长标题、图片和字体重新测量；建议标题控制在两行以内。Small 和收合状态使用单行省略，可通过 `collapsed-title` 提供简短标题。
-
----
-
 ## 外观
 
-`default` 无阴影或边框；`elevated` 随滚动逐步显示阴影；`bordered` 显示底部分隔线。下面用 `scrolled` 展示完整滚动配色和阴影端点。
+用 `appearance="elevated"` 在滚动时显示阴影，或用 `bordered` 添加分隔线。`scrolled` 只改变外观，不会改变布局或滚动位置。
 
 <DemoBlock>
   <AppBarAppearanceDemo />
@@ -158,13 +150,9 @@ const appearances: MdvAppBarAppearance[] = ['default', 'elevated', 'bordered']
   </template>
 </DemoBlock>
 
-`scrolled` 只覆盖外观，不会让应用栏收合或改变正文滚动位置。未设置时，配色随实际滚动进度连续变化。
-
----
-
 ## 标题对齐
 
-通过 `title-alignment` 设置起始侧或居中对齐。居中以整个应用栏为基准，不会因仅有前置按钮而偏向一侧。
+用 `title-alignment="center"` 将标题在整条应用栏中居中。
 
 <DemoBlock>
   <AppBarAlignmentDemo />
@@ -198,45 +186,13 @@ const alignments: MdvAppBarTitleAlignment[] = ['start', 'center']
   </template>
 </DemoBlock>
 
-`title`、`subtitle` 插槽可替换默认文字。所有应用栏插槽都接收 `{ scrolled, collapsed }`：`scrolled` 表示滚动目标已离开顶部，`collapsed` 表示中、大款已收合到 Small。
-
----
-
 ## 品牌图像
 
-中、大款可通过 `image` 插槽在标题上方放置品牌图像。Small 的品牌标识应放入 `title` 插槽，并提供合适的可访问名称。
-
-<DemoBlock>
-  <AppBarImageDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvAppBar } from '@mdv-ui/mdv'
-</script>
-
-<template>
-  <MdvAppBar variant="large" title="Explore new places" subtitle="A little inspiration for your next trip" :heading-level="3">
-    <template #image>
-      <svg width="96" height="32" viewBox="0 0 96 32" role="img" aria-label="Explore brand">
-        <path d="M16 0 32 16 16 32 0 16Z" fill="currentColor" />
-        <text x="40" y="23" font-size="20" fill="currentColor">MDV</text>
-      </svg>
-    </template>
-  </MdvAppBar>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
----
+通过 `#image` 在中型或大型应用栏的标题上方展示品牌图像。小型应用栏可使用 `#title`。
 
 ## 滚动与 Scaffold
 
-应用布局推荐使用 `MdvAppBarScaffold`：应用栏放入 `appbar` 插槽，正文放入默认插槽。Scaffold 自动关联滚动目标，只让正文区域滚动。
-
-在下面的独立区域滚动，切换不同的 `scroll-behavior`；可同时观察简短标题、自定义操作和透明外观。
+将应用栏放在 `MdvAppBarScaffold` 的 `#appbar` 中，页面放在默认插槽。给 Scaffold 设置明确的高度，让应用栏跟随内容区域滚动。
 
 <DemoBlock>
   <AppBarScrollDemo />
@@ -321,38 +277,7 @@ function backToTop() {
 
 </DocsTable>
 
-### 布局要求
-
-Scaffold 需要确定的可用高度，例如示例中的 `h-80`，或在已有高度的布局中使用 `h-full`、`flex-1 min-h-0`。默认插槽不生成 `main`，也不添加 padding，正文语义和留白由使用方决定。
-
-Scaffold 的正文背景透明。可在共同布局容器上设置 `bg-mdv-surface-container-low`；应用栏和导航保留各自的表面配色。
-
-与标准抽屉组合时，让 `MdvNavigationDrawer` 紧邻并位于 Scaffold 之前，作为同一外层容器的兄弟节点。Scaffold 会将应用栏背景延伸到抽屉圆角后方。Modal Drawer 使用独立浮层。
-
-Vue `Transition` 或路由视图可以放在默认插槽内，对正文自行添加页面切换动画，保留应用栏和正文滚动节点。
-
-### 独立滚动目标
-
-独立使用时默认跟随 `window`。监听局部容器可传入 `scroll-target`，例如返回模板引用的 getter：
-
-```vue
-<MdvAppBar
-  title="My library"
-  scroll-behavior="pinned"
-  :scroll-target="() => scrollContainer"
-/>
-```
-
-将应用栏放在对应滚动容器内，以便 sticky 边界与滚动目标一致。显式选择器或 getter 未找到目标时，不会回退；外部稍后创建目标时可调用 `refresh()`。使用 Scaffold 时通常无需传入此属性。
-
----
-
-## 键盘与无障碍
-
-- 通过 `heading-level` 使标题等级符合页面结构；示例使用 3，避免与文章主标题竞争。
-- 图标按钮需提供 `aria-label` 或 `aria-labelledby`，应用栏不会替它们补充名称。
-- Tab、Shift+Tab 按原生顺序访问操作。键盘焦点进入应用栏时会恢复完整操作区，并在焦点停留期间保持可见。
-- 收合只复用原有插槽节点；系统减少动态效果时关闭吸附补间，仍保留直接跟随滚动的效果。
+独立应用栏若需跟随局部滚动区域，可设置 `scroll-target`。
 
 ---
 

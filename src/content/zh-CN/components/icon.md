@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import DemoBlock from '@/components/docs/DemoBlock.vue'
-import DocsTable from '@/components/docs/DocsTable.vue'
 import ApiTable from '@/components/docs/ApiTable.vue'
 import type { ApiTableItem } from '@/components/docs/api-table.types'
 import IconBasicDemo from '@/components/docs/demos/icon/basic.vue'
 import IconStyleDemo from '@/components/docs/demos/icon/style.vue'
 import IconSizeColorDemo from '@/components/docs/demos/icon/sizeColor.vue'
 import IconSemanticsDemo from '@/components/docs/demos/icon/semantics.vue'
-import IconCustomDemo from '@/components/docs/demos/icon/custom.vue'
 
 const iconProps: ApiTableItem[] = [
   { name: 'icon', type: 'MdvIconData（必填）', description: '包含字符串 body 的本地 Iconify SVG 数据。传入导入的数据对象，不接收字符串图标名称。' },
@@ -15,20 +13,17 @@ const iconProps: ApiTableItem[] = [
   { name: 'color', type: 'string', default: 'currentColor', description: '直接使用 CSS 颜色，包括 MDV 色彩变量，不会将输入转换为种子色方案。' },
 ]
 </script>
-
 # 图标
 
-`MdvIcon` 通过 MDV 自带的 `@iconify/vue/offline` 渲染本地 SVG 数据，同步显示，不请求图标 API 或字体 CDN。它可以表达装饰或独立含义；纯图标操作应使用[图标按钮](/zh-CN/components/icon-button)。
+用 `MdvIcon` 渲染 Iconify 图标数据，只导入实际使用的图标。
 
-## 安装数据包与按需导入
+## Material Symbols
 
-应用需要使用 Material Symbols 图形时，安装其数据包：
+需要使用 Material Symbols 时，安装可选的图标数据包。逐个导入图标，再传给 `icon`。
 
 ```sh
 pnpm add @iconify-icons/material-symbols
 ```
-
-每个图标从自己的子路径导入，如下所示。安装数据包会将其放入本地依赖，但不会因此把整套图标打入站点产物；构建工具按实际导入的模块处理。MDV 不会为了 `MdvIcon` 导入或注册完整图标集。
 
 <DemoBlock>
   <IconBasicDemo />
@@ -61,13 +56,9 @@ const icons = [
   </template>
 </DemoBlock>
 
-保持静态的单图标导入。导入整个集合、注册全部数据，或动态匹配所有图标文件，都可能让这些数据进入构建依赖，增大产物。其他 MDV 组件内置使用的图标已由组件提供；应用自行导入 Material Symbols 数据时才需要安装这个数据包。
+## 图标风格
 
-`icon` 接收 `homeIcon` 这样的对象，不接收 `'material-symbols:home'` 这类名称。无效输入保留空图标盒子，并在开发环境提示，不会联网补取。
-
-## 风格与填充
-
-Material Symbols 的风格、空心和实心均由导入的 SVG 数据决定。MDV 推荐以 Outlined 400 为基线，Rounded、Sharp 则使用各自的子路径。
+图标的描边、填充和风格由导入的图案决定，不是 `MdvIcon` 的运行时属性。
 
 <DemoBlock>
   <IconStyleDemo />
@@ -108,21 +99,9 @@ const styles = [
   </template>
 </DemoBlock>
 
-<DocsTable label="Material Symbols 单图标导入名称" min-width="29rem">
+## 尺寸与颜色
 
-| 风格 | 空心图形 | 实心图形 |
-| --- | --- | --- |
-| Outlined | `favorite-outline` | `favorite` |
-| Rounded | `favorite-outline-rounded` | `favorite-rounded` |
-| Sharp | `favorite-outline-sharp` | `favorite-sharp` |
-
-</DocsTable>
-
-这些名称均接在 `@iconify-icons/material-symbols/` 后。切换数据即可更换图形；组件没有可变字体的 `FILL`、`wght`、`GRAD`、`opsz` 属性，也不会随尺寸自动切换光学轮廓。
-
-## 尺寸、颜色与按钮组合
-
-独立图标默认为 24 × 24px。数字使用像素，CSS 字符串可以跟随字号或局部变量。未显式设置颜色时继承 `currentColor`。
+图标默认继承 `currentColor`。`size` 接受 CSS 长度或以像素计的数字。在按钮中使用图标时，请为按钮本身提供无障碍名称。
 
 <DemoBlock>
   <IconSizeColorDemo />
@@ -166,13 +145,9 @@ const sizes = [
   </template>
 </DemoBlock>
 
-第一个图标继承 primary 文字色，第二个使用 error 令牌，第三个直接使用 CSS 色值。`MdvIcon` 不会把 `success` 解释为 MDV 语义角色，也不会将十六进制值作为主题种子；需要跟随主题的语义色时，传入 `var(--mdv-sys-color-success)` 等变量。
-
-在 Button、IconButton 中省略 `size`，即可跟随按钮尺寸。显式设置仅改变 SVG，不会扩大外层按钮或额外预留空间。`style` 优先于尺寸、颜色 prop，接受 Vue 常用的对象、字符串和数组形式。
-
 ## 装饰图标与独立含义
 
-默认图标带有 `aria-hidden="true"` 和 `focusable="false"`。相邻文字已经表达同一信息时，保留装饰语义即可。独立状态可以使用 `aria-label`，或通过 `aria-labelledby` 引用已有文字。
+旁边已有同义文本时，保留图标的装饰语义。单独传达信息的图标请用 `aria-label` 或 `aria-labelledby` 命名。
 
 <DemoBlock>
   <IconSemanticsDemo />
@@ -208,43 +183,11 @@ const expose = ref(true)
   </template>
 </DemoBlock>
 
-非空名称会解除默认隐藏，保留图像语义。显式 `aria-hidden` 优先，引用的标签元素由应用保证存在。给图标命名不会使其进入 Tab 顺序或成为操作；原生 `title` 也不能替代可访问名称或 MDV Tooltip。
-
-操作名称应提供给按钮，内部图标保持装饰。需要按钮键盘、焦点、禁用、表单行为时，不要仅为独立 SVG 添加点击监听器。
-
 ## 其他本地图形
 
-也可以使用其他图标集，或符合 Iconify 格式的可信本地图形。必须提供字符串 `body`，通过原始宽高保留图形坐标系。
+也可以传入 Iconify 格式的可信本地图案。`MdvIcon` 不会清理 SVG 数据。
 
-<DemoBlock>
-  <IconCustomDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvButton, MdvIcon } from '@mdv-ui/mdv'
-import type { MdvIconData } from '@mdv-ui/mdv'
-
-// Trusted local artwork in Iconify's data format; no icon-data package is needed.
-const diamond: MdvIconData = {
-  width: 24,
-  height: 24,
-  body: '<path fill="currentColor" d="M12 2 22 12 12 22 2 12Z"/>',
-}
-</script>
-
-<template>
-  <div class="flex flex-wrap items-center gap-6">
-    <span class="inline-flex items-center gap-2 text-mdv-primary"><MdvIcon :icon="diamond" :size="32" />Local artwork</span>
-    <MdvButton variant="tonal"><template #leading><MdvIcon :icon="diamond" /></template>Explore collection</MdvButton>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-这个示例不需要外部图标数据包。MDV 会渲染传入的 SVG 数据，不负责清洗。纯路径 Material Symbols 可以在 SSR 中同步输出；自定义渐变、裁剪路径、内部 ID 则需要额外检查 SSR 与 hydration。
+---
 
 ## API
 

@@ -149,6 +149,8 @@ The preview stretches its content across the available width using a single `min
 
 Fences in the source slot use the same build-time syntax highlighting, line numbers, language labels, and copy controls as article code blocks. Keep reusable demo components focused on the preview; place explanatory source snippets in the localized articles and update them alongside changes to the live example.
 
+Use the Button page as the editorial reference: introduce the component in a sentence, show the common case first, and explain each example briefly. Keep complete API tables and constraints that affect usage. Avoid stretching the article into a test matrix or repeating the same behavior in both prose and the API. Keep package baselines, investigation notes, and validation results in the roadmap rather than repeating them on each component page.
+
 ### Content tables
 
 Wrap ordinary Markdown tables in `DocsTable` for the shared MDV surface, rounded border, header background, cell padding, and row/column dividers. Leave blank lines between the component tags and Markdown so the table is parsed correctly:

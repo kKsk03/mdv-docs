@@ -5,9 +5,7 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import type { ApiTableItem } from '@/components/docs/api-table.types'
 import CircularProgressBasicDemo from '@/components/docs/demos/circularProgress/basic.vue'
 import CircularProgressVariantDemo from '@/components/docs/demos/circularProgress/variant.vue'
-import CircularProgressModeDemo from '@/components/docs/demos/circularProgress/mode.vue'
 import CircularProgressSizeDemo from '@/components/docs/demos/circularProgress/size.vue'
-import CircularProgressThemeDemo from '@/components/docs/demos/circularProgress/theme.vue'
 
 const progressProps: ApiTableItem[] = [
   { name: 'value', type: 'number', default: '0', description: 'Current value in the range 0–max. Finite values are clamped; nonfinite values become 0. Decimal values are preserved.' },
@@ -19,14 +17,13 @@ const progressProps: ApiTableItem[] = [
   { name: 'label', type: 'string', description: 'Optional visible label above the graphic. Also supplies its accessible name unless an explicit ARIA name is provided.' },
 ]
 </script>
-
 # Circular Progress
 
-`MdvCircularProgress` displays the progress of a task as a circular indicator. Use determinate progress for a measurable task and indeterminate progress when its completion amount is unknown. Flat and wavy appearances support both modes.
+Use `MdvCircularProgress` to show task progress in a compact circular indicator.
 
 ## Determinate progress
 
-Pass `value` and, if needed, `max` in the task's actual units. The example tracks megabytes rather than converting everything to percentages. Use `aria-valuetext` when a spoken value needs its unit or other context.
+Pass `value` and `max` in the task’s units. Name the indicator with `label` or `aria-label`; provide `aria-valuetext` if the value needs a spoken unit.
 
 <DemoBlock>
   <CircularProgressBasicDemo />
@@ -57,13 +54,9 @@ const total = 256
   </template>
 </DemoBlock>
 
-Values are clamped to `0…max`; invalid `value` becomes `0`, and an invalid/nonpositive `max` becomes `100`. Decimal values remain supported. Reaching `max` does not remove the indicator or announce completion automatically. The example provides a separate status message for the application result.
-
----
-
 ## Flat and wavy appearances
 
-Set `variant="wavy"` for the expressive appearance, or keep the default `flat` stroke. Both appearances support determinate and indeterminate progress.
+Use `variant="wavy"` for a wavy stroke. Set `indeterminate` when the completed amount is unknown.
 
 <DemoBlock>
   <CircularProgressVariantDemo />
@@ -90,54 +83,9 @@ const variants: MdvProgressVariant[] = ['flat', 'wavy']
   </template>
 </DemoBlock>
 
-Determinate progress starts at the top and travels clockwise, including in RTL layouts. A determinate wavy stroke expands its waves between 10% and 95%, returning to a flat stroke near either endpoint while preserving its outer size. Flat indeterminate progress omits the track; wavy indeterminate progress retains it.
-
-## Switching progress modes
-
-Use `indeterminate` while the task is waiting for a measurable result, then set it to `false` and provide the known value. Do not use an invented percentage to represent unknown progress.
-
-<DemoBlock>
-  <CircularProgressModeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvCheckbox, MdvCircularProgress } from '@mdv-ui/mdv'
-
-const unknown = ref(true)
-const value = ref(25)
-
-function complete() {
-  unknown.value = false
-  value.value = 100
-}
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvCheckbox v-model="unknown" label="Progress is unknown" />
-    <MdvCircularProgress :value="value" :indeterminate="unknown" variant="wavy" label="Processing files" />
-    <div class="flex flex-wrap gap-3">
-      <MdvButton variant="tonal" :disabled="unknown || value === 100" @click="value = Math.min(100, value + 5)">Advance 5%</MdvButton>
-      <MdvButton variant="outlined" @click="complete">Complete</MdvButton>
-      <MdvButton variant="text" @click="value = 0; unknown = true">Start over</MdvButton>
-    </div>
-    <p class="text-sm text-mdv-on-surface-variant" role="status">{{ unknown ? 'Waiting for a measurable result…' : value === 100 ? 'Processing complete.' : `Processed ${value}%.` }}</p>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-`indeterminate` is independent of `value`. While it is enabled, the progressbar has no `aria-valuenow`; switching back exposes the normalized current value. The application owns task cancellation, retrying, error messages, completion feedback, and when the indicator is shown.
-
----
-
 ## Size and stroke width
 
-`size` controls the diameter in CSS pixels; `thickness` controls the stroke width. Flat defaults to 40px and wavy to 48px, both with a 4px stroke. Set a common size if changing variants should keep the same diameter.
+Use `size` for the diameter and `thickness` for the stroke width, both in CSS pixels.
 
 <DemoBlock>
   <CircularProgressSizeDemo />
@@ -165,38 +113,9 @@ const sizes = [24, 40, 64, 96]
   </template>
 </DemoBlock>
 
-Leave enough surrounding space for the label and graphic. The indicator is a status display rather than a control, so it does not create a button target or enter the Tab order.
+## Colors
 
-## Themes and colors
-
-The default active stroke uses `primary`; the track uses `secondary-container`. Local light/dark scopes inherit MDV's theme tokens. There is no `color` prop; override the dedicated CSS variables when another semantic role is needed.
-
-<DemoBlock>
-  <CircularProgressThemeDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvCircularProgress } from '@mdv-ui/mdv'
-</script>
-
-<template>
-  <div class="grid gap-4 sm:grid-cols-2">
-    <div v-for="theme in ['light', 'dark']" :key="theme" :data-mdv-theme="theme" class="flex flex-wrap items-center gap-6 rounded-xl bg-mdv-surface-container p-5 text-mdv-on-surface">
-      <MdvCircularProgress :value="60" :label="`${theme}: primary`" />
-      <MdvCircularProgress
-        :value="60"
-        variant="wavy"
-        :label="`${theme}: tertiary`"
-        style="--mdv-progress-active-color: var(--mdv-sys-color-tertiary); --mdv-progress-track-color: var(--mdv-sys-color-tertiary-container)"
-      />
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
+To override the active stroke or track color, set these CSS variables on the indicator. Use separate text for completion or errors.
 
 <DocsTable label="Circular progress color variables" min-width="28rem">
 
@@ -206,16 +125,6 @@ import { MdvCircularProgress } from '@mdv-ui/mdv'
 | `--mdv-progress-track-color` | `--mdv-sys-color-secondary-container` |
 
 </DocsTable>
-
-Do not rely on color alone to communicate completion or failure. In forced-colors mode, the indicator uses system `Highlight` and `GrayText` colors.
-
-## Accessibility and motion
-
-- Give the indicator an accessible name using `label`, `aria-label`, or `aria-labelledby`. `label` is also visible; an explicit `aria-label` takes precedence, and `aria-labelledby` prevents adding the label as another name.
-- The root exposes `role="progressbar"`, `aria-valuemin="0"`, and the normalized `aria-valuemax`. Determinate mode also exposes the real current `aria-valuenow`, without waiting for visual interpolation.
-- The decorative SVG is hidden from assistive technology and has no focus target. Keep related task descriptions outside the graphic and reference them with `aria-describedby` when useful.
-- A progressbar is not a live region. Provide an application status message for meaningful completion/error changes. Avoid announcing every animation frame or continuously updating text for an unknown task.
-- Value and waveform transitions take about 500ms. With reduced motion, determinate updates are immediate and indeterminate mode uses a static unknown-progress graphic. Continuous motion pauses when the page or indicator is not visible, and while its containing KeepAlive view is deactivated.
 
 ---
 

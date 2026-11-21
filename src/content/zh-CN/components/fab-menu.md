@@ -5,10 +5,8 @@ import ApiTable from '@/components/docs/ApiTable.vue'
 import SlotsTable from '@/components/docs/SlotsTable.vue'
 import type { ApiTableItem, SlotTableItem } from '@/components/docs/api-table.types'
 import FabMenuBasicDemo from '@/components/docs/demos/fabMenu/basic.vue'
-import FabMenuAppearanceDemo from '@/components/docs/demos/fabMenu/appearance.vue'
 import FabMenuSelectionDemo from '@/components/docs/demos/fabMenu/selection.vue'
 import FabMenuControlledDemo from '@/components/docs/demos/fabMenu/controlled.vue'
-import FabMenuDialogDemo from '@/components/docs/demos/fabMenu/dialog.vue'
 
 const menuProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'false（内部状态）', description: '省略时内部管理打开状态。绑定布尔值后，父级需要接受 update:modelValue 请求。' },
@@ -39,14 +37,13 @@ const itemSlots: SlotTableItem[] = [
   { name: 'leading', description: '装饰性前置图标，优先于 icon 数据。没有公开插槽参数。' },
 ]
 </script>
-
 # 浮动操作菜单
 
-`MdvFabMenu` 通过一个浮动入口展开少量相关的主要操作，内部使用 `MdvFabMenuItem`。`expressive` 将操作显示为独立胶囊，`baseline` 则在 FAB 旁使用普通菜单。
+用 `MdvFabMenu` 从悬浮操作按钮展开相关操作。每项使用一个 `MdvFabMenuItem`。
 
 ## Expressive 与 Baseline
 
-两种呈现可以使用同一组操作数据，但语义和键盘规则不同。下面并排展示，方便对比。
+用 `variant="expressive"` 显示展开式操作列表，或用 `baseline` 显示常规菜单。请为触发按钮提供明确的名称。
 
 <DemoBlock>
   <FabMenuBasicDemo />
@@ -89,68 +86,9 @@ const actions = [
   </template>
 </DemoBlock>
 
-Expressive 展开时，原触发器变为关闭操作，焦点仍留在同一节点。操作列表是非模态的 `group`：通过 Tab 进入第一个操作，再按正常顺序继续。它不使用菜单的方向键导航，也不锁住焦点。
+## 选择操作
 
-Baseline 使用 `variant="baseline"`、`placement="top-end"`、间距 4px 的 `MdvMenu`。打开后聚焦菜单项，方向键、Home/End、输入字符查找、Escape、Tab 均沿用普通菜单规则。定位时可以自动翻转或平移以适应视口。
-
-## 外观、方向与局部主题
-
-关闭状态的入口支持 56/80/96px 三种尺寸和六种颜色。Expressive 展开后，关闭操作固定为 56px，对齐原入口顶部的逻辑末端角，同时保留原入口的布局占位。
-
-<DemoBlock>
-  <FabMenuAppearanceDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvCheckbox, MdvFabMenu, MdvFabMenuItem, MdvSelect } from '@mdv-ui/mdv'
-import type { MdvFabMenuColor, MdvFabMenuSize } from '@mdv-ui/mdv'
-
-const size = ref<MdvFabMenuSize>('regular')
-const color = ref<MdvFabMenuColor>('primary-container')
-const elevated = ref(true)
-const disabled = ref(false)
-const rtl = ref(false)
-const dark = ref(false)
-const sizes = ['regular', 'medium', 'large'].map(value => ({ value, label: value }))
-const colors = ['primary-container', 'secondary-container', 'tertiary-container', 'primary', 'secondary', 'tertiary'].map(value => ({ value, label: value }))
-</script>
-
-<template>
-  <div class="grid gap-4">
-    <div class="flex flex-wrap gap-4">
-      <MdvSelect :model-value="size" :options="sizes" label="Trigger size" @update:model-value="size = $event as MdvFabMenuSize" />
-      <MdvSelect :model-value="color" :options="colors" label="Trigger color" @update:model-value="color = $event as MdvFabMenuColor" />
-    </div>
-    <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <MdvCheckbox v-model="elevated" label="Elevated surfaces" />
-      <MdvCheckbox v-model="disabled" label="Disable trigger" />
-      <MdvCheckbox v-model="rtl" label="Right-to-left layout" />
-      <MdvCheckbox v-model="dark" label="Local dark theme" />
-    </div>
-    <div :dir="rtl ? 'rtl' : 'ltr'" :data-mdv-theme="dark ? 'dark' : undefined" class="relative min-h-80 rounded-xl bg-mdv-surface-container-low p-5 pb-32 text-mdv-on-surface">
-      <p class="text-sm">Large triggers keep their original layout space while the close action becomes 56px.</p>
-      <MdvFabMenu :size="size" :color="color" :elevated="elevated" :trigger-attrs="{ disabled }" label="More creation options" close-label="Close creation options" position="absolute" :offset="16">
-        <MdvFabMenuItem label="New note" />
-        <MdvFabMenuItem label="Create a shared project folder with a longer label" />
-        <MdvFabMenuItem label="Import a template" />
-      </MdvFabMenu>
-    </div>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-Expressive 胶囊操作项最小高度为 56px，图标 24px，水平内边距 24px，图文间距 8px。相邻操作间距为 4px，最后一个操作与关闭按钮之间为 8px。长文字可以换行增加高度；视口较短时，操作列表可独立滚动，关闭操作仍可访问。
-
-胶囊使用所选色彩家族的 container/on-container，关闭操作使用实色与 on-color。`elevated` 影响入口、关闭操作和胶囊悬停阴影，不会移除 Baseline 普通菜单表面自身的阴影。与 Fab 不同，FabMenu 没有 `surface` 颜色和 `small` 尺寸。
-
-## 选择、保持打开与取消
-
-在操作项上监听 `@select` 执行业务逻辑，`event.detail.value` 用于辨识操作。组件没有选中值模型。需要重复执行时，可使用 `keep-open`。
+处理 `select` 并读取 `event.detail.value` 识别操作。使用 `keep-open` 让菜单在操作后保持打开，或调用 `preventDefault()` 取消选择。
 
 <DemoBlock>
   <FabMenuSelectionDemo />
@@ -192,13 +130,9 @@ function cancel(event: MdvFabMenuSelectEvent) {
   </template>
 </DemoBlock>
 
-可以切换两种呈现后，分别尝试 Add another、Cancel link action 和 Unavailable export。第一个保持菜单打开，并保留数字 `0` 的操作值；第二个同步调用 `event.preventDefault()`，同时取消原生链接导航与自动关闭；禁用项不会调用操作回调或导航。
+## 展开状态与触发按钮
 
-该事件为可取消的 `CustomEvent`，`detail` 包含 `{ value, selected: false, originalEvent }`。需要取消时，请在异步等待之前同步调用 `preventDefault()`。取消原始 click 的默认行为也会阻止选择。`keep-open` 仅影响关闭行为，不会把操作变为选中状态。
-
-## 受控状态与触发器属性
-
-不绑定模型时，菜单内部管理打开状态。绑定后，父级可以接受或拒绝打开、关闭请求。下面默认拒绝打开，启用后才接受；也可以拒绝下一次关闭，再允许后续尝试。
+用 `v-model` 控制菜单开关。通过 `trigger-attrs` 向内置按钮传递 `disabled` 等原生属性。
 
 <DemoBlock>
   <FabMenuControlledDemo />
@@ -257,67 +191,7 @@ function update(value: boolean) {
   </template>
 </DemoBlock>
 
-`open()`、`close()`、`toggle()` 只请求状态变化，返回 `void`，不会返回接受情况或等待动画。请观察绑定模型与生命周期事件；`focus()` 用于聚焦真实入口。
-
-入口专属的原生属性、事件应放入 `trigger-attrs`。其中的 `ref` 接受函数或 Vue ref，收到原生按钮，不支持字符串 ref。根节点的 `class`、`style`、`id`、`dir` 属于外壳。按钮类型、ID、可访问名称、展开状态和控制关系由 MDV 管理。
-
-原生 `disabled`、`aria-disabled="true"`、禁用的 fieldset 都会阻止入口激活。传入的 click/keydown 监听器可通过取消对应事件的默认行为，阻止该次内部激活处理。
-
-## 与对话框组合
-
-Expressive 浮层使用浏览器原生 Popover 顶层，不会通过 Teleport 脱离原来的 DOM 父级。因此能够继承局部主题，也可以参与外层 MDV 对话框的焦点管理。
-
-<DemoBlock>
-  <FabMenuDialogDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { ref } from 'vue'
-import { MdvButton, MdvDialog, MdvFabMenu, MdvFabMenuItem, MdvIcon, MdvTextField } from '@mdv-ui/mdv'
-import folderIcon from '@iconify-icons/material-symbols/create-new-folder-outline'
-import noteIcon from '@iconify-icons/material-symbols/note-add-outline'
-
-const open = ref(false)
-const name = ref('Reading list')
-const message = ref('No content added yet.')
-</script>
-
-<template>
-  <div class="grid justify-items-start gap-4">
-    <MdvButton @click="open = true">Open workspace</MdvButton>
-    <MdvDialog v-model="open" title="Workspace actions" role="dialog">
-      <div class="relative min-h-72 pb-24">
-        <MdvTextField v-model="name" label="Workspace name" full-width autofocus />
-        <p class="mt-4 text-sm text-mdv-on-surface-variant" role="status">{{ message }}</p>
-        <MdvFabMenu label="Add to workspace" close-label="Close workspace menu" position="absolute" :offset="0">
-          <template #icon><MdvIcon :icon="folderIcon" /></template>
-          <MdvFabMenuItem @select="message = `Note added to ${name}.`">
-            <template #leading><MdvIcon :icon="noteIcon" /></template>
-            Add a note
-          </MdvFabMenuItem>
-          <MdvFabMenuItem label="Add a collection" :icon="folderIcon" @select="message = `Collection added to ${name}.`" />
-        </MdvFabMenu>
-      </div>
-      <template #actions="{ close }"><MdvButton variant="text" @click="close()">Done</MdvButton></template>
-    </MdvDialog>
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
-打开工作区，输入名称后选择操作。Escape 优先关闭活动菜单，对话框仍保持可用。示例还通过 `#icon` 自定义入口图标，通过 `#leading` 自定义操作图标。由于组件默认关闭名称为中文，英文演示明确传入了 `close-label`。
-
-## 定位、焦点与动效
-
-- `static` 保留普通布局入口，`absolute`、`fixed` 使用逻辑底部末端定位。`absolute` 需要明确的定位容器。与 Fab 不同，FabMenu 没有 `placement` 属性。
-- 省略 `offset` 时，小于 1200px 的视口采用 16px，从 1200px 起采用 24px，安全区另计。显式值会覆盖响应式默认距离。布局仍需为入口和相邻导航预留空间。
-- Expressive 为非模态交互，没有遮罩或页面滚动锁。Tab/Shift+Tab 正常访问操作，方向键不用于选择操作。禁用的 Expressive 操作退出 Tab 顺序；Baseline 沿用普通菜单及其禁用项导航语义。
-- Escape 关闭并将焦点还给入口。外部点击、焦点或 Tab 离开时，保留新目标的焦点。当前操作被移除或变为不可用时，组件会恢复到可用入口。
-- 定位会跟随滚动和视口变化；锚点离开可见视口时请求 outside 关闭。受控父级仍可以拒绝该请求，因此应明确规划接受策略。
-- MDV 支持快速反向动画与减少动态效果偏好。需要等待完成时使用 `opened`、`closed`，不要把方法调用视为动画结束。需要原生 Popover 支持，实际支持的浏览器与辅助技术组合仍需验证。
+---
 
 ## MdvFabMenu API
 

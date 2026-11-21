@@ -8,7 +8,6 @@ import AutocompleteVariantDemo from '@/components/docs/demos/autocomplete/varian
 import AutocompleteMenuDemo from '@/components/docs/demos/autocomplete/menuVariant.vue'
 import AutocompleteOptionDemo from '@/components/docs/demos/autocomplete/option.vue'
 import AutocompleteRemoteDemo from '@/components/docs/demos/autocomplete/remote.vue'
-import AutocompleteStatesDemo from '@/components/docs/demos/autocomplete/states.vue'
 import AutocompleteFormDemo from '@/components/docs/demos/autocomplete/form.vue'
 
 const autocompleteProps: ApiTableItem[] = [
@@ -36,14 +35,13 @@ const autocompleteSlots: SlotTableItem[] = [
   { name: 'option', description: 'Custom option content, receiving { option, selected, active }. Presentation only: do not include buttons, links, or other focusable controls.' },
 ]
 </script>
-
 # Autocomplete
 
-`MdvAutocomplete` provides suggestions for an editable input. Users can choose an option or retain any text they type. Use `MdvSelect` when values must come from a fixed list.
+Use `MdvAutocomplete` to suggest matches as users type. It can also accept text that is not in the suggestions.
 
 ## Basic usage
 
-Bind `string | number | null` with `v-model` and supply `options` containing `{ value, label }`. Local filtering is enabled by default: it matches labels case-insensitively and trims the query for matching.
+Bind `v-model` and pass `options` with a `value` and `label` for each suggestion. The default filter matches labels without regard to case.
 
 <DemoBlock>
   <AutocompleteBasicDemo />
@@ -83,15 +81,9 @@ const options: MdvSelectOption[] = [
   </template>
 </DemoBlock>
 
-Choosing London produces the model `'london'` while displaying `London`. Typing an unmatched city produces that input string. Numeric and string values are distinct: `1` and `'1'` do not identify the same option.
-
-Options also support `supportingText` and `disabled`. Disabled options remain visible but cannot be selected or become keyboard-active. Keep the model value type consistent with each unique option value.
-
----
-
 ## Field appearance
 
-Choose `outlined` or `filled` with `variant`; the default is `outlined`. Use `full-width` to fill the parent container.
+Set `variant` to `outlined` or `filled`. Use `full-width` to fill the parent.
 
 <DemoBlock>
   <AutocompleteVariantDemo />
@@ -123,10 +115,6 @@ const options = [
   </template>
 </DemoBlock>
 
-### Suggestion panel
-
-`menu-variant` controls the panel independently. The default Expressive appearance has larger corners and selection shapes. Baseline uses smaller corners and continuous rows.
-
 <DemoBlock>
   <AutocompleteMenuDemo />
   <template #source>
@@ -157,13 +145,9 @@ const options = [
   </template>
 </DemoBlock>
 
-The panel uses combobox/listbox semantics. It serves a different purpose from an action menu and does not require `MdvMenu`.
-
----
-
 ## Custom options
 
-The `option` slot receives the original option, selection state, and active state. Use it for presentation such as text or images; the component retains selection and keyboard behavior.
+Use the `option` slot to customize how suggestions appear. Selection and keyboard interaction still belong to Autocomplete.
 
 <DemoBlock>
   <AutocompleteOptionDemo />
@@ -197,15 +181,9 @@ const options = [
   </template>
 </DemoBlock>
 
-Do not place independent buttons, links, or inputs inside an option. Use a composition suited to the interaction when multiple actions are needed.
-
----
-
 ## Async search
 
-With `filter-mode="external"`, the component displays `options` as supplied. Read the query from `search`, then update the list and `loading`.
-
-This example simulates a 350ms response with a local timer and makes no network request. New input cancels the previous scheduled response, clears previous options while loading, and unmounting clears the timer.
+Set `filter-mode="external"` to use server results as supplied. Read the query from `search`, then update `options` and `loading`. Cancel or ignore stale requests.
 
 <DemoBlock>
   <AutocompleteRemoteDemo />
@@ -266,45 +244,9 @@ onBeforeUnmount(() => clearTimeout(timer))
   </template>
 </DemoBlock>
 
-Real applications own requests, debouncing, errors, sorting, and stale responses. Use mechanisms such as `AbortController` or request sequence numbers to discard outdated results. `loading` only presents status; it does not disable previous options or manage requests.
-
-The default `loading-text` and `no-options-text` are Chinese. Shared demonstrations explicitly provide English text so their examples remain identical across article locales. Supply messages for your own application language.
-
----
-
-## Disabled and error states
-
-Use `disabled` to disable the field, and `error` with `error-text` for an application error. Setting `error-text` alone does not activate an error. To block submission, use native constraints or `setCustomValidity()`.
-
-<DemoBlock>
-  <AutocompleteStatesDemo />
-  <template #source>
-
-```vue:line-numbers
-<script setup lang="ts">
-import { MdvAutocomplete } from '@mdv-ui/mdv'
-
-const options = [{ value: 'paris', label: 'Paris' }]
-</script>
-
-<template>
-  <div class="grid gap-5 sm:grid-cols-2">
-    <MdvAutocomplete label="Disabled" model-value="paris" :options="options" disabled full-width />
-    <MdvAutocomplete label="Destination" :options="options" error error-text="Choose a supported destination." no-options-text="No cities found." full-width />
-  </div>
-</template>
-```
-
-  </template>
-</DemoBlock>
-
----
-
 ## Forms and validation
 
-`name` submits the model value without an extra copy of the display label. A `null` model omits the field; numbers become strings on submission. Disabled fields are excluded, and `form` can associate an external form.
-
-Click Submit while empty to see required validation. A selected suggestion or free text satisfies the constraint. Reset restores the model captured at component creation.
+Set `name` to submit the model rather than the display label. Use native constraints or `setCustomValidity()` to block invalid submission; `error` and `error-text` only display feedback.
 
 <DemoBlock>
   <AutocompleteFormDemo />
@@ -355,23 +297,6 @@ function submit(event: Event) {
 
   </template>
 </DemoBlock>
-
-`required` checks only for a non-null, nonempty string. It does not require a listed option or trim whitespace from the model. Use `MdvSelect` or add application validation if values must belong to a fixed list.
-
-A native form validation proxy reports errors through the visible field. Reset requests the initial model and closes the panel; a controlled parent must accept the updates. Wait for Vue updates before reading restored state. The application clears external errors and custom validity messages.
-
----
-
-## Open state and keyboard
-
-Omit `open` for internal panel state, or use `v-model:open` to control it. Template refs also provide `open()`, `close()`, and focus methods; controlled panels still follow the state accepted by their parent.
-
-- ArrowDown and ArrowUp browse enabled suggestions, Enter selects the active option, and Escape closes the panel.
-- Focus stays in the input, with `aria-activedescendant` identifying the active option.
-- Home and End retain native cursor editing. Tab leaves the field in native order.
-- Composition input, including Chinese IME, is supported. Suggestions and status messages expose the corresponding accessibility semantics.
-
-Provide a `label` or accessible name; placeholder text does not replace a label. Custom content does not replace the option semantics.
 
 ---
 
