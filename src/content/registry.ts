@@ -34,6 +34,9 @@ import searchBarIcon from '@iconify-icons/material-symbols/search'
 import segmentedButtonIcon from '@iconify-icons/material-symbols/view-week-outline'
 import selectIcon from '@iconify-icons/material-symbols/arrow-drop-down-circle-outline'
 import sideSheetIcon from '@iconify-icons/material-symbols/dock-to-right-outline'
+import sliderIcon from '@iconify-icons/material-symbols/tune'
+import snackbarIcon from '@iconify-icons/material-symbols/notifications-active'
+import splitButtonIcon from '@iconify-icons/material-symbols/arrow-split'
 
 export const locales = ['en-US', 'zh-CN'] as const
 
@@ -126,6 +129,39 @@ export const navigationItems: NavigationItem[] = [
         documents: {
           'en-US': () => import('./en-US/components/side-sheet.md'),
           'zh-CN': () => import('./zh-CN/components/side-sheet.md'),
+        },
+      },
+      {
+        id: 'slider',
+        slug: 'components/slider',
+        title: { 'en-US': 'Slider', 'zh-CN': '滑块' },
+        navigationLabel: { 'en-US': 'Slider', 'zh-CN': 'Slider' },
+        icon: sliderIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/slider.md'),
+          'zh-CN': () => import('./zh-CN/components/slider.md'),
+        },
+      },
+      {
+        id: 'snackbar',
+        slug: 'components/snackbar',
+        title: { 'en-US': 'Snackbar', 'zh-CN': '消息提示' },
+        navigationLabel: { 'en-US': 'Snackbar', 'zh-CN': 'Snackbar' },
+        icon: snackbarIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/snackbar.md'),
+          'zh-CN': () => import('./zh-CN/components/snackbar.md'),
+        },
+      },
+      {
+        id: 'split-button',
+        slug: 'components/split-button',
+        title: { 'en-US': 'Split Button', 'zh-CN': '拆分按钮' },
+        navigationLabel: { 'en-US': 'SplitButton', 'zh-CN': 'SplitButton' },
+        icon: splitButtonIcon,
+        documents: {
+          'en-US': () => import('./en-US/components/split-button.md'),
+          'zh-CN': () => import('./zh-CN/components/split-button.md'),
         },
       },
       {
