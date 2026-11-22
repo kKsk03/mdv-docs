@@ -6,6 +6,15 @@ export default {
     headingLink: 'Link to section: {title}',
     onThisPage: 'On this page',
   },
+  introduction: {
+    componentLibrary: 'Component Library',
+    summary: 'A Material Design 3 component library for Vue 3. Build forms, navigation, and dialogs with TypeScript and Tailwind CSS v4.',
+    getStarted: 'Get started',
+    browseComponents: 'Components',
+    componentCount: '{count} components',
+    dynamicColor: 'Dynamic color',
+    darkMode: 'Dark mode',
+  },
   navigation: {
     content: 'Documentation content',
     introduction: 'Introduction',

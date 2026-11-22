@@ -40,8 +40,9 @@ export function scrollToArticleHash(hash: string, router?: Router): false {
     return false
   }
 
+  // The landing page opts in to fragment scrolling without mounting an article.
   // Entering and leaving pages can briefly contain the same heading ID.
-  const target = Array.from(document.querySelectorAll<HTMLElement>('.docs-prose [id]'))
+  const target = Array.from(document.querySelectorAll<HTMLElement>('.docs-prose [id], [data-docs-anchor][id]'))
     .find(element => element.id === id && !element.closest('[inert], [aria-hidden="true"]'))
   if (target) {
     const root = target.closest<HTMLElement>('.docs-article-scroll')

@@ -1,6 +1,6 @@
 # Documentation Roadmap
 
-Updated: 2026-11-21. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
+Updated: 2026-11-22. Documentation dependency: **@mdv-ui/mdv 0.1.5**.
 
 This is the local checklist for documenting MDV in this repository. Use it to select, implement, and review three component pages at a time. Read [AGENTS.md](./AGENTS.md) for project decisions and [MAINTENANCE.md](./MAINTENANCE.md) for validation procedures.
 
@@ -13,7 +13,7 @@ The inventory was checked against the sibling library's `src/index.ts`, `COMPONE
 - The 40 non-Button component pages follow the Button page's concise example-first style in both locales. Package baselines and integration investigations stay in maintainer documentation; only usage-relevant caveats appear in articles.
 - Related items, groups, providers, scaffolds, and variants are documented in their owning page when listed below. Each included component needs its own API coverage on that page.
 - Public types belong with the components that use them. The `useSnackbar` helper belongs on the Snackbar page. Dynamic-color functions have a separate guide task below.
-- Introduction and Setup already exist in both locales. The shared demo shell, API tables, Markdown highlighting, heading links, page outline, and page transitions are already implemented.
+- Introduction is the localized landing page; Setup remains a separate guide in both locales. The shared demo shell, API tables, Markdown highlighting, heading links, page outline, and page transitions are already implemented.
 
 The library working-tree manifest currently says `0.1.4`, while this site's dependency and installed package say `0.1.5`. Their 67 component export names and public component source files match after line-ending normalization. Use the installed package as the API baseline for examples; check props, defaults, slots, events, methods, and public types again before writing each page.
 
@@ -137,14 +137,14 @@ Use these checks for every page in the active batch. Mark the component entry co
 
 These are follow-up documentation tasks, separate from the component-page count. Introduction and Setup remain the existing starting points.
 
-- [x] Expand Introduction with the supported library scope, a flat component library grid, and links to setup and examples.
+- [x] Make Introduction a landing page with a centered, theme-aware wordmark and a CSS-only animated backdrop above the flat component grid. Accent the M, D, and V initials and keep the backdrop still with reduced motion. The hero links to Setup, the catalog, and the library repository. The version and public component count follow the package at build time.
 - [ ] Review Setup against the installed package, including optional icon data, individual component imports, CSS order, consumer-side Tailwind generation, and font behavior.
 - [ ] Add theme/style guidance covering light/dark/system and local scopes, MDV color roles, CSS variables and Tailwind mappings, typography/fonts, shapes, elevation, motion, and reduced motion.
 - [ ] Add dynamic-color guidance for `createMdvColorScheme`, `applyMdvColorScheme`, their public types, seed requirements, scoped application, cleanup, and server/browser boundaries.
 - [ ] Add integration guidance for native forms, accessible names and keyboard interaction, IME, overlay composition, routing, SSR/hydration limits, and individual imports/bundle considerations.
 - [ ] Establish a visible documented-version policy and keep it aligned with the installed package before publishing the site.
 
-Introduction and navigation validation: The registry supplies one card per component page and the same English names for the grid and drawer. Integration tests verified the inventory, order, names, translated subtitles and badges, and card links in both locales. `pnpm check` passed (24 files, 222 tests, and a production build); the existing Vite chunk-size warning remains. A browser spot check confirmed that switching to English removes both translations, the two-column grid fits at 390px, and Enter opens the localized article.
+Introduction and navigation validation: The registry supplies one card per component page and the same English names for the grid and drawer. Integration tests cover the root locale redirect, icon-free wordmark with accented initials, no article outline, localized catalog permalinks, and card links. `pnpm check` passed (222 tests in 24 files, type checking, and a production build); the existing Vite chunk-size warning remains. CSS polygons preserve the moving backdrop in light and dark mode, with no horizontal overflow at 320px and 390px. The production build no longer emits the backdrop PNG; the landing route's CSS, JavaScript, and backdrop assets are 14,086 bytes smaller before compression. Browser checks for the shared catalog permalink covered pointer and keyboard activation, direct loading of the locale fragments, and an unclipped focus outline at both widths. Reduced motion was not emulated in the browser.
 
 Component editorial review validation: `pnpm check` passed (23 files, 220 tests, and a production build). All internal article links and fragments resolved, and retained demos and displayed source matched across locales. Production preview spot checks covered the Chinese Navigation Rail outline, rail expansion and example code, and the English Date Range Picker link to Date Picker localization. With both sidebars visible at 1280px, the unchanged Date Range Picker text-entry demo clipped the end field on the right; investigate its container layout separately. Broader browser coverage and the existing Vite chunk-size warning remain open.
 

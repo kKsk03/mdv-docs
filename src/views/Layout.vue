@@ -82,6 +82,7 @@ const navigationOpen = computed({
 const pageTitle = computed(() =>
   typeof route.meta.title === 'string' ? route.meta.title : t('navigation.introduction'),
 )
+const appBarTitle = computed(() => route.meta.documentId === defaultDocumentId ? '' : pageTitle.value)
 const themeIcons = {
   light: lightModeIcon,
   dark: darkModeIcon,
@@ -272,7 +273,7 @@ onBeforeUnmount(() => {
     >
       <template #appbar>
         <MdvAppBar
-          :title="pageTitle"
+          :title="appBarTitle"
           variant="small"
           scroll-behavior="pinned"
           :heading-level="2"
@@ -374,7 +375,13 @@ onBeforeUnmount(() => {
       <main id="main-content" class="route-page-container">
         <RouterView v-slot="{ Component, route: currentRoute }">
           <Transition name="route-page" @before-leave="prepareLeavingPage">
-            <ArticlePage :key="currentRoute.path" class="route-page">
+            <component
+              :is="Component"
+              v-if="currentRoute.meta.documentId === defaultDocumentId"
+              :key="currentRoute.path"
+              class="route-page"
+            />
+            <ArticlePage v-else :key="currentRoute.path" class="route-page">
               <component :is="Component" />
             </ArticlePage>
           </Transition>

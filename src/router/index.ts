@@ -32,7 +32,7 @@ function localeFromPath(path: string) {
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to) {
-    // Vue Router runs this after the lazy article has rendered.
+    // Vue Router runs this after the lazy page has rendered.
     return scrollToArticleHash(to.hash, router)
   },
   routes: [
@@ -54,6 +54,7 @@ const router = createRouter({
           path: page.slug,
           name: getRouteName(locale, page.id),
           component: page.documents[locale],
+          props: page.id === defaultDocumentId ? { locale } : false,
           meta: {
             documentId: page.id,
             locale,

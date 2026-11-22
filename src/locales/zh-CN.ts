@@ -6,6 +6,15 @@ export default {
     headingLink: '跳转到章节：{title}',
     onThisPage: '本页目录',
   },
+  introduction: {
+    componentLibrary: '组件库',
+    summary: '为 Vue 3 打造的 Material Design 3 组件库。按需引入按钮、表单和导航，用 Tailwind CSS v4 完成布局。',
+    getStarted: '开始使用',
+    browseComponents: '浏览组件',
+    componentCount: '{count} 个组件',
+    dynamicColor: '动态配色',
+    darkMode: '深色模式',
+  },
   navigation: {
     content: '文档内容',
     introduction: '简介',

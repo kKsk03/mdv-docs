@@ -5,7 +5,7 @@ import { h, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import Layout from '../src/views/Layout.vue'
-import { documentationPages, getRouteName, locales } from '../src/content/registry.ts'
+import { defaultDocumentId, documentationPages, getRouteName, locales } from '../src/content/registry.ts'
 import enUS from '../src/locales/en-US.ts'
 import zhCN from '../src/locales/zh-CN.ts'
 
@@ -62,12 +62,11 @@ async function fixture(desktop = false, realTransitions = false) {
     routes: locales.flatMap(locale => documentationPages.map(page => ({
       path: `/${locale}/${page.slug}`,
       name: getRouteName(locale, page.id),
-      component: { render: () => h('div', [
+      component: page.id === defaultDocumentId ? page.documents[locale] : { render: () => h('div', [
         h('h1', { id: page.id, 'data-docs-heading': '' }, page.title[locale]),
-        ...(page.id === 'introduction' ? [] : [
-          h('h2', { id: `${page.id}-section`, 'data-docs-heading': '' }, `${page.title[locale]} section`),
-        ]),
+        h('h2', { id: `${page.id}-section`, 'data-docs-heading': '' }, `${page.title[locale]} section`),
       ]) },
+      props: page.id === defaultDocumentId ? { locale } : false,
       meta: { documentId: page.id, locale, title: page.title[locale] },
     }))),
   })
@@ -166,7 +165,7 @@ test('article changes replace the page while fragment and query updates preserve
   expect(wrapper.get('.route-page').element).not.toBe(setupPage)
 })
 
-test('each transitioning page keeps its own article and outline when entering or leaving Introduction', async () => {
+test('article outlines remain with their own pages when transitioning to or from the landing page', async () => {
   vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'setTimeout', 'clearTimeout'] })
   const { wrapper, router } = await fixture(true, true)
   const buttonPage = wrapper.get('.route-page')
@@ -190,8 +189,8 @@ test('each transitioning page keeps its own article and outline when entering or
   expect(buttonPage.get('.docs-outline').element).toBe(buttonOutline)
   expect(buttonPage.get('.docs-outline__title').text()).toBe('按钮')
   const introduction = wrapper.get('.route-page:not([inert])')
-  expect(introduction.get('h1').text()).toBe('简介')
-  expect(introduction.find('.docs-outline').exists()).toBe(false)
+  expect(introduction.get('h2').text().replace(/^#\s*/, '')).toBe('组件库')
+  expect(introduction.find('article, .docs-outline').exists()).toBe(false)
   await vi.advanceTimersByTimeAsync(800)
   expect(wrapper.findAll('.route-page')).toHaveLength(1)
 

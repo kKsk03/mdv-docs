@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs'
+import { findPackageJSON } from 'node:module'
 import { fileURLToPath, URL } from 'node:url'
+import * as mdv from '@mdv-ui/mdv'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -9,8 +12,16 @@ import tailwindcss from '@tailwindcss/vite'
 import { markdownCode, withCodeImports } from './build/markdown-code.ts'
 import { markdownHeadings } from './build/markdown-headings.ts'
 
+const mdvManifest = JSON.parse(readFileSync(findPackageJSON('@mdv-ui/mdv', import.meta.url)!, 'utf8')) as { version: string }
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    __MDV_LIBRARY__: JSON.stringify({
+      version: mdvManifest.version,
+      components: Object.keys(mdv).filter(name => /^Mdv[A-Z]/.test(name)).length,
+    }),
+  },
   build: {
     // Preserve native :dir() matching; lowering it to :lang() breaks scoped RTL demos.
     cssTarget: ['chrome120', 'edge120', 'firefox114', 'safari16.4', 'ios16.4'],

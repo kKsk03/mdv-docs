@@ -25,7 +25,7 @@
   scroll-margin-block-start: 1.5rem;
 }
 
-.docs-prose .docs-heading-anchor {
+:is(.docs-prose, .introduction-page) .docs-heading-anchor {
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: 100%;
@@ -38,16 +38,16 @@
   transition: opacity var(--mdv-sys-motion-duration-short-2) var(--mdv-sys-motion-easing-standard);
 }
 
-.docs-prose :where(h1, h2, h3, h4, h5, h6):hover > .docs-heading-anchor,
-.docs-prose .docs-heading-anchor:focus-visible {
+:is(.docs-prose, .introduction-page) :where(h1, h2, h3, h4, h5, h6):hover > .docs-heading-anchor,
+:is(.docs-prose, .introduction-page) .docs-heading-anchor:focus-visible {
   opacity: 1;
 }
 
-.docs-prose .docs-heading-anchor:hover {
+:is(.docs-prose, .introduction-page) .docs-heading-anchor:hover {
   text-decoration: underline;
 }
 
-.docs-prose .docs-heading-anchor:focus-visible {
+:is(.docs-prose, .introduction-page) .docs-heading-anchor:focus-visible {
   border-radius: var(--mdv-sys-shape-corner-extra-small);
   outline: 2px solid var(--mdv-sys-color-primary);
   outline-offset: 2px;
@@ -136,7 +136,7 @@
     scroll-behavior: auto;
   }
 
-  .docs-prose .docs-heading-anchor {
+  :is(.docs-prose, .introduction-page) .docs-heading-anchor {
     transition: none;
   }
 }

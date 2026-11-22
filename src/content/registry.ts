@@ -1,3 +1,4 @@
+import type { Component } from 'vue'
 import type { MdvIconData } from '@mdv-ui/mdv'
 import introductionIcon from '@iconify-icons/material-symbols/menu-book'
 import setupIcon from '@iconify-icons/material-symbols/settings'
@@ -48,8 +49,7 @@ export const locales = ['en-US', 'zh-CN'] as const
 
 export type Locale = (typeof locales)[number]
 
-type MarkdownModule = typeof import('./en-US/getting-started/introduction.md')
-type MarkdownLoader = () => Promise<MarkdownModule>
+type PageLoader = () => Promise<{ default: Component }>
 type LocalizedText = Record<Locale, string>
 
 export interface DocumentationPage {
@@ -58,7 +58,7 @@ export interface DocumentationPage {
   title: LocalizedText
   navigationLabel?: LocalizedText
   icon: MdvIconData
-  documents: Record<Locale, MarkdownLoader>
+  documents: Record<Locale, PageLoader>
 }
 
 export interface NavigationGroup {
@@ -85,6 +85,8 @@ function sortComponentPages(pages: DocumentationPage[]) {
   )
 }
 
+const loadIntroduction = () => import('@/views/IntroductionPage.vue')
+
 export const navigationItems: NavigationItem[] = [
   {
     id: 'introduction',
@@ -92,8 +94,8 @@ export const navigationItems: NavigationItem[] = [
     title: { 'en-US': 'Introduction', 'zh-CN': '简介' },
     icon: introductionIcon,
     documents: {
-      'en-US': () => import('./en-US/getting-started/introduction.md'),
-      'zh-CN': () => import('./zh-CN/getting-started/introduction.md'),
+      'en-US': loadIntroduction,
+      'zh-CN': loadIntroduction,
     },
   },
   {
