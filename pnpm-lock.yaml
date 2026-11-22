@@ -170,8 +170,8 @@ importers:
         specifier: ^2.0.11
         version: 2.0.11
       '@mdv-ui/mdv':
-        specifier: 0.1.6
-        version: 0.1.6(tailwindcss@4.3.5)(vue@3.5.45(typescript@6.0.3))
+        specifier: 0.1.8
+        version: 0.1.8(tailwindcss@4.3.5)(vue@3.5.45(typescript@6.0.3))
       pinia:
         specifier: ^4.1.0
         version: 4.1.0(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.45(typescript@6.0.3))
@@ -945,8 +945,8 @@ packages:
     resolution: {integrity: sha512-00aAZ0F0NLik6I6Yba2emGbHLxv+QYrPH00qQ5dFKXlAo1Ll2RHDXwY7nN2WAfrx2pP+WrvSRFTGFCNGdzBDHw==}
     engines: {node: '>=20.0.0'}
 
-  '@mdv-ui/mdv@0.1.6':
-    resolution: {integrity: sha512-U+E/fL8qWlp2ZSvIGS65NhjIbB8WkKPMsdWRLjwhX1A+DkT8B8QrtVFS4U0nhIL5LD8BDefTpJBuqQqvWnQ2bQ==}
+  '@mdv-ui/mdv@0.1.8':
+    resolution: {integrity: sha512-42z/d2yf1U8f5NZ9sljNaCC3RAg6JKQV3mixOGFHygqrbyvrxCkYhNkTAvbiLc4jBwGJCSOIC3/I+7z82sGbwA==}
     engines: {node: ^22.18.0 || >=24.12.0}
     peerDependencies:
       tailwindcss: ^4.0.0
@@ -3200,7 +3200,7 @@ snapshots:
 
   '@mdit-vue/types@3.0.2': {}
 
-  '@mdv-ui/mdv@0.1.6(tailwindcss@4.3.5)(vue@3.5.45(typescript@6.0.3))':
+  '@mdv-ui/mdv@0.1.8(tailwindcss@4.3.5)(vue@3.5.45(typescript@6.0.3))':
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@fontsource/roboto': 5.3.0

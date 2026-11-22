@@ -319,11 +319,13 @@ async function navigateToSection(event: MouseEvent, navigate: (event?: MouseEven
 }
 
 .docs-outline__link {
+  --mdv-button-color: var(--mdv-sys-color-on-surface-variant);
+
   min-block-size: 36px;
   justify-content: flex-start;
+
   border: 1px solid transparent;
   padding: 0.5rem 0.875rem;
-  color: var(--mdv-sys-color-on-surface-variant);
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.4;
@@ -331,13 +333,14 @@ async function navigateToSection(event: MouseEvent, navigate: (event?: MouseEven
 }
 
 .docs-outline__link--ancestor {
-  color: var(--mdv-sys-color-on-surface);
+  --mdv-button-color: var(--mdv-sys-color-on-surface);
   font-weight: 500;
 }
 
 .docs-outline__link--active {
+  --mdv-button-color: var(--mdv-sys-color-primary);
+
   border-color: var(--mdv-sys-color-outline);
-  color: var(--mdv-sys-color-primary);
   font-weight: 600;
 }
 
