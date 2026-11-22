@@ -49,7 +49,6 @@ function mockPopover() {
 }
 
 async function fixture(desktop = false, realTransitions = false) {
-  localStorage.clear()
   const opened = mockPopover()
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   const viewport = Object.assign(new EventTarget(), {
@@ -72,12 +71,16 @@ async function fixture(desktop = false, realTransitions = false) {
   })
   await router.push('/zh-CN/components/button')
   const i18n = createI18n({ legacy: false, locale: 'zh-CN', messages: { 'en-US': enUS, 'zh-CN': zhCN } })
-  host = mount(Layout, {
-    attachTo: document.body,
-    global: { plugins: [router, i18n], stubs: { transition: !realTransitions } },
-  })
-  await flushPromises()
-  const wrapper = host
+  async function mountLayout() {
+    host?.unmount()
+    host = mount(Layout, {
+      attachTo: document.body,
+      global: { plugins: [router, i18n], stubs: { transition: !realTransitions } },
+    })
+    await flushPromises()
+    return host
+  }
+  const wrapper = await mountLayout()
   const action = (label: string) => wrapper.get(`.mdv-app-bar__actions button[aria-label="${label}"]`)
   const item = (label: string) => {
     const control = wrapper.findAll('[data-mdv-menu-item]').find(control => control.text() === label)
@@ -89,7 +92,13 @@ async function fixture(desktop = false, realTransitions = false) {
     viewport.dispatchEvent(new Event('change'))
     await flushPromises()
   }
-  return { wrapper, router, opened, action, item, resize }
+  return { wrapper, router, opened, action, item, resize, mountLayout }
+}
+
+async function settlePalette() {
+  await flushPromises()
+  await vi.dynamicImportSettled()
+  await flushPromises()
 }
 
 test('compact actions group themes and languages in separate submenus and persist theme choices', async () => {
@@ -104,7 +113,7 @@ test('compact actions group themes and languages in separate submenus and persis
     const rootMenu = [...opened][0]!
     expect([...rootMenu.querySelectorAll('[data-mdv-menu-item]')]
       .filter(control => control.closest('[role="menu"]') === rootMenu)
-      .map(control => control.textContent?.trim())).toEqual(['主题', '语言'])
+      .map(control => control.textContent?.trim())).toEqual(['配色', '主题', '语言'])
     await item('主题').trigger('click')
     await flushPromises()
     expect(opened.size).toBe(2)
@@ -117,6 +126,116 @@ test('compact actions group themes and languages in separate submenus and persis
     expect(item(label).attributes('aria-checked')).toBe('true')
     expect(action('更多选项').attributes('aria-expanded')).toBe('false')
     expect(opened.size).toBe(0)
+  }
+})
+
+test('desktop palette previews presets without changing the theme mode and can restore MDV defaults', async () => {
+  localStorage.setItem('mdv-docs-theme', 'light')
+  localStorage.setItem('mdv-docs-palette', '__proto__')
+  const { wrapper, router, action, mountLayout } = await fixture(true)
+  const scope = wrapper.get<HTMLElement>('[data-mdv-theme]').element
+  expect(wrapper.findAll('.mdv-app-bar__actions > button').map(button => button.attributes('aria-label')))
+    .toEqual(['配色：默认', '主题：浅色模式', '语言'])
+  expect(scope.hasAttribute('data-mdv-color-scheme')).toBe(false)
+
+  await action('配色：默认').trigger('click')
+  await flushPromises()
+  expect(action('配色：默认').attributes('aria-expanded')).toBe('true')
+  const dialog = wrapper.get('[role="dialog"][aria-modal="false"]')
+  expect(dialog.element.matches(':popover-open')).toBe(true)
+  const group = dialog.get('[role="radiogroup"]')
+  expect(group.findAll('input[type="radio"]')).toHaveLength(20)
+  expect(group.get<HTMLInputElement>('input[value="default"]').element.checked).toBe(true)
+
+  await group.get('input[value="blue"]').setValue(true)
+  await settlePalette()
+  expect(scope.hasAttribute('data-mdv-color-scheme')).toBe(true)
+  const lightPrimary = scope.style.getPropertyValue('--mdv-dynamic-light-color-primary')
+  const darkPrimary = scope.style.getPropertyValue('--mdv-dynamic-dark-color-primary')
+  expect(lightPrimary).toMatch(/^#[a-f0-9]{6}$/)
+  expect(darkPrimary).toMatch(/^#[a-f0-9]{6}$/)
+  expect(lightPrimary).not.toBe(darkPrimary)
+  expect(document.documentElement.hasAttribute('data-mdv-color-scheme')).toBe(false)
+  expect(localStorage.getItem('mdv-docs-palette')).toBe('blue')
+  expect(action('配色：蓝色').attributes('aria-expanded')).toBe('true')
+  expect(scope.getAttribute('data-mdv-theme')).toBe('light')
+
+  await action('主题：浅色模式').trigger('click')
+  expect(scope.getAttribute('data-mdv-theme')).toBe('dark')
+  expect(scope.style.getPropertyValue('--mdv-dynamic-dark-color-primary')).toBe(darkPrimary)
+  await router.push('/en-US/components/button')
+  await flushPromises()
+  expect(action('Color palette: Blue').attributes('aria-haspopup')).toBe('dialog')
+
+  const reloaded = await mountLayout()
+  await settlePalette()
+  const newScope = reloaded.get<HTMLElement>('[data-mdv-theme]').element
+  expect(scope.hasAttribute('data-mdv-color-scheme')).toBe(false)
+  expect(newScope.getAttribute('data-mdv-theme')).toBe('dark')
+  expect(newScope.style.getPropertyValue('--mdv-dynamic-dark-color-primary')).toBe(darkPrimary)
+  await reloaded.get('button[aria-label="Color palette: Blue"]').trigger('click')
+  await flushPromises()
+  const reopened = reloaded.get('[role="dialog"][aria-modal="false"]')
+  expect(reopened.element.matches(':popover-open')).toBe(true)
+  expect(reopened.get<HTMLInputElement>('input[value="blue"]').element.checked).toBe(true)
+
+  await reopened.get('input[value="green"]').setValue(true)
+  expect(reloaded.get('button[aria-label="Color palette: Green"]').attributes('aria-expanded')).toBe('true')
+  const nextPrimary = newScope.style.getPropertyValue('--mdv-dynamic-light-color-primary')
+  expect(nextPrimary).toMatch(/^#[a-f0-9]{6}$/)
+  expect(nextPrimary).not.toBe(lightPrimary)
+
+  await reopened.get('input[value="default"]').setValue(true)
+  expect(reloaded.get('.mdv-app-bar__actions button[aria-label="Color palette: Default"]').attributes('aria-haspopup')).toBe('dialog')
+  expect(newScope.hasAttribute('data-mdv-color-scheme')).toBe(false)
+  expect(newScope.style.getPropertyValue('--mdv-dynamic-light-color-primary')).toBe('')
+  expect(localStorage.getItem('mdv-docs-palette')).toBe('default')
+  expect(newScope.getAttribute('data-mdv-theme')).toBe('dark')
+})
+
+test('compact palette closes the More menu and shares the selection with desktop', async () => {
+  const proto = HTMLDialogElement.prototype
+  const show = Object.getOwnPropertyDescriptor(proto, 'showModal')
+  const close = Object.getOwnPropertyDescriptor(proto, 'close')
+  Object.defineProperties(proto, {
+    showModal: { configurable: true, value(this: HTMLDialogElement) { this.open = true } },
+    close: { configurable: true, value(this: HTMLDialogElement) { this.open = false } },
+  })
+
+  try {
+    const { wrapper, action, item, opened, resize } = await fixture()
+    await action('更多选项').trigger('click')
+    await flushPromises()
+    await item('配色').trigger('click')
+    await flushPromises()
+    expect(opened.size).toBe(0)
+    const dialog = wrapper.get('dialog[open][role="dialog"]')
+    expect(dialog.get('h2').text()).toBe('配色')
+    const defaultColor = dialog.get<HTMLInputElement>('input[value="default"]')
+    expect(document.activeElement).toBe(defaultColor.element)
+    await dialog.get('input[value="teal"]').setValue(true)
+    await settlePalette()
+    expect(localStorage.getItem('mdv-docs-palette')).toBe('teal')
+    await dialog.get('button').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('dialog[open]').exists()).toBe(false)
+    expect(document.activeElement).toBe(action('更多选项').element)
+
+    await action('更多选项').trigger('click')
+    await flushPromises()
+    await item('配色').trigger('click')
+    await flushPromises()
+    expect(wrapper.get<HTMLInputElement>('dialog[open] input[value="teal"]').element.checked).toBe(true)
+    await resize(true)
+    expect(wrapper.find('dialog[open]').exists()).toBe(false)
+    expect(action('配色：蓝绿').attributes('aria-expanded')).toBe('false')
+  } finally {
+    host?.unmount()
+    host = undefined
+    if (show) Object.defineProperty(proto, 'showModal', show)
+    else Reflect.deleteProperty(proto, 'showModal')
+    if (close) Object.defineProperty(proto, 'close', close)
+    else Reflect.deleteProperty(proto, 'close')
   }
 })
 
@@ -240,7 +359,7 @@ test('changing breakpoints disposes open menu layers and preserves shared theme 
 
   await resize(true)
   expect(opened.size).toBe(0)
-  expect(wrapper.findAll('.mdv-app-bar__actions > button')).toHaveLength(2)
+  expect(wrapper.findAll('.mdv-app-bar__actions > button')).toHaveLength(3)
   expect(wrapper.find('.mdv-app-bar__actions button[aria-label="更多选项"]').exists()).toBe(false)
   await action('主题：深色模式').trigger('click')
   expect(wrapper.attributes('data-mdv-theme')).toBe('system')

@@ -6,7 +6,8 @@
 - Use MDV components for shared navigation and controls. Keep Tailwind CSS v4 and MDV styles imported only through `src/assets/css/main.css`.
 - Do not globally register MDV components; import them where used to preserve tree-shaking.
 - The theme control cycles through light, dark, and system modes and persists the choice under `mdv-docs-theme`; system mode follows `prefers-color-scheme`.
-- At 768px and above, keep separate theme and language actions in the App Bar. Below that breakpoint, use one More options icon button with an MDV menu containing only Theme and Language parent items, each with a single-choice `#children` group. Use `submenu-mode="push"` for compact navigation and share the existing theme persistence and locale routing. Mount only the current breakpoint's actions so hidden menu layers are disposed when switching layouts; keep this composition in the documentation site.
+- At 768px and above, keep separate palette, theme, and language actions in that order. Open the shared swatches in a persistent `MdvRichTooltip`. Below that breakpoint, use one More options button with a Color palette action opening an `MdvDialog`, followed by Theme and Language single-choice submenus in `push` mode. Mount only the active breakpoint's controls and layers. Keep this composition in the documentation site.
+- Offer fixed color presets only. Save the palette under `mdv-docs-palette` independently of the light/dark/system mode. Use MDV's dynamic color API on the layout root for non-default presets; restore the declared MDV palette when the default is selected. Load the dynamic color engine only when needed.
 
 ## Content and locales
 

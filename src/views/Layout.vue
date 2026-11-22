@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import brightnessAutoIcon from '@iconify-icons/material-symbols/brightness-auto'
@@ -7,10 +7,13 @@ import darkModeIcon from '@iconify-icons/material-symbols/dark-mode'
 import lightModeIcon from '@iconify-icons/material-symbols/light-mode'
 import menuIcon from '@iconify-icons/material-symbols/menu'
 import moreVertIcon from '@iconify-icons/material-symbols/more-vert'
+import paletteIcon from '@iconify-icons/material-symbols/palette-outline'
 import translateIcon from '@iconify-icons/material-symbols/translate'
 import {
   MdvAppBar,
   MdvAppBarScaffold,
+  MdvButton,
+  MdvDialog,
   MdvIcon,
   MdvIconButton,
   MdvModalNavigationDrawer,
@@ -20,6 +23,7 @@ import {
   MdvNavigationDrawer,
   MdvNavigationDrawerGroup,
   MdvNavigationDrawerItem,
+  MdvRichTooltip,
   MdvTooltip,
 } from '@mdv-ui/mdv'
 import {
@@ -34,6 +38,8 @@ import {
   type Locale,
 } from '@/content/registry'
 import ArticlePage from '@/components/docs/ArticlePage.vue'
+import PaletteSwatches from '@/components/docs/PaletteSwatches.vue'
+import { usePalette } from '@/color-palettes'
 
 const themeModes = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof themeModes)[number]
@@ -56,6 +62,9 @@ const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n({ useScope: 'global' })
 const themeMode = ref<ThemeMode>(getInitialThemeMode())
+const { palette, selectPalette } = usePalette(useTemplateRef<HTMLElement>('themeScope'))
+const mobilePaletteOpen = ref(false)
+const paletteButtonLabel = computed(() => t('palette.button', { color: t(`palette.names.${palette.value}`) }))
 const desktopQuery =
   typeof window !== 'undefined' && typeof window.matchMedia === 'function'
     ? window.matchMedia('(min-width: 768px)')
@@ -137,7 +146,10 @@ watch(
 function syncViewport() {
   if (!desktopQuery) return
   isDesktop.value = desktopQuery.matches
-  if (isDesktop.value) mobileNavigationOpen.value = false
+  if (isDesktop.value) {
+    mobileNavigationOpen.value = false
+    mobilePaletteOpen.value = false
+  }
 }
 
 function navigateFromDrawer(event: MouseEvent, navigate: (event: MouseEvent) => void) {
@@ -201,6 +213,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
+    ref="themeScope"
     class="flex h-dvh min-w-0 overflow-hidden bg-mdv-surface-container-low text-mdv-on-surface"
     :data-mdv-theme="themeMode"
   >
@@ -292,6 +305,19 @@ onBeforeUnmount(() => {
           </template>
           <template #actions>
             <template v-if="isDesktop">
+              <MdvRichTooltip persistent placement="bottom-end" :title="t('palette.label')">
+                <template #trigger="{ triggerProps }">
+                  <MdvIconButton
+                    v-bind="triggerProps"
+                    variant="standard"
+                    :aria-label="paletteButtonLabel"
+                    :title="t('palette.label')"
+                  >
+                    <MdvIcon :icon="paletteIcon" />
+                  </MdvIconButton>
+                </template>
+                <PaletteSwatches :selected="palette" @select="selectPalette" />
+              </MdvRichTooltip>
               <MdvTooltip :text="themeModeLabel" placement="bottom">
                 <template #trigger="{ triggerProps }">
                   <MdvIconButton
@@ -336,6 +362,7 @@ onBeforeUnmount(() => {
                   <MdvIcon :icon="moreVertIcon" />
                 </MdvIconButton>
               </template>
+              <MdvMenuItem :label="t('palette.label')" :icon="paletteIcon" @select="mobilePaletteOpen = true" />
               <MdvMenuItem :label="t('theme.label')" :icon="themeIcons[themeMode]">
                 <template #children>
                   <MdvMenuGroup
@@ -388,6 +415,19 @@ onBeforeUnmount(() => {
         </RouterView>
       </main>
     </MdvAppBarScaffold>
+
+    <MdvDialog
+      v-if="!isDesktop"
+      v-model="mobilePaletteOpen"
+      role="dialog"
+      :title="t('palette.label')"
+      destroy-on-close
+    >
+      <PaletteSwatches :selected="palette" @select="selectPalette" />
+      <template #actions="{ close }">
+        <MdvButton variant="text" @click="close()">{{ t('palette.done') }}</MdvButton>
+      </template>
+    </MdvDialog>
   </div>
 </template>
 

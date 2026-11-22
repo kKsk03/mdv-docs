@@ -28,7 +28,7 @@ The drawer lists **Introduction** and **Setup** directly, followed by a divider 
 
 The drawer and the Introduction component grid use the same English component names, such as `AppBar`. Outside the English locale, show the translated title as a drawer badge and card subtitle. The article title itself remains localized. The Introduction routes render `src/views/IntroductionPage.vue` without the article layout or outline. The root URL opens this landing page for the preferred locale.
 
-The App Bar shows separate theme and language buttons at widths of 768px and above. On smaller screens, a single **More options** button opens an MDV menu containing **Theme** and **Language**. Each item opens its own submenu: light, dark, and system modes under Theme, and the supported languages under Language. Both submenus use MDV's `push` mode with a back action in the same position. Current values are marked as selected, theme and language preferences are saved, and changing the language keeps the current documentation page. Changing the viewport across the breakpoint unmounts the previous actions and their open menus.
+At 768px and above, the App Bar shows separate **Color palette**, **Theme**, and **Language** buttons. On smaller screens, choose **More options → Color palette** to open the same swatches in a dialog. Theme and Language stay in separate push submenus. The 20 fixed swatches apply immediately and save the selection in the browser. **Default** restores the original colors. Light, dark, and system mode are independent of the palette, and changing the language keeps the current documentation page. Crossing the breakpoint closes the previous layout's panels.
 
 ### Heading links
 
