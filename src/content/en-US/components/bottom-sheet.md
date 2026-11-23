@@ -15,9 +15,9 @@ const appearanceProps: ApiTableItem[] = [
   { name: 'maxHeight', type: 'string', description: 'Optional CSS height limit. The default follows the responsive top gap and available viewport or scaffold height.' },
   { name: 'showHandle', type: 'boolean', default: 'true', description: 'Displays the native button handle. If hidden, an expand/collapse icon button appears only when two height anchors are available.' },
   { name: 'draggable', type: 'boolean', default: 'true', description: 'Enables pointer/touch dragging. Does not disable handle clicks or explicit actions.' },
-  { name: 'expandLabel', type: 'string', default: "'展开面板'", description: 'Accessible name for expanding. Set this for the application locale.' },
-  { name: 'collapseLabel', type: 'string', default: "'收起面板'", description: 'Accessible name for collapsing. Set this for the application locale.' },
-  { name: 'closeLabel', type: 'string', default: "'关闭面板'", description: 'Accessible name for hiding with the handle. Set this for the application locale.' },
+  { name: 'expandLabel', type: 'string', description: 'Accessible name of the expand action.' },
+  { name: 'collapseLabel', type: 'string', description: 'Accessible name of the collapse action.' },
+  { name: 'closeLabel', type: 'string', description: 'Accessible name when the handle hides the sheet.' },
 ]
 const modalProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'false', description: 'Controlled visibility. Accept update:modelValue to complete user close requests.' },

@@ -21,7 +21,7 @@ function updateQuery(next: string) {
 <template>
   <div class="grid gap-4">
     <MdvCheckbox v-model="acceptOpen" label="Accept open requests" />
-    <MdvSearchView :open="open" :model-value="query" placeholder="Search with an icon trigger" clear-label="Clear controlled query" back-label="Close controlled search" @update:open="updateOpen" @update:model-value="updateQuery">
+    <MdvSearchView :open="open" :model-value="query" placeholder="Search with an icon trigger" results-label="Controlled search results" clear-label="Clear controlled query" back-label="Close controlled search" @update:open="updateOpen" @update:model-value="updateQuery">
       <template #trigger="{ triggerProps }"><MdvIconButton v-bind="triggerProps" variant="tonal" aria-label="Open controlled search"><MdvIcon :icon="searchIcon" /></MdvIconButton></template>
       <template #default="{ close }">
         <div class="grid gap-4 p-5">

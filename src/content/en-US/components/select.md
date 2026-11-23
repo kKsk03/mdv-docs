@@ -12,6 +12,7 @@ import FormDemo from '@/components/docs/demos/select/form.vue'
 const props: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'string | number | null', default: 'Internal null', description: 'Selected option value. Omit for internal state; bind to control acceptance. Value comparison uses Object.is.' },
   { name: 'options', type: 'readonly MdvSelectOption[]', default: 'Required', description: 'Options with unique typed values and visible labels; supports supportingText and disabled.' },
+  { name: 'noOptionsText', type: 'string', description: 'Optional message shown in an empty listbox.' },
   { name: 'variant', type: "'filled' | 'outlined'", default: "'outlined'", description: 'TextField appearance, independent of menuVariant.' },
   { name: 'menuVariant', type: "'expressive' | 'baseline'", default: "'expressive'", description: 'Listbox surface and option treatment. The popup is an independent combobox listbox, not MdvMenu.' },
   { name: 'label', type: 'string', default: "''", description: 'Visible field label and listbox name. Supply aria-label or aria-labelledby if omitting the visible label.' },
@@ -64,6 +65,12 @@ const typed = ref<MdvSelectValue | null>(1)
       <MdvSelect v-model="filled" label="Filled size" variant="filled" placeholder="Choose a size" :options="sizes" full-width />
     </div>
     <MdvSelect v-model="typed" label="Strict value types" :options="typedOptions" full-width />
+    <MdvSelect
+      label="Archived projects"
+      :options="[]"
+      no-options-text="No archived projects"
+      full-width
+    />
     <p role="status" class="break-words text-sm text-mdv-on-surface-variant">Outlined: {{ JSON.stringify(outlined) }} · Filled: {{ JSON.stringify(filled) }} · Typed: {{ typeof typed }} {{ JSON.stringify(typed) }}</p>
   </div>
 </template>
@@ -214,7 +221,7 @@ function reset() {
   </template>
 </DemoBlock>
 
-If options load asynchronously, show loading, errors, or retry outside the field. The popup’s built-in empty message is fixed Chinese.
+Use `no-options-text` to describe an empty list. Open the Archived projects field above to see an example. For asynchronous options, manage loading, errors, and retry in the application.
 
 ---
 

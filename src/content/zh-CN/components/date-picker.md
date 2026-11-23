@@ -26,10 +26,11 @@ const pickerProps: ApiTableItem[] = [
   { name: 'clearable', type: 'boolean', default: 'false', description: '在字段中添加清除操作，请求 null；仍遵循必填校验。' },
   { name: 'label', type: 'string', default: 'labels.dateLabel', description: '可见字段标签及辅助技术读取的输入名称。' },
   { name: 'name', type: 'string', description: '已接受 ISO 日期的表单字段名，不会重复提交本地化显示文字。' },
-  { name: 'supportingText', type: 'string', default: '本地化日期格式提示', description: '字段下方的辅助说明；空值回退为日期格式提示。' },
+  { name: 'placeholder', type: 'string', description: '字段与面板文本输入共用的可选占位提示。' },
+  { name: 'supportingText', type: 'string', description: '输入框下方的辅助说明。省略后，只有传入 labels.formatHint 才会显示格式提示。' },
   { name: 'error', type: 'boolean', default: 'false', description: '外部字段错误状态，也参与原生字段有效性；不能替代面板日期限制或父级接受策略。' },
-  { name: 'errorText', type: 'string', description: '外部错误说明；存在错误但未提供文字时使用 labels.invalidDate。' },
-  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', default: '中文文案', description: '覆盖操作名称、面板标题、日期状态、键盘提示及校验消息。' },
+  { name: 'errorText', type: 'string', description: 'error 状态下由应用提供的错误说明。组件内部校验使用 labels 中对应的文案。' },
+  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', description: '由应用传入的可选文案，包括面板标题、操作文字、无障碍名称、提示和校验消息。' },
 ]
 const pickerSlots: SlotTableItem[] = [
   { name: 'trigger', description: '替换字段内的日历按钮，不是整个输入区域。接收 { open, close, triggerProps }，将 triggerProps 绑定到真实按钮。' },
@@ -283,7 +284,7 @@ const labels: MdvDatePickerLabels = {
 
 ## 地区格式与界面文案
 
-用 `locale` 设置日期格式，用 `labels` 设置按钮、无障碍名称和错误文案。未提供的文案使用中文默认值。
+用 `locale` 设置日期格式，按需通过 `labels` 提供应用文案。省略 `cancel`、`confirm` 或 `save` 时，对应操作显示图标。没有对应错误文案时，组件仍会拒绝无效日期。未提供自定义必填提示时，原生必填消息由浏览器提供。
 
 <DemoBlock>
   <DatePickerLocaleDemo />

@@ -31,7 +31,7 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'image', description: '中、大款标题上方的品牌图像。接收 { scrolled, collapsed }；Small 不显示此插槽。' },
 ]
 const scaffoldProps: ApiTableItem[] = [
-  { name: 'contentAttrs', type: 'HTMLAttributes', description: '传给正文滚动元素的原生属性和事件，例如 aria-label、id、tabindex 和 onScroll。默认 role 为 region、aria-label 为正文、tabindex 为 0，可覆盖。' },
+  { name: 'contentAttrs', type: 'HTMLAttributes', description: '传给正文滚动区的原生属性和事件。默认 role 为 region，tabindex 为 0。可通过 aria-label 或 aria-labelledby 命名。' },
 ]
 const scaffoldSlots: SlotTableItem[] = [
   { name: 'appbar', description: '放置一个 MdvAppBar，可经过包装组件。自动关联当前 Scaffold 的正文滚动区。' },

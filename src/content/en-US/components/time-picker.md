@@ -23,11 +23,12 @@ const props: ApiTableItem[] = [
   { name: 'required', type: 'boolean', default: 'false', description: 'Requires a valid, available time.' },
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Shows a clear action on a nonempty editable field, even when required.' },
   { name: 'label', type: 'string', description: 'Visible input label. Falls back to labels.time.' },
-  { name: 'supportingText', type: 'string', description: 'Replaces the default format hint below the input.' },
+  { name: 'placeholder', type: 'string', description: 'Optional placeholder for the main time input.' },
+  { name: 'supportingText', type: 'string', description: 'Supporting text below the input. When omitted, a format hint appears only if labels.formatHint is supplied.' },
   { name: 'error', type: 'boolean', default: 'false', description: 'Reports an application error and blocks confirmation and native validity.' },
-  { name: 'errorText', type: 'string', description: 'Application error message. Falls back to labels.invalidTime when error is true.' },
+  { name: 'errorText', type: 'string', description: 'Application message for the error prop. Internal validation uses the corresponding entry in labels.' },
   { name: 'name', type: 'string', description: 'Name of the hidden native field carrying the committed value.' },
-  { name: 'labels', type: 'Partial<MdvTimePickerLabels>', description: 'Overrides Chinese interface and validation strings one key at a time.' },
+  { name: 'labels', type: 'Partial<MdvTimePickerLabels>', description: 'Optional application copy for panel titles, controls, accessible names, hints, and validation messages.' },
 ]
 const slots: SlotTableItem[] = [
   { name: 'trigger', description: 'Replaces the trailing clock button. Receives { open, close, triggerProps }; bind triggerProps to a single real button or a component that forwards them to a button.' },
@@ -217,7 +218,7 @@ function submit(event: SubmitEvent) {
 
 ## Localization
 
-Use `locale` and `hour-cycle` for display and input format. Pass `labels` to translate interface text, which defaults to Chinese.
+Use `locale` and `hour-cycle` to set display and input formats. Pass the strings you need through `labels`. Confirm and cancel actions use icons when their text is omitted. Invalid times still fail validation when the corresponding message is absent.
 
 ```ts:line-numbers
 import type { MdvTimePickerLabels } from '@mdv-ui/mdv'

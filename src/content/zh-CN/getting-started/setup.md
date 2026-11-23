@@ -83,3 +83,22 @@ import { MdvButton } from '@mdv-ui/mdv'
   <MdvButton>开始使用</MdvButton>
 </template>
 ```
+
+## 组件文案与校验
+
+从 MDV 0.1.10 起，组件使用应用提供的文案和无障碍名称。升级时，如果原有用法依赖默认文案，可通过对应的 prop、插槽或原生 ARIA 属性补上。纯图标操作可由应用提供无障碍名称。
+
+如果应用使用 Vue I18n，可以直接传入翻译结果。这个示例中的 `emailTaken` 来自应用对邮箱可用性的判断。
+
+```vue:line-numbers
+<MdvTextField
+  v-model="email"
+  :label="t('profile.email.label')"
+  type="email"
+  required
+  :error="emailTaken"
+  :error-text="emailTaken ? t('profile.email.taken') : undefined"
+/>
+```
+
+`required` 和 `type="email"` 等原生约束的提示由浏览器提供。需要把业务错误纳入原生校验时，可调用字段的 `setCustomValidity(message)` 方法。日期和时间选择器的 `locale` 控制地区格式，`labels` 接收提示和操作文案。省略文案时，选择器仍会校验。

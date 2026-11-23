@@ -26,7 +26,10 @@ const props: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: '禁止编辑，仍可聚焦且参与提交。' },
   { name: 'required', type: 'boolean', default: 'false', description: '启用原生必填约束。' },
   { name: 'clearable', type: 'boolean', default: 'false', description: '有可编辑文本且未处于组合输入时提供清除操作。' },
+  { name: 'clearLabel', type: 'string', description: '内置清除按钮的无障碍名称。' },
   { name: 'passwordToggle', type: 'boolean', default: 'false', description: '为单行密码框提供显隐切换。' },
+  { name: 'showPasswordLabel', type: 'string', description: '显示密码按钮的无障碍名称。' },
+  { name: 'hidePasswordLabel', type: 'string', description: '隐藏密码按钮的无障碍名称。' },
   { name: 'showCount', type: 'boolean', description: '显示 UTF-16 长度。省略时，有合法的 maxlength 才显示计数。' },
   { name: 'fullWidth', type: 'boolean', default: 'false', description: '占满可用宽度；否则默认 280px，且不超过容器。' },
 ]
@@ -157,7 +160,7 @@ function fillProjectCode() {
 
 <template>
   <div class="grid min-w-0 gap-4">
-    <MdvTextField v-model="query" type="search" label="Search examples" clearable full-width>
+    <MdvTextField v-model="query" type="search" label="Search examples" clearable clear-label="Clear search examples" full-width>
       <template #leading><MdvIcon :icon="search" /></template>
     </MdvTextField>
     <MdvTextField
@@ -167,6 +170,8 @@ function fillProjectCode() {
       autocomplete="new-password"
       supporting-text="Use sample text, not a real password."
       password-toggle
+      show-password-label="Show demo password"
+      hide-password-label="Hide demo password"
       full-width
     />
     <MdvTextField ref="codeField" v-model="projectCode" label="Project code" full-width>
@@ -188,7 +193,7 @@ function fillProjectCode() {
   </template>
 </DemoBlock>
 
-内置操作的无障碍名称为中文。需要其他语言时，可用 `trailing` 插槽替换这两个操作，并给自定义控件提供无障碍名称。
+用 `clear-label`、`show-password-label` 和 `hide-password-label` 为内置按钮命名。需要自定义控件时，`trailing` 插槽可替换整个尾部区域。
 
 ## 原生表单与校验
 

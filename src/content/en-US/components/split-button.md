@@ -13,7 +13,7 @@ const splitButtonProps: ApiTableItem[] = [
   { name: 'size', type: 'MdvButtonSize', default: "'s'", description: "One of 'xs', 's', 'm', 'l', or 'xl'." },
   { name: 'color', type: 'MdvButtonColor', description: 'Theme/semantic color or a #RGB/#RRGGBB seed color.' },
   { name: 'expanded', type: 'boolean', default: 'false', description: 'Accepted menu-open state used for arrow, shape, and aria-expanded. The component does not toggle it itself.' },
-  { name: 'menuButtonLabel', type: 'string', description: 'Required accessible name describing the related choices, such as “More save options”.' },
+  { name: 'menuButtonLabel', type: 'string', description: 'Accessible name of the trailing menu button, for example “More save options”.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables both the primary action and menu button.' },
   { name: 'actionDisabled / menuDisabled', type: 'boolean', default: 'false', description: 'Disables only the corresponding half.' },
   { name: 'loading', type: 'boolean', default: 'false', description: 'Shows progress in the primary action; does not disable the menu side.' },

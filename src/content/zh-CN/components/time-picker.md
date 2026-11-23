@@ -23,11 +23,12 @@ const props: ApiTableItem[] = [
   { name: 'required', type: 'boolean', default: 'false', description: '必须输入有效且可用的时间。' },
   { name: 'clearable', type: 'boolean', default: 'false', description: '非空且可编辑时提供清除操作，即使字段必填也可以清除。' },
   { name: 'label', type: 'string', description: '外部输入框的可见标签，默认使用 labels.time。' },
-  { name: 'supportingText', type: 'string', description: '替代输入框下方的默认格式提示。' },
+  { name: 'placeholder', type: 'string', description: '主时间输入框的可选占位提示。' },
+  { name: 'supportingText', type: 'string', description: '输入框下方的辅助说明。省略后，只有传入 labels.formatHint 才会显示格式提示。' },
   { name: 'error', type: 'boolean', default: 'false', description: '设置业务错误，阻止弹窗确认并使原生校验失败。' },
-  { name: 'errorText', type: 'string', description: '业务错误文案；error 为 true 时默认使用 labels.invalidTime。' },
+  { name: 'errorText', type: 'string', description: 'error 状态下由应用提供的错误说明。组件内部校验使用 labels 中对应的文案。' },
   { name: 'name', type: 'string', description: '用于提交已确认值的隐藏表单字段名。' },
-  { name: 'labels', type: 'Partial<MdvTimePickerLabels>', description: '按键覆盖默认的中文界面和校验文案。' },
+  { name: 'labels', type: 'Partial<MdvTimePickerLabels>', description: '由应用传入的可选文案，包括面板标题、操作文字、无障碍名称、提示和校验消息。' },
 ]
 const slots: SlotTableItem[] = [
   { name: 'trigger', description: '替换尾部时钟按钮。获得 { open, close, triggerProps }，将 triggerProps 整体绑定到一个原生按钮或能透传到按钮的组件。' },
@@ -217,7 +218,7 @@ function submit(event: SubmitEvent) {
 
 ## 本地化
 
-通过 `locale` 和 `hour-cycle` 设置显示和输入格式。界面文案默认是中文，可通过 `labels` 本地化。
+通过 `locale` 和 `hour-cycle` 设置显示和输入格式，按需用 `labels` 传入应用文案。省略确认或取消文案时，对应操作显示图标。未提供对应消息时，无效时间仍无法通过校验。
 
 ```ts:line-numbers
 import type { MdvTimePickerLabels } from '@mdv-ui/mdv'

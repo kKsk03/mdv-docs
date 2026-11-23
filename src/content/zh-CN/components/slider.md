@@ -23,7 +23,7 @@ const sliderProps: ApiTableItem[] = [
   { name: 'supportingText', type: 'string', default: "''", description: '可见辅助说明，会关联到底层原生输入。' },
   { name: 'disabled', type: 'boolean', default: 'false', description: '禁用交互，并从表单数据中排除原生 range 输入。' },
   { name: 'color', type: 'MdvSliderColor', default: "'primary'", description: '主题色、语义色或 #RGB/#RRGGBB 种子色。' },
-  { name: 'startAriaLabel / endAriaLabel', type: 'string', description: '分别命名 range 的两个手柄；本地化应用请显式提供。' },
+  { name: 'startAriaLabel / endAriaLabel', type: 'string', description: '分别命名 range 的两个手柄。组件不会在共用名称后附加端点文案。' },
 ]
 const sliderSlots: SlotTableItem[] = [
   { name: 'default', description: '替换可见标签。' },

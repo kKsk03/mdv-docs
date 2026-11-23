@@ -13,24 +13,25 @@ import SearchAppBarDemo from '@/components/docs/demos/searchBar/appbar.vue'
 
 const barProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'string', default: "'' (internal)", description: 'Query. Omit for internal state; an explicit value lets the parent accept or reject updates.' },
-  { name: 'placeholder', type: 'string', default: "'搜索'", description: 'Input hint. Also provides the input/dialog name unless label is supplied. Set English labels explicitly in English applications.' },
+  { name: 'placeholder', type: 'string', description: 'Optional input hint. When label is omitted, the supplied placeholder also names the input and the Search View dialog.' },
   { name: 'label', type: 'string', default: 'placeholder', description: 'Accessible input name; SearchView also uses it to name its dialog.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables the field and blocks opening or submitting search.' },
   { name: 'readonly', type: 'boolean', default: 'false', description: 'Prevents edits and clearing while allowing existing results to be opened and searched.' },
   { name: 'clearable', type: 'boolean', default: 'true', description: 'Shows a clear action for a nonempty editable query.' },
-  { name: 'clearLabel', type: 'string', default: "'清空搜索'", description: 'Accessible name of the clear action.' },
+  { name: 'clearLabel', type: 'string', description: 'Accessible name of the clear action.' },
   { name: 'loading', type: 'boolean', default: 'false', description: 'Sets aria-busy on the input, and on View results. Does not automatically fetch, show a spinner, or disable editing.' },
 ]
 const viewProps: ApiTableItem[] = [
   { name: 'open', attribute: 'v-model:open', type: 'boolean', default: 'false', description: 'Expanded search state. Internally managed when unbound; bound models require parent acceptance.' },
   { name: 'variant', type: "'contained' | 'divided'", default: "'contained'", description: 'Separate rounded search/result surfaces or a joined surface with an input divider.' },
   { name: 'layout', type: "'auto' | 'docked' | 'fullscreen'", default: "'auto'", description: 'auto uses fullscreen below 600px viewport width and docked at 600px and above. Both are modal.' },
-  { name: 'backLabel', type: 'string', default: "'返回'", description: 'Accessible name of the back action shown for fullscreen, divided, or custom-trigger search.' },
+  { name: 'backLabel', type: 'string', description: 'Accessible name of the back action shown for fullscreen, divided, or custom-trigger search.' },
   { name: 'closeOnEsc', type: 'boolean', default: 'true', description: 'Allows Escape on the topmost search dialog to request closing.' },
   { name: 'closeOnScrim', type: 'boolean', default: 'true', description: 'Allows a completed scrim click to request closing.' },
   { name: 'destroyOnClose', type: 'boolean', default: 'false', description: 'Destroys expanded content after closing. External query/open models are retained.' },
   { name: 'beforeClose', type: 'MdvSearchBeforeClose', description: 'Synchronous/asynchronous close guard. false blocks a request. Direct changes to open bypass the guard.' },
   { name: 'inputAttrs', type: 'InputHTMLAttributes', description: 'Native attributes/listeners for the actual search input, such as id, name, form, required, and ARIA. Only the active field participates in the form.' },
+  { name: 'resultsLabel', type: 'string', description: 'Accessible name of the results region in Search View and Search App Bar.' },
   { name: 'statusText', type: 'string', default: "''", description: 'Concise polite result-status announcement, such as “3 documents found”. Does not announce the entire result list.' },
 ]
 const appBarProps: ApiTableItem[] = [
@@ -145,7 +146,7 @@ function choose(title: string, close: MdvSearchSlotProps['close']) {
       <MdvSelect :model-value="layout" :options="layouts" label="Search layout" @update:model-value="layout = $event as MdvSearchLayout" />
     </div>
     <div class="rounded-xl bg-mdv-surface-container-low py-6">
-      <MdvSearchView v-model="query" v-model:open="open" :variant="variant" :layout="layout" placeholder="Search messages" clear-label="Clear messages query" back-label="Back to messages" :status-text="`${results.length} matching messages`" @search="selected = `Submitted: ${$event || '(all messages)'}`">
+      <MdvSearchView v-model="query" v-model:open="open" :variant="variant" :layout="layout" placeholder="Search messages" results-label="Message search results" clear-label="Clear messages query" back-label="Back to messages" :status-text="`${results.length} matching messages`" @search="selected = `Submitted: ${$event || '(all messages)'}`">
         <template #default="{ close }">
           <div class="px-4 pb-2"><MdvCheckbox v-model="unreadOnly" label="Unread only" /></div>
           <MdvList v-if="results.length" :variant="variant === 'contained' ? 'expressive' : 'baseline'">
@@ -163,7 +164,7 @@ function choose(title: string, close: MdvSearchSlotProps['close']) {
   </template>
 </DemoBlock>
 
-Localize the field and actions with `placeholder`, `clear-label`, and `back-label`. The internal results region has a fixed Chinese accessible name.
+Pass application text for `placeholder`, `clear-label`, and `back-label` as needed. Use `results-label` to name the results region for assistive technology. Use `status-text` to announce changes such as the result count.
 
 ## Search forms
 
@@ -189,7 +190,7 @@ function submit(event: Event) {
 
 <template>
   <div class="grid gap-4">
-    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
+    <MdvSearchView v-model="query" placeholder="Search external form" results-label="Form search results" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
       <template #default="{ close }">
         <div class="grid gap-4 p-5">
           <p class="text-sm">Only the active search input belongs to the external form.</p>
@@ -241,7 +242,7 @@ function updateQuery(next: string) {
 <template>
   <div class="grid gap-4">
     <MdvCheckbox v-model="acceptOpen" label="Accept open requests" />
-    <MdvSearchView :open="open" :model-value="query" placeholder="Search with an icon trigger" clear-label="Clear controlled query" back-label="Close controlled search" @update:open="updateOpen" @update:model-value="updateQuery">
+    <MdvSearchView :open="open" :model-value="query" placeholder="Search with an icon trigger" results-label="Controlled search results" clear-label="Clear controlled query" back-label="Close controlled search" @update:open="updateOpen" @update:model-value="updateQuery">
       <template #trigger="{ triggerProps }"><MdvIconButton v-bind="triggerProps" variant="tonal" aria-label="Open controlled search"><MdvIcon :icon="searchIcon" /></MdvIconButton></template>
       <template #default="{ close }">
         <div class="grid gap-4 p-5">
@@ -312,7 +313,7 @@ onBeforeUnmount(cancel)
 </script>
 
 <template>
-  <MdvSearchView v-model="query" placeholder="Search the catalog" clear-label="Clear catalog query" back-label="Close catalog search" :loading="loading" :status-text="status" @search="search">
+  <MdvSearchView v-model="query" placeholder="Search the catalog" results-label="Catalog results" clear-label="Clear catalog query" back-label="Close catalog search" :loading="loading" :status-text="status" @search="search">
     <template #default="{ close }">
       <div class="px-4 pb-2"><MdvCheckbox v-model="failNext" label="Fail the next simulated request" /></div>
       <MdvLinearProgress v-if="loading" indeterminate aria-label="Searching catalog" />
@@ -354,7 +355,7 @@ const results = computed(() => subjects.filter(title => title.toLowerCase().incl
     <div class="h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
       <MdvAppBarScaffold class="h-full" :content-attrs="{ 'aria-label': 'Search application messages', tabindex: 0 }">
         <template #appbar>
-          <MdvSearchAppBar v-model="query" appearance="bordered" scroll-behavior="enter-always" placeholder="Search inbox" clear-label="Clear inbox query" back-label="Back to inbox" :status-text="`${results.length} inbox results`">
+          <MdvSearchAppBar v-model="query" appearance="bordered" scroll-behavior="enter-always" placeholder="Search inbox" results-label="Inbox results" clear-label="Clear inbox query" back-label="Back to inbox" :status-text="`${results.length} inbox results`">
             <template #leading><MdvIcon :icon="homeIcon" /></template>
             <template #actions><MdvIconButton variant="standard" aria-label="About search example" @click="about = true"><MdvIcon :icon="moreIcon" /></MdvIconButton></template>
             <template #default="{ close }">

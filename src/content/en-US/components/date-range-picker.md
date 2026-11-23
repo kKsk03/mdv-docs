@@ -28,10 +28,11 @@ const rangeProps: ApiTableItem[] = [
   { name: 'endLabel', type: 'string', default: 'labels.endLabel', description: 'Visible label and accessible name of the end entry.' },
   { name: 'startName', type: 'string', description: 'Form field name for the accepted start ISO date.' },
   { name: 'endName', type: 'string', description: 'Form field name for the accepted end ISO date.' },
-  { name: 'supportingText', type: 'string', default: 'Localized format hint', description: 'Shared entry supporting text, falling back to the date-format hint when empty.' },
+  { name: 'placeholder', type: 'string', description: 'Optional placeholder shared by the entry fields and the panel text inputs.' },
+  { name: 'supportingText', type: 'string', description: 'Supporting text below the input. When omitted, a format hint appears only if labels.formatHint is supplied.' },
   { name: 'error', type: 'boolean', default: 'false', description: 'External entry error state, also used by native validity. Use constraints or parent acceptance logic for panel restrictions.' },
-  { name: 'errorText', type: 'string', description: 'External error message, with labels.invalidDate as its fallback.' },
-  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', default: 'Chinese labels', description: 'Operation names, panel headings, date descriptions, hints, and errors shared with DatePicker.' },
+  { name: 'errorText', type: 'string', description: 'Application message for the error prop. Internal validation uses the corresponding entry in labels.' },
+  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', description: 'Optional application copy for panel titles, controls, accessible names, hints, and validation messages.' },
 ]
 const rangeSlots: SlotTableItem[] = [
   { name: 'trigger', description: 'Replaces the calendar button in the end field. Receives { open, close, triggerProps }; bind the supplied props to a native button.' },
@@ -277,7 +278,7 @@ const labels: MdvDatePickerLabels = {
 
 ## Text input and validation
 
-With the panel closed, Enter or leaving both fields validates the typed range. Reversed dates are not swapped. Use `locale` for date format and see the [Date Picker label reference](./date-picker#locale-and-interface-labels) to translate the controls.
+With the panel closed, Enter or leaving both fields validates the typed range. Reversed or incomplete ranges cannot be saved even without an error message. Use `locale` to set the date format and supply the messages your application needs through `labels`. [Date Picker label reference](./date-picker#locale-and-interface-labels)
 
 <DemoBlock>
   <DateRangePickerInputDemo />

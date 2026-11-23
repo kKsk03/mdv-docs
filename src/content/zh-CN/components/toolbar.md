@@ -20,8 +20,8 @@ const props: ApiTableItem[] = [
   { name: 'scrollBehavior', type: 'MdvToolbarScrollBehavior', default: "'none'", description: 'hide 移出整条工具栏，collapse 只适用于可收合的浮动款。' },
   { name: 'scrollTarget', type: 'MdvToolbarScrollTarget', description: 'Window、元素、CSS 选择器或取值函数。省略时监听 window；显式目标不存在时不回退。' },
   { name: 'scrollThreshold', type: 'number', default: '40', description: '同一方向累计多少像素后请求改变状态。' },
-  { name: 'expandLabel', type: 'string', default: "'展开工具栏'", description: '收合后展开按钮的无障碍名称。' },
-  { name: 'collapseLabel', type: 'string', default: "'收起工具栏'", description: '展开后收合按钮的无障碍名称。' },
+  { name: 'expandLabel', type: 'string', description: '工具栏收合时展开按钮的无障碍名称。' },
+  { name: 'collapseLabel', type: 'string', description: '工具栏展开时收合按钮的无障碍名称。' },
 ]
 const slots: SlotTableItem[] = [
   { name: 'default', description: '主要操作。不配套 FAB 时，收合后仍可使用。' },
@@ -232,7 +232,7 @@ const notes = [
 
 <SlotsTable :items="slots" />
 
-所有插槽均收到 `{ expanded, expand, collapse, toggle, toggleProps }`。按钮绑定包含 `aria-expanded`、`aria-controls`、`aria-label` 与 `onClick`。存在可收合分组或配套 FAB 时才有默认切换按钮。
+所有插槽均收到 `{ expanded, expand, collapse, toggle, toggleProps }`。按钮绑定包含 `aria-expanded`、`aria-controls` 与 `onClick`。可通过 `expandLabel` 或 `collapseLabel` 为按钮绑定 `aria-label`。存在可收合分组或配套 FAB 时才有默认切换按钮。
 
 ### 事件、原生属性与公开方法
 

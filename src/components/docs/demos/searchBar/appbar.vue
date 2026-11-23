@@ -16,7 +16,7 @@ const results = computed(() => subjects.filter(title => title.toLowerCase().incl
     <div class="h-[28rem] min-w-0 overflow-hidden rounded-xl bg-mdv-surface-container-low">
       <MdvAppBarScaffold class="h-full" :content-attrs="{ 'aria-label': 'Search application messages', tabindex: 0 }">
         <template #appbar>
-          <MdvSearchAppBar v-model="query" appearance="bordered" scroll-behavior="enter-always" placeholder="Search inbox" clear-label="Clear inbox query" back-label="Back to inbox" :status-text="`${results.length} inbox results`">
+          <MdvSearchAppBar v-model="query" appearance="bordered" scroll-behavior="enter-always" placeholder="Search inbox" results-label="Inbox results" clear-label="Clear inbox query" back-label="Back to inbox" :status-text="`${results.length} inbox results`">
             <template #leading><MdvIcon :icon="homeIcon" /></template>
             <template #actions><MdvIconButton variant="standard" aria-label="About search example" @click="about = true"><MdvIcon :icon="moreIcon" /></MdvIconButton></template>
             <template #default="{ close }">

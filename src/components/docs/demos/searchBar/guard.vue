@@ -26,7 +26,7 @@ onBeforeUnmount(() => resolveClose?.(false))
 
 <template>
   <div class="grid gap-4">
-    <MdvSearchView v-model:open="open" placeholder="Search and annotate" clear-label="Clear annotation query" back-label="Leave annotation search" variant="divided" :before-close="beforeClose" @closed="closed">
+    <MdvSearchView v-model:open="open" placeholder="Search and annotate" results-label="Annotation search results" clear-label="Clear annotation query" back-label="Leave annotation search" variant="divided" :before-close="beforeClose" @closed="closed">
       <template #default="{ close }">
         <div class="grid gap-4 p-5">
           <MdvTextField :model-value="note" label="Unsaved note" supporting-text="Type a note, then request closing." @update:model-value="note = String($event); dirty = true" />

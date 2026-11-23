@@ -13,7 +13,7 @@ import ChipLayoutDemo from '@/components/docs/demos/chip/layout.vue'
 
 const chipProps: ApiTableItem[] = [
   { name: 'variant', type: "'assist' | 'filter' | 'input' | 'suggestion'", default: "'assist'", description: '纸片用途。Filter 默认可选择；Input 表示已输入内容，默认可删除。' },
-  { name: 'label', type: 'string', default: "''", description: '默认可见文字及删除名称来源；默认插槽优先显示。' },
+  { name: 'label', type: 'string', default: "''", description: '纸片的可见文字，有默认插槽时使用插槽内容。' },
   { name: 'elevated', type: 'boolean', default: 'false', description: 'Assist、Filter、Suggestion 的抬升外观，Input 忽略。' },
   { name: 'color', type: 'MdvChipColor', description: 'primary、secondary、tertiary、success、warning、error、info，或 #RGB/#RRGGBB 种子色；省略时保留默认变体颜色角色。' },
   { name: 'value', type: 'string | number', description: 'ChipSet 单选/多选模式中 Filter 的唯一选值。' },
@@ -21,7 +21,7 @@ const chipProps: ApiTableItem[] = [
   { name: 'selectable', type: 'boolean', default: 'filter: true; input: false', description: '允许主操作切换 Filter/Input 选择。Assist/Suggestion 不参与选择，removeOnly 会关闭选择。' },
   { name: 'removable', type: 'boolean', default: 'input: true; filter: false', description: '开启 Filter/Input 删除；Assist/Suggestion 没有删除操作。' },
   { name: 'removeOnly', type: 'boolean', default: 'false', description: '可删除 Input 整颗只作为一个删除操作和焦点目标，不再提供独立主操作及选中状态。' },
-  { name: 'removeLabel', type: 'string', default: "''（自动生成中文删除名称）", description: '显式删除可访问名称；默认是“删除”加标签/文字，或“删除此项”，应按应用语言本地化。' },
+  { name: 'removeLabel', type: 'string', description: '删除操作的无障碍名称。省略时组件没有可供读屏的删除文案。' },
   { name: 'disabled', type: 'boolean', default: 'false', description: '禁用主操作与删除；ChipSet 的禁用也会生效。' },
   { name: 'href', type: 'string', description: '仅 Assist/Suggestion 支持的原生链接；Filter/Input 忽略并在开发环境提示。' },
 ]
@@ -33,7 +33,7 @@ const setProps: ApiTableItem[] = [
   { name: 'scrollable', type: 'boolean', default: 'false', description: '使用单行水平滚动替代自动换行；键盘导航时显露目标。' },
 ]
 const chipSlots: SlotTableItem[] = [
-  { name: 'default', description: '自定义标签，接收 { selected }。复杂内容需准确的 label/removeLabel，以保证删除名称。' },
+  { name: 'default', description: '自定义可见标签，接收 { selected }。用 removeLabel 单独命名删除操作。' },
   { name: 'leading', description: '前置装饰图标，接收 { selected }；Filter 选中时替换为内置勾选符号。' },
   { name: 'avatar', description: '仅 Input 的 24px 圆形内容，优先于 leading；接收 { selected }。' },
   { name: 'trailing', description: '可删除 Filter/Input 的删除图标替换，或不可删除 Filter/Input 的末端装饰；接收 { selected }，删除语义仍由组件管理。' },

@@ -15,9 +15,9 @@ const appearanceProps: ApiTableItem[] = [
   { name: 'maxHeight', type: 'string', description: '可选的 CSS 高度上限；默认根据响应式顶部留白及视口或 Scaffold 可用高度限制。' },
   { name: 'showHandle', type: 'boolean', default: 'true', description: '显示原生按钮手柄。隐藏后，仅在两个高度锚点可用时显示替代的展开/收起图标按钮。' },
   { name: 'draggable', type: 'boolean', default: 'true', description: '启用鼠标/触摸拖动；不影响手柄点击及显式操作。' },
-  { name: 'expandLabel', type: 'string', default: "'展开面板'", description: '展开操作的可访问名称，按应用语言设置。' },
-  { name: 'collapseLabel', type: 'string', default: "'收起面板'", description: '收起操作的可访问名称，按应用语言设置。' },
-  { name: 'closeLabel', type: 'string', default: "'关闭面板'", description: '通过手柄隐藏时的可访问名称，按应用语言设置。' },
+  { name: 'expandLabel', type: 'string', description: '展开操作的无障碍名称。' },
+  { name: 'collapseLabel', type: 'string', description: '收合操作的无障碍名称。' },
+  { name: 'closeLabel', type: 'string', description: '手柄用于隐藏面板时的无障碍名称。' },
 ]
 const modalProps: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'boolean', default: 'false', description: '受控的显示状态；接收 update:modelValue 才会完成用户关闭请求。' },

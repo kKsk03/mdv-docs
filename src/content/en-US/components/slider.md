@@ -23,7 +23,7 @@ const sliderProps: ApiTableItem[] = [
   { name: 'supportingText', type: 'string', default: "''", description: 'Visible description associated with the range input(s).' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables interaction and excludes the native range input(s) from form data.' },
   { name: 'color', type: 'MdvSliderColor', default: "'primary'", description: 'Theme or semantic color, or a #RGB/#RRGGBB seed color.' },
-  { name: 'startAriaLabel / endAriaLabel', type: 'string', description: 'Separate accessible names for range handles. Supply both when the application is localized.' },
+  { name: 'startAriaLabel / endAriaLabel', type: 'string', description: 'Separate accessible names for the range handles. MDV does not append endpoint names to a shared label.' },
 ]
 const sliderSlots: SlotTableItem[] = [
   { name: 'default', description: 'Replaces the visible label.' },

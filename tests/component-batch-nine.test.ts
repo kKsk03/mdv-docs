@@ -253,6 +253,7 @@ test('search view filters results and explicitly closes after selecting a destin
   await flushPromises()
   const modal = wrapper.get<HTMLDialogElement>('dialog')
   expect(modal.element.open).toBe(true)
+  expect(modal.find('[role="region"][aria-label="Message search results"]').exists()).toBe(true)
   await modal.get('input[type="search"]').setValue('travel')
   expect(modal.findAll('.mdv-list-item__primary')).toHaveLength(1)
   await checkbox(modal, 'Unread only').setValue(true)

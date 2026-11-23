@@ -16,8 +16,8 @@ const menuProps: ApiTableItem[] = [
   { name: 'elevated', type: 'boolean', default: 'true', description: '控制触发器、关闭操作的阴影与 Expressive 操作项的悬停阴影。Baseline 菜单表面的阴影仍由 MdvMenu 管理。' },
   { name: 'position', type: "'static' | 'absolute' | 'fixed'", default: "'static'", description: '普通布局，或相对包含块、视口定位到逻辑底部末端。没有 placement 属性。' },
   { name: 'offset', type: 'number', default: '16 / 24', description: '贴边距离，默认 16px，视口宽度达到 1200px 时为 24px。显式非负值覆盖响应式默认值，安全区另计。' },
-  { name: 'label', type: 'string（必填）', description: '说明可用操作的可访问名称，也用于命名 Expressive 操作组或 Baseline 菜单。' },
-  { name: 'closeLabel', type: 'string', default: "'关闭菜单'", description: 'Expressive 展开后关闭操作的可访问名称，请按应用语言明确设置。' },
+  { name: 'label', type: 'string', description: '说明可用操作的可访问名称，也用于命名 Expressive 操作组或 Baseline 菜单。' },
+  { name: 'closeLabel', type: 'string', description: 'Expressive 菜单展开后关闭按钮的无障碍名称。' },
   { name: 'triggerAttrs', type: 'MdvFabMenuTriggerAttrs', description: '传给入口按钮的原生属性、事件，以及可选的函数或 Vue ref。入口语义仍由组件管理。' },
 ]
 const itemProps: ApiTableItem[] = [
@@ -43,7 +43,7 @@ const itemSlots: SlotTableItem[] = [
 
 ## Expressive 与 Baseline
 
-用 `variant="expressive"` 显示展开式操作列表，或用 `baseline` 显示常规菜单。请为触发按钮提供明确的名称。
+用 `variant="expressive"` 显示展开式操作列表，或用 `baseline` 显示常规菜单。用 `label` 命名触发按钮，用 `close-label` 命名 Expressive 菜单展开后的关闭操作。
 
 <DemoBlock>
   <FabMenuBasicDemo />

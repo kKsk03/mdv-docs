@@ -14,7 +14,7 @@ const snackbarProps: ApiTableItem[] = [
   { name: 'action', type: 'MdvSnackbarAction', description: '可选操作标签及同步/异步 onClick 回调。包含操作时默认常驻。' },
   { name: 'duration', type: 'number', description: '毫秒；无操作时默认 4000，有操作时默认 0。负数按 0 处理，非有限值表示常驻。' },
   { name: 'closable', type: 'boolean', description: '默认常驻消息显示关闭按钮，定时消息不显示。' },
-  { name: 'closeLabel', type: 'string', default: "'关闭通知'", description: '关闭按钮的可访问名称；请按应用语言覆盖。' },
+  { name: 'closeLabel', type: 'string', description: '关闭按钮显示时的无障碍名称。' },
   { name: 'actionLayout', type: "'auto' | 'inline' | 'stacked'", default: "'auto'", description: '允许操作换行、保持同行或独占一行。' },
   { name: 'placement', type: "'bottom' | 'bottom-start'", default: "'bottom'", description: '底部居中或逻辑起始侧，并随 RTL 镜像。' },
   { name: 'offset', type: 'number', default: '16', description: '在底部安全区上方增加的距离，单位为 px。' },

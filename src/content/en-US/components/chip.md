@@ -13,7 +13,7 @@ import ChipLayoutDemo from '@/components/docs/demos/chip/layout.vue'
 
 const chipProps: ApiTableItem[] = [
   { name: 'variant', type: "'assist' | 'filter' | 'input' | 'suggestion'", default: "'assist'", description: 'Chip purpose. Filter selects by default; Input represents entered content and is removable by default.' },
-  { name: 'label', type: 'string', default: "''", description: 'Default visible text and source for the fallback removal name. The default slot overrides displayed text.' },
+  { name: 'label', type: 'string', default: "''", description: 'Visible chip text. The default slot replaces it.' },
   { name: 'elevated', type: 'boolean', default: 'false', description: 'Raised appearance for Assist, Filter, and Suggestion. Ignored by Input.' },
   { name: 'color', type: 'MdvChipColor', description: 'Primary, secondary, tertiary, success, warning, error, info, or a #RGB/#RRGGBB seed. Omitted preserves the default variant color roles.' },
   { name: 'value', type: 'string | number', description: 'Unique Filter value for a single/multiple selection ChipSet.' },
@@ -21,7 +21,7 @@ const chipProps: ApiTableItem[] = [
   { name: 'selectable', type: 'boolean', default: 'filter: true; input: false', description: 'Allows the primary action to toggle Filter/Input selection. Assist/Suggestion never select; removeOnly disables selection.' },
   { name: 'removable', type: 'boolean', default: 'input: true; filter: false', description: 'Enables removal for Filter/Input. Assist/Suggestion do not have removal actions.' },
   { name: 'removeOnly', type: 'boolean', default: 'false', description: 'Makes a removable Input chip one removal action with one focus target; no separate primary operation or selected state.' },
-  { name: 'removeLabel', type: 'string', default: "'' (derived Chinese removal name)", description: 'Explicit accessible removal name. Fallback is 删除 plus the label/text, or 删除此项. Localize it for the application.' },
+  { name: 'removeLabel', type: 'string', description: 'Accessible name of the removal action. The component leaves the removal name unset when omitted.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables primary and removal actions. ChipSet disabling also applies.' },
   { name: 'href', type: 'string', description: 'Native link for Assist/Suggestion only. Filter/Input ignore it and warn in development.' },
 ]
@@ -33,7 +33,7 @@ const setProps: ApiTableItem[] = [
   { name: 'scrollable', type: 'boolean', default: 'false', description: 'Uses one horizontally scrollable row instead of wrapping. Keyboard navigation reveals its target.' },
 ]
 const chipSlots: SlotTableItem[] = [
-  { name: 'default', description: 'Custom label, receiving { selected }. Keep an accurate label/removeLabel when the content needs an explicit removal name.' },
+  { name: 'default', description: 'Custom visible label. Receives { selected }. Use removeLabel to name the removal action separately.' },
   { name: 'leading', description: 'Decorative icon, receiving { selected }. Selected Filter replaces it with its built-in checkmark.' },
   { name: 'avatar', description: 'Input-only 24px circular content, taking precedence over leading. Receives { selected }.' },
   { name: 'trailing', description: 'Removal icon replacement for removable Filter/Input, or decorative trailing content for nonremovable Filter/Input. Receives { selected }; removal semantics stay managed by the chip.' },

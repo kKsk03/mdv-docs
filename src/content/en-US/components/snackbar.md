@@ -14,7 +14,7 @@ const snackbarProps: ApiTableItem[] = [
   { name: 'action', type: 'MdvSnackbarAction', description: 'Optional action label and sync/async onClick callback. An action defaults to a persistent message.' },
   { name: 'duration', type: 'number', description: 'Milliseconds; default is 4000 without an action and 0 with one. Negative values become 0; nonfinite values mean persistent.' },
   { name: 'closable', type: 'boolean', description: 'By default, persistent messages show a close button and timed messages do not.' },
-  { name: 'closeLabel', type: 'string', default: "'关闭通知'", description: 'Accessible name for the close button; localize it in the application.' },
+  { name: 'closeLabel', type: 'string', description: 'Accessible name of the close button when shown.' },
   { name: 'actionLayout', type: "'auto' | 'inline' | 'stacked'", default: "'auto'", description: 'Allows the action to wrap, stay inline, or occupy its own line.' },
   { name: 'placement', type: "'bottom' | 'bottom-start'", default: "'bottom'", description: 'Bottom center or logical start side, mirrored in RTL.' },
   { name: 'offset', type: 'number', default: '16', description: 'Additional distance above the bottom safe area in pixels.' },

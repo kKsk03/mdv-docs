@@ -26,7 +26,10 @@ const props: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: 'Disallows editing but preserves focus and submission.' },
   { name: 'required', type: 'boolean', default: 'false', description: 'Enables the native required constraint.' },
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Offers a clear action when there is editable text and no active composition.' },
+  { name: 'clearLabel', type: 'string', description: 'Accessible name of the built-in clear action.' },
   { name: 'passwordToggle', type: 'boolean', default: 'false', description: 'Offers visibility control for a single-line password.' },
+  { name: 'showPasswordLabel', type: 'string', description: 'Accessible name of the action that reveals the password.' },
+  { name: 'hidePasswordLabel', type: 'string', description: 'Accessible name of the action that hides the password.' },
   { name: 'showCount', type: 'boolean', description: 'Shows the UTF-16 length. When omitted, a valid maxlength enables the count.' },
   { name: 'fullWidth', type: 'boolean', default: 'false', description: 'Fills the available width; otherwise the default width is 280px, capped by the container.' },
 ]
@@ -157,7 +160,7 @@ function fillProjectCode() {
 
 <template>
   <div class="grid min-w-0 gap-4">
-    <MdvTextField v-model="query" type="search" label="Search examples" clearable full-width>
+    <MdvTextField v-model="query" type="search" label="Search examples" clearable clear-label="Clear search examples" full-width>
       <template #leading><MdvIcon :icon="search" /></template>
     </MdvTextField>
     <MdvTextField
@@ -167,6 +170,8 @@ function fillProjectCode() {
       autocomplete="new-password"
       supporting-text="Use sample text, not a real password."
       password-toggle
+      show-password-label="Show demo password"
+      hide-password-label="Hide demo password"
       full-width
     />
     <MdvTextField ref="codeField" v-model="projectCode" label="Project code" full-width>
@@ -188,7 +193,7 @@ function fillProjectCode() {
   </template>
 </DemoBlock>
 
-The built-in action names are Chinese. For a different language, replace the `trailing` slot and give the replacement controls accessible names. This replaces both built-in actions.
+Name the built-in buttons with `clear-label`, `show-password-label`, and `hide-password-label`. The `trailing` slot replaces both actions when you need custom controls.
 
 ## Native forms and validation
 

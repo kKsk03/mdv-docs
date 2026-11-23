@@ -185,7 +185,7 @@ function cancel(event: MdvMenuSelectEvent) {
 
 ## 子菜单
 
-把子菜单放在菜单项的 `#children` 插槽中。空间较窄时使用 `submenu-mode="push"`，子菜单会原位显示并提供返回项。
+把子菜单放在菜单项的 `#children` 插槽中。空间较窄时可用 `submenu-mode="push"` 原位显示子菜单。返回项使用父菜单项的标签或插槽文字。
 
 <DemoBlock>
   <MenuNestedDemo />

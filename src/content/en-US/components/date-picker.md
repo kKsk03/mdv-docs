@@ -26,10 +26,11 @@ const pickerProps: ApiTableItem[] = [
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Adds an entry-field clear action requesting null. Required validation still applies.' },
   { name: 'label', type: 'string', default: 'labels.dateLabel', description: 'Visible entry label and native input name for assistive technology.' },
   { name: 'name', type: 'string', description: 'Form field name for the accepted ISO value. The formatted display text is not submitted a second time.' },
-  { name: 'supportingText', type: 'string', default: 'Localized format hint', description: 'Supporting text below the entry. An empty value falls back to the date-format hint.' },
+  { name: 'placeholder', type: 'string', description: 'Optional placeholder shared by the entry fields and the panel text inputs.' },
+  { name: 'supportingText', type: 'string', description: 'Supporting text below the input. When omitted, a format hint appears only if labels.formatHint is supplied.' },
   { name: 'error', type: 'boolean', default: 'false', description: 'External entry error state, also used by native entry validity. It does not replace panel date constraints or a parent acceptance policy.' },
-  { name: 'errorText', type: 'string', description: 'External error message; an error without a message uses labels.invalidDate.' },
-  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', default: 'Chinese labels', description: 'Overrides operation names, panel headings, date-state descriptions, keyboard hints, and validation messages.' },
+  { name: 'errorText', type: 'string', description: 'Application message for the error prop. Internal validation uses the corresponding entry in labels.' },
+  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', description: 'Optional application copy for panel titles, controls, accessible names, hints, and validation messages.' },
 ]
 const pickerSlots: SlotTableItem[] = [
   { name: 'trigger', description: 'Replaces the calendar button inside the field, not the complete entry. Receives { open, close, triggerProps }; bind triggerProps to a real button.' },
@@ -283,7 +284,7 @@ const labels: MdvDatePickerLabels = {
 
 ## Locale and interface labels
 
-Use `locale` for date formatting, and `labels` for button names, accessible names, and errors. Unspecified labels use the Chinese defaults.
+Use `locale` to set the date format. Pass the strings you need through `labels`. If you omit `cancel`, `confirm`, or `save`, the matching action uses an icon. The picker still rejects invalid dates when the corresponding error text is absent. For native required-field messages, the browser supplies its own text unless the application provides a custom message.
 
 <DemoBlock>
   <DatePickerLocaleDemo />

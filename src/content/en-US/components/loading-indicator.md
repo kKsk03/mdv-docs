@@ -10,7 +10,7 @@ import LoadingButtonDemo from '@/components/docs/demos/loadingIndicator/button.v
 const indicatorProps: ApiTableItem[] = [
   { name: 'contained', type: 'boolean', default: 'false', description: 'Adds a circular primary-container background and uses on-primary-container for the shape.' },
   { name: 'size', type: 'number', default: '48', description: 'Overall size in CSS pixels. Finite values are clamped to 24–240; nonfinite values fall back to 48.' },
-  { name: 'label', type: 'string', default: "'加载中'", description: 'Accessible name only; does not display text. Whitespace-only labels use the default Chinese name. Set explicitly for the application language.' },
+  { name: 'label', type: 'string', description: 'Name read by assistive technology. A missing or blank value leaves the name unset unless native ARIA names it.' },
   { name: 'paused', type: 'boolean', default: 'false', description: 'Freezes the current animation phase; resuming continues from that phase. Does not mean the task has finished.' },
   { name: 'decorative', type: 'boolean', default: 'false', description: 'Hides the indicator from assistive technology and removes its role/name/description when the owner already conveys loading.' },
 ]

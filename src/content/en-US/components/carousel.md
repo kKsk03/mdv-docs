@@ -21,13 +21,13 @@ const carouselProps: ApiTableItem[] = [
   { name: 'flingBehavior', type: "'auto' | 'single-advance' | 'multi-browse' | 'no-snap'", default: "'auto'", description: 'Settling behavior for dragging/wheel. Auto uses no-snap for uncontained, otherwise single-advance. Free scrolling is only available in uncontained; full-screen always uses single-advance.' },
   { name: 'userScrollEnabled', type: 'boolean', default: 'true', description: 'Enables dragging and wheel input. Keyboard, item activation, external controls, and programmatic navigation remain available when false.' },
   { name: 'showControls', type: 'boolean', default: 'horizontal: true; full-screen: false', description: 'Shows the control region below the viewport. Must be true to render a custom controls slot.' },
-  { name: 'labels', type: 'Partial<MdvCarouselLabels>', default: 'Chinese labels', description: 'Overrides carousel, slide, previous, next, skip, empty, and item(index, count). Configure all needed labels for the application locale.' },
+  { name: 'labels', type: 'Partial<MdvCarouselLabels>', description: 'Optional copy for carousel, slide, previous, next, skip, empty, and item(index, count). Each entry is supplied by the application.' },
 ]
 const carouselSlots: SlotTableItem[] = [
   { name: 'item', description: 'Custom item content, receiving { item, index, active }. Owns its native controls, names, disabling, and business actions.' },
   { name: 'header', description: 'Content above the viewport. Receives the shared controls slot props.' },
   { name: 'controls', description: 'Replaces the default previous/position/next controls below the viewport. Receives the shared controls slot props; needs showControls=true.' },
-  { name: 'empty', description: 'Content shown for an empty items array. No slot parameters.' },
+  { name: 'empty', description: 'Replaces the empty-state content and receives { text } from labels.empty. Text is undefined when omitted. The container stays present when items is empty.' },
 ]
 </script>
 # Carousel
@@ -36,7 +36,7 @@ Use `MdvCarousel` to browse a collection of images or related content.
 
 ## Basic usage
 
-Give each item a unique, stable `key` and bind the active key with `v-model`. Add `aria-label` and supply `labels` to translate the controls.
+Give each item a unique, stable `key` and bind the active key with `v-model`. Name the region with `aria-label`. Supply `labels.previous`, `labels.next`, and `labels.skip` to show the matching controls. A `controls` slot can provide custom navigation.
 
 <DemoBlock>
   <CarouselBasicDemo />

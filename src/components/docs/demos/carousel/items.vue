@@ -13,7 +13,7 @@ const items = ref([...initial])
 const current = ref<MdvCarouselKey | null>('design')
 const labels: MdvCarouselLabels = {
   carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
-  skip: 'Skip carousel', empty: 'No collections.',
+  skip: 'Skip carousel', empty: 'No collections left. Restore them to continue.',
   item: (index, count) => `Collection ${index + 1} of ${count}`,
 }
 
@@ -30,7 +30,7 @@ function reset() {
 <template>
   <div class="grid gap-4">
     <MdvCarousel v-model="current" :items="items" :labels="labels" :height="150" aria-label="Dynamic collections">
-      <template #empty><p>No collections left. Restore them to continue.</p></template>
+      <template #empty="{ text }"><p>{{ text }}</p></template>
     </MdvCarousel>
     <div class="flex flex-wrap gap-3">
       <MdvButton variant="tonal" :disabled="!items.length" @click="rotate">Move first to end</MdvButton>

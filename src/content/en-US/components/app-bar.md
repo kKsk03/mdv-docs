@@ -31,7 +31,7 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'image', description: 'Brand image above the medium/large title. Receives { scrolled, collapsed }; not shown in Small.' },
 ]
 const scaffoldProps: ApiTableItem[] = [
-  { name: 'contentAttrs', type: 'HTMLAttributes', description: 'Native attributes and events for the content scroll element, such as aria-label, id, tabindex, and onScroll. Defaults to role region, aria-label 正文, and tabindex 0; these can be overridden.' },
+  { name: 'contentAttrs', type: 'HTMLAttributes', description: 'Native attributes and events for the content scroll region. Its default role is region and its tabindex is 0. Use aria-label or aria-labelledby to name it.' },
 ]
 const scaffoldSlots: SlotTableItem[] = [
   { name: 'appbar', description: 'One MdvAppBar, optionally through a wrapper component. Automatically follows this Scaffold content scroll area.' },

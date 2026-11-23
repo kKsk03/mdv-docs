@@ -39,7 +39,7 @@ onBeforeUnmount(cancel)
 </script>
 
 <template>
-  <MdvSearchView v-model="query" placeholder="Search the catalog" clear-label="Clear catalog query" back-label="Close catalog search" :loading="loading" :status-text="status" @search="search">
+  <MdvSearchView v-model="query" placeholder="Search the catalog" results-label="Catalog results" clear-label="Clear catalog query" back-label="Close catalog search" :loading="loading" :status-text="status" @search="search">
     <template #default="{ close }">
       <div class="px-4 pb-2"><MdvCheckbox v-model="failNext" label="Fail the next simulated request" /></div>
       <MdvLinearProgress v-if="loading" indeterminate aria-label="Searching catalog" />

@@ -30,7 +30,7 @@ const itemProps: ApiTableItem[] = [
   { name: 'color', type: 'MdvButtonColor', description: 'Primary, secondary, tertiary, success, warning, error, info, or a #RGB/#RRGGBB local seed. Omitted uses the variant defaults.' },
   { name: 'size', type: 'MdvButtonSize', default: 'Inherited', description: 'Overrides group size only in standard layout; standalone default is s.' },
   { name: 'shape', type: 'MdvButtonShape', default: 'Inherited', description: 'Overrides group shape only in standard layout; standalone default is round.' },
-  { name: 'iconOnly', type: 'boolean', default: 'false', description: 'Icon-only item. Provide aria-label or aria-labelledby.' },
+  { name: 'iconOnly', type: 'boolean', default: 'false', description: 'Icon-only item. Use aria-label or aria-labelledby to name it.' },
   { name: 'width', type: "'narrow' | 'default' | 'wide'", default: "'default'", description: 'Width of icon-only items.' },
   { name: 'selected', attribute: 'v-model:selected', type: 'boolean', description: 'Controlled independent toggle in selection=none. Omit it for ordinary actions and grouped selection.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables this item, selection, and link navigation.' },

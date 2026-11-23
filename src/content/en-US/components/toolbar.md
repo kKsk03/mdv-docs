@@ -20,8 +20,8 @@ const props: ApiTableItem[] = [
   { name: 'scrollBehavior', type: 'MdvToolbarScrollBehavior', default: "'none'", description: "'hide' moves the entire bar; 'collapse' is only for a collapsible floating toolbar." },
   { name: 'scrollTarget', type: 'MdvToolbarScrollTarget', description: 'Window, element, CSS selector, or getter. Omit to follow window; an unresolved explicit target does not fall back.' },
   { name: 'scrollThreshold', type: 'number', default: '40', description: 'Accumulated scroll distance in pixels in one direction before a change is requested.' },
-  { name: 'expandLabel', type: 'string', default: "'展开工具栏'", description: 'Accessible name of the toggle when collapsed.' },
-  { name: 'collapseLabel', type: 'string', default: "'收起工具栏'", description: 'Accessible name of the toggle when expanded.' },
+  { name: 'expandLabel', type: 'string', description: 'Accessible name for the toggle when the toolbar is collapsed.' },
+  { name: 'collapseLabel', type: 'string', description: 'Accessible name for the toggle when the toolbar is expanded.' },
 ]
 const slots: SlotTableItem[] = [
   { name: 'default', description: 'Primary actions. Stay reachable on collapse unless a FAB is paired.' },
@@ -232,7 +232,7 @@ const notes = [
 
 <SlotsTable :items="slots" />
 
-All slots receive `{ expanded, expand, collapse, toggle, toggleProps }`. The button binding includes `aria-expanded`, `aria-controls`, `aria-label`, and `onClick`. A default toggle appears only when there is a collapsible group or paired FAB.
+All slots receive `{ expanded, expand, collapse, toggle, toggleProps }`. The button binding includes `aria-expanded`, `aria-controls`, and `onClick`. The optional `aria-label` comes from `expandLabel` or `collapseLabel`. A default toggle appears only when there is a collapsible group or paired FAB.
 
 ### Events, attributes, and exposed methods
 

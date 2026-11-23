@@ -28,10 +28,11 @@ const rangeProps: ApiTableItem[] = [
   { name: 'endLabel', type: 'string', default: 'labels.endLabel', description: '结束字段的可见标签及可访问名称。' },
   { name: 'startName', type: 'string', description: '已接受的开始 ISO 日期表单字段名。' },
   { name: 'endName', type: 'string', description: '已接受的结束 ISO 日期表单字段名。' },
-  { name: 'supportingText', type: 'string', default: '本地化日期格式提示', description: '两个字段共用的辅助说明，空值回退为日期格式提示。' },
+  { name: 'placeholder', type: 'string', description: '字段与面板文本输入共用的可选占位提示。' },
+  { name: 'supportingText', type: 'string', description: '输入框下方的辅助说明。省略后，只有传入 labels.formatHint 才会显示格式提示。' },
   { name: 'error', type: 'boolean', default: 'false', description: '外部字段错误状态，也参与原生校验。面板限制请使用日期约束或父级接受逻辑。' },
-  { name: 'errorText', type: 'string', description: '外部错误说明，省略时回退为 labels.invalidDate。' },
-  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', default: '中文文案', description: '与 DatePicker 共用的操作名称、面板标题、日期说明、提示和错误消息。' },
+  { name: 'errorText', type: 'string', description: 'error 状态下由应用提供的错误说明。组件内部校验使用 labels 中对应的文案。' },
+  { name: 'labels', type: 'Partial<MdvDatePickerLabels>', description: '由应用传入的可选文案，包括面板标题、操作文字、无障碍名称、提示和校验消息。' },
 ]
 const rangeSlots: SlotTableItem[] = [
   { name: 'trigger', description: '替换结束字段内的日历按钮，接收 { open, close, triggerProps }；将提供的 props 绑定到原生按钮。' },
@@ -277,7 +278,7 @@ const labels: MdvDatePickerLabels = {
 
 ## 文本输入与校验
 
-选择器关闭时，按 Enter 或让焦点离开整组输入框可校验日期范围。起止日期写反时不会自动交换。用 `locale` 设置日期格式，界面文案请参阅[日期选择器文案](./date-picker#地区格式与界面文案)。
+选择器关闭时，按 Enter 或让焦点离开整组输入框可校验日期范围。即使省略错误文案，也无法保存倒序或不完整的范围。使用 `locale` 设置日期格式，按需用 `labels` 传入文案。[日期选择器文案](./date-picker#地区格式与界面文案)
 
 <DemoBlock>
   <DateRangePickerInputDemo />

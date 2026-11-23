@@ -16,8 +16,8 @@ const menuProps: ApiTableItem[] = [
   { name: 'elevated', type: 'boolean', default: 'true', description: 'Enables trigger/close shadows and expressive pill hover elevation. Baseline menu elevation still belongs to MdvMenu.' },
   { name: 'position', type: "'static' | 'absolute' | 'fixed'", default: "'static'", description: 'Normal-flow trigger or bottom-end positioning relative to a containing block/viewport. No placement prop.' },
   { name: 'offset', type: 'number', default: '16 / 24', description: 'Edge offset in pixels: 16 by default, 24 at viewport widths of 1200px and above. An explicit non-negative value overrides this; safe areas are additional.' },
-  { name: 'label', type: 'string (required)', description: 'Accessible name describing the available actions. Also labels the expressive action group or baseline menu.' },
-  { name: 'closeLabel', type: 'string', default: "'关闭菜单'", description: 'Accessible name of the opened expressive close action. Set explicitly for the language of the application.' },
+  { name: 'label', type: 'string', description: 'Accessible name describing the available actions. Also labels the expressive action group or baseline menu.' },
+  { name: 'closeLabel', type: 'string', description: 'Accessible name of the close action in the expanded Expressive menu.' },
   { name: 'triggerAttrs', type: 'MdvFabMenuTriggerAttrs', description: 'Native button attributes/listeners plus an optional function or Vue ref for the trigger. The component retains its managed trigger semantics.' },
 ]
 const itemProps: ApiTableItem[] = [
@@ -43,7 +43,7 @@ Use `MdvFabMenu` to reveal related actions from a floating action button. Render
 
 ## Expressive and baseline
 
-Use `variant="expressive"` for an expanding action list or `baseline` for a conventional menu. Give the trigger a meaningful label.
+Use `variant="expressive"` for an expanding action list or `baseline` for a conventional menu. Use `label` to name the trigger and `close-label` to name its close action in the expanded Expressive menu.
 
 <DemoBlock>
   <FabMenuBasicDemo />

@@ -28,8 +28,8 @@ const autocompleteProps: ApiTableItem[] = [
   { name: 'open', attribute: 'v-model:open', type: 'boolean', description: '面板打开状态，省略时内部管理。受控模式下父级决定是否接受打开或关闭请求。' },
   { name: 'filterMode', type: "'local' | 'external'", default: "'local'", description: 'local 按 label 忽略大小写包含匹配；external 原样展示传入列表，由使用方管理搜索。' },
   { name: 'loading', type: 'boolean', default: 'false', description: '显示加载说明，并为 listbox 设置 aria-busy。不会发起请求或自动移除已有选项。' },
-  { name: 'loadingText', type: 'string', default: "'正在加载…'", description: '面板的加载状态文案。组件默认文案为中文，按站点语言显式传入。' },
-  { name: 'noOptionsText', type: 'string', default: "'没有匹配项'", description: '没有选项且未加载时显示的文案，可按页面语言自定义。' },
+  { name: 'loadingText', type: 'string', description: '加载期间显示的文案。省略文案时，列表框仍设置 aria-busy。' },
+  { name: 'noOptionsText', type: 'string', description: '没有匹配选项且当前未加载时显示的文案。' },
 ]
 const autocompleteSlots: SlotTableItem[] = [
   { name: 'option', description: '自定义选项内容，接收 { option, selected, active }。仅负责呈现，不应放置按钮、链接或其他可聚焦控件。' },

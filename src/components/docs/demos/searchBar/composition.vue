@@ -17,7 +17,7 @@ const documents = ['Design system overview', 'Forms and validation', 'Navigation
       <MdvButton variant="tonal" @click="dialog = true">Choose a document</MdvButton>
       <p role="status" class="mt-4 text-sm">{{ selected }}</p>
       <MdvDialog v-model="dialog" title="Attach a document" description="Open the nested search. Escape closes search first and returns to this dialog.">
-        <MdvSearchView v-model="query" placeholder="Search attachments" clear-label="Clear attachment query" back-label="Back to attachment dialog" variant="divided">
+        <MdvSearchView v-model="query" placeholder="Search attachments" results-label="Attachment results" clear-label="Clear attachment query" back-label="Back to attachment dialog" variant="divided">
           <template #default="{ close }">
             <MdvList><MdvListItem v-for="title in documents.filter(value => value.toLowerCase().includes(query.toLowerCase()))" :key="title" :headline="title" interactive @click="selected = title; close()" /></MdvList>
             <MdvButton class="m-4" variant="text" @click="close()">Close attachment search</MdvButton>

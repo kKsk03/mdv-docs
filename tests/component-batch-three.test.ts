@@ -51,7 +51,7 @@ test('dynamic carousel demo preserves key identity after reordering and accepts 
   await button(wrapper, 'Clear').trigger('click')
   await flushPromises()
   expect(wrapper.get('[role="status"]').text()).toBe('Current: (none) · 0 collections')
-  expect(wrapper.get('.mdv-carousel__empty').text()).toContain('Restore them to continue')
+  expect(wrapper.get('.mdv-carousel__empty p').text()).toBe('No collections left. Restore them to continue.')
   await button(wrapper, 'Restore').trigger('click')
   await flushPromises()
   expect(wrapper.get('[role="status"]').text()).toBe('Current: design · 4 collections')

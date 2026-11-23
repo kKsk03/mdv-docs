@@ -14,7 +14,7 @@ const dialogProps: ApiTableItem[] = [
   { name: 'title', type: 'string', default: "''", description: 'Visible header title and automatic accessible naming source unless overridden by the title slot or explicit ARIA.' },
   { name: 'description', type: 'string', default: "''", description: 'Simple body text and automatic accessible description. The default slot replaces this content and its automatic description association.' },
   { name: 'closable', type: 'boolean', default: 'true', description: 'Shows the built-in header close button. Does not disable Escape or application actions.' },
-  { name: 'closeLabel', type: 'string', default: "'关闭对话框'", description: 'Accessible name of the built-in close action. Set explicitly for the application language.' },
+  { name: 'closeLabel', type: 'string', description: 'Accessible name of the close button when closable is enabled.' },
   { name: 'closeOnEsc', type: 'boolean', default: 'true', description: 'Allows the top dialog to request Escape dismissal, excluding IME composition.' },
   { name: 'beforeClose', type: 'MdvDialogBeforeClose', description: 'Synchronous/asynchronous close guard. false rejects closing; direct parent model changes bypass the guard.' },
   { name: 'destroyOnClose', type: 'boolean', default: 'false', description: 'Unmounts rendered content after exit completes. Otherwise internal content is retained; external models are not cleared.' },

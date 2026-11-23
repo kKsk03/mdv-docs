@@ -21,13 +21,13 @@ const carouselProps: ApiTableItem[] = [
   { name: 'flingBehavior', type: "'auto' | 'single-advance' | 'multi-browse' | 'no-snap'", default: "'auto'", description: '拖动/滚轮结束后的停靠策略。Auto 在 Uncontained 使用 no-snap，其余使用 single-advance。自由滚动仅 Uncontained 可用；Full-screen 始终 single-advance。' },
   { name: 'userScrollEnabled', type: 'boolean', default: 'true', description: '开启拖动和滚轮。false 时仍保留键盘、条目激活、外部控制和程序定位。' },
   { name: 'showControls', type: 'boolean', default: '横向: true；full-screen: false', description: '显示视口下方的控制区；自定义 controls 插槽也需要此值为 true。' },
-  { name: 'labels', type: 'Partial<MdvCarouselLabels>', default: '中文标签', description: '覆盖 carousel、slide、previous、next、skip、empty 和 item(index, count)；请按应用语言配置。' },
+  { name: 'labels', type: 'Partial<MdvCarouselLabels>', description: '可选文案包括 carousel、slide、previous、next、skip、empty 和 item(index, count)。各项由应用提供。' },
 ]
 const carouselSlots: SlotTableItem[] = [
   { name: 'item', description: '自定义条目内容，接收 { item, index, active }。自行负责原生控件、名称、禁用和业务操作。' },
   { name: 'header', description: '视口上方内容，接收公共控制插槽参数。' },
   { name: 'controls', description: '替代视口下方的上一项/序号/下一项控件；接收公共控制插槽参数，需要 showControls=true。' },
-  { name: 'empty', description: 'items 为空数组时的内容，无插槽参数。' },
+  { name: 'empty', description: '替换空状态内容。参数 { text } 来自 labels.empty，省略时为 undefined。列表为空时保留空状态容器。' },
 ]
 </script>
 # 轮播
@@ -36,7 +36,7 @@ const carouselSlots: SlotTableItem[] = [
 
 ## 基本用法
 
-为每项设置唯一、稳定的 `key`，用 `v-model` 绑定当前项。用 `aria-label` 为轮播命名，用 `labels` 本地化控件文案。
+为每项设置唯一、稳定的 `key`，用 `v-model` 绑定当前项。可以用 `aria-label` 命名区域。传入 `labels.previous`、`labels.next` 和 `labels.skip` 会显示对应控件。可用 `controls` 插槽提供自定义导航。
 
 <DemoBlock>
   <CarouselBasicDemo />

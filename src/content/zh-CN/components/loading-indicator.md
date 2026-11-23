@@ -10,7 +10,7 @@ import LoadingButtonDemo from '@/components/docs/demos/loadingIndicator/button.v
 const indicatorProps: ApiTableItem[] = [
   { name: 'contained', type: 'boolean', default: 'false', description: '增加圆形 primary-container 背景，图形使用 on-primary-container。' },
   { name: 'size', type: 'number', default: '48', description: '整体 CSS 像素尺寸。有限值限制在 24–240，非有限数值回退到 48。' },
-  { name: 'label', type: 'string', default: "'加载中'", description: '仅作为可访问名称，不显示文字。纯空白标签回退到默认中文名称，请按应用语言显式设置。' },
+  { name: 'label', type: 'string', description: '供辅助技术读取的名称。省略或传入空白时，可通过原生 ARIA 属性命名。' },
   { name: 'paused', type: 'boolean', default: 'false', description: '冻结当前动画相位，恢复后继续，不代表任务已经完成。' },
   { name: 'decorative', type: 'boolean', default: 'false', description: '当所属控件已说明加载状态时，移除指示器的角色、名称和描述，并对辅助技术隐藏。' },
 ]

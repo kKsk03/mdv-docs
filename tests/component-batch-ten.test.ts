@@ -160,6 +160,20 @@ test('select keeps typed values distinct and skips a disabled final option durin
   expect(document.activeElement).toBe(fields[2]!.element)
 })
 
+test('select renders the empty-list message supplied by the example', async () => {
+  setReducedMotion(true)
+  const wrapper = host = mount(SelectBasicDemo, { attachTo: document.body })
+  const field = wrapper.findAll<HTMLInputElement>('[role="combobox"]').find(
+    input => input.element.labels?.[0]?.textContent?.trim() === 'Archived projects',
+  )!
+  await field.trigger('click')
+  await flushPromises()
+  const popup = wrapper.get(`[id="${field.attributes('aria-controls')}"]`).element.parentElement!
+  expect(field.attributes('aria-expanded')).toBe('true')
+  expect(popup.querySelector('[role="status"]')?.textContent?.trim()).toBe('No archived projects')
+  expect(popup.querySelector('[role="option"]')).toBeNull()
+})
+
 test('select clearing is an application action and external errors do not change native validity', async () => {
   setReducedMotion(true)
   const wrapper = host = mount(SelectStateDemo, { attachTo: document.body })

@@ -30,7 +30,7 @@ const itemProps: ApiTableItem[] = [
   { name: 'color', type: 'MdvButtonColor', description: 'primary、secondary、tertiary、success、warning、error、info，或 #RGB/#RRGGBB 局部种子色。省略时使用变体默认颜色。' },
   { name: 'size', type: 'MdvButtonSize', default: '继承组', description: '仅 Standard 可以覆盖组尺寸；独立使用时默认 s。' },
   { name: 'shape', type: 'MdvButtonShape', default: '继承组', description: '仅 Standard 可以覆盖组形状；独立使用时默认 round。' },
-  { name: 'iconOnly', type: 'boolean', default: 'false', description: '纯图标按钮，必须提供 aria-label 或 aria-labelledby。' },
+  { name: 'iconOnly', type: 'boolean', default: 'false', description: '纯图标按钮，可通过 aria-label 或 aria-labelledby 命名。' },
   { name: 'width', type: "'narrow' | 'default' | 'wide'", default: "'default'", description: '纯图标项的宽度。' },
   { name: 'selected', attribute: 'v-model:selected', type: 'boolean', description: 'selection=none 时的受控独立切换模型；普通操作和组选中模式应省略。' },
   { name: 'disabled', type: 'boolean', default: 'false', description: '禁用此项、选择及链接导航。' },

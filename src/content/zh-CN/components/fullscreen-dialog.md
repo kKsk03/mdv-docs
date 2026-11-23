@@ -14,7 +14,7 @@ const dialogProps: ApiTableItem[] = [
   { name: 'title', type: 'string', default: "''", description: '顶栏可见标题，同时作为自动可访问名称来源，可由 title 插槽或显式 ARIA 覆盖。' },
   { name: 'description', type: 'string', default: "''", description: '简单正文与自动可访问描述。默认插槽会替换该内容，并取消这项自动描述关联。' },
   { name: 'closable', type: 'boolean', default: 'true', description: '显示内置顶栏关闭按钮，不会因此禁用 Escape 或业务操作。' },
-  { name: 'closeLabel', type: 'string', default: "'关闭对话框'", description: '内置关闭操作的可访问名称，请按应用语言设置。' },
+  { name: 'closeLabel', type: 'string', description: '启用 closable 时关闭按钮的无障碍名称。' },
   { name: 'closeOnEsc', type: 'boolean', default: 'true', description: '允许最上层对话框通过 Escape 请求关闭，输入法组合期间不触发。' },
   { name: 'beforeClose', type: 'MdvDialogBeforeClose', description: '同步或异步关闭拦截器，false 拒绝关闭；父级直接修改模型会跳过拦截。' },
   { name: 'destroyOnClose', type: 'boolean', default: 'false', description: '退出完成后卸载内容，否则保留内部状态；不会清空父级绑定的模型。' },

@@ -21,6 +21,12 @@ const typed = ref<MdvSelectValue | null>(1)
       <MdvSelect v-model="filled" label="Filled size" variant="filled" placeholder="Choose a size" :options="sizes" full-width />
     </div>
     <MdvSelect v-model="typed" label="Strict value types" :options="typedOptions" full-width />
+    <MdvSelect
+      label="Archived projects"
+      :options="[]"
+      no-options-text="No archived projects"
+      full-width
+    />
     <p role="status" class="break-words text-sm text-mdv-on-surface-variant">Outlined: {{ JSON.stringify(outlined) }} · Filled: {{ JSON.stringify(filled) }} · Typed: {{ typeof typed }} {{ JSON.stringify(typed) }}</p>
   </div>
 </template>

@@ -185,7 +185,7 @@ function cancel(event: MdvMenuSelectEvent) {
 
 ## Submenus
 
-Place a submenu in the item’s `#children` slot. Use `submenu-mode="push"` for compact layouts that need a Back row in place of a side panel.
+Place a submenu in the item’s `#children` slot. In compact layouts, `submenu-mode="push"` opens the child menu in place. Its back row uses the parent item’s label or slot text.
 
 <DemoBlock>
   <MenuNestedDemo />

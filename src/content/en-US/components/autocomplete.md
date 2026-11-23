@@ -28,8 +28,8 @@ const autocompleteProps: ApiTableItem[] = [
   { name: 'open', attribute: 'v-model:open', type: 'boolean', description: 'Panel state, internally managed when omitted. In controlled mode the parent accepts or rejects open/close requests.' },
   { name: 'filterMode', type: "'local' | 'external'", default: "'local'", description: 'Local performs case-insensitive label inclusion matching. External displays the supplied list and leaves search to the application.' },
   { name: 'loading', type: 'boolean', default: 'false', description: 'Displays loading text and sets listbox aria-busy. Does not fetch results or automatically remove existing options.' },
-  { name: 'loadingText', type: 'string', default: "'正在加载…'", description: 'Panel loading message. The component default is Chinese; provide text for your application locale.' },
-  { name: 'noOptionsText', type: 'string', default: "'没有匹配项'", description: 'Message shown when there are no options and loading is false. Set it for your application locale.' },
+  { name: 'loadingText', type: 'string', description: 'Status text shown while loading. The listbox exposes aria-busy even without this text.' },
+  { name: 'noOptionsText', type: 'string', description: 'Status text shown when no options match and loading is false.' },
 ]
 const autocompleteSlots: SlotTableItem[] = [
   { name: 'option', description: 'Custom option content, receiving { option, selected, active }. Presentation only: do not include buttons, links, or other focusable controls.' },

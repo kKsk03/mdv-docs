@@ -13,7 +13,7 @@ function submit(event: Event) {
 
 <template>
   <div class="grid gap-4">
-    <MdvSearchView v-model="query" placeholder="Search external form" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
+    <MdvSearchView v-model="query" placeholder="Search external form" results-label="Form search results" clear-label="Clear form query" back-label="Back to external form" variant="divided" :input-attrs="{ id: inputId, form: id, name: 'q' }">
       <template #default="{ close }">
         <div class="grid gap-4 p-5">
           <p class="text-sm">Only the active search input belongs to the external form.</p>

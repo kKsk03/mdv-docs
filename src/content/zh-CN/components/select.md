@@ -12,6 +12,7 @@ import FormDemo from '@/components/docs/demos/select/form.vue'
 const props: ApiTableItem[] = [
   { name: 'modelValue', attribute: 'v-model', type: 'string | number | null', default: '内部 null', description: '选中选项的值。不绑定时使用内部状态；绑定后由父级接受请求，使用 Object.is 比较。' },
   { name: 'options', type: 'readonly MdvSelectOption[]', default: '必填', description: '每项具有唯一的带类型 value 和可见 label，可提供 supportingText 和 disabled。' },
+  { name: 'noOptionsText', type: 'string', description: '应用提供的空列表提示。省略时不显示提示。' },
   { name: 'variant', type: "'filled' | 'outlined'", default: "'outlined'", description: 'TextField 外观，与 menuVariant 分开控制。' },
   { name: 'menuVariant', type: "'expressive' | 'baseline'", default: "'expressive'", description: '列表框表面与选项样式。弹层是独立的 combobox listbox，并非 MdvMenu。' },
   { name: 'label', type: 'string', default: "''", description: '可见字段标签及列表框名称。省略时应提供 aria-label 或 aria-labelledby。' },
@@ -64,6 +65,12 @@ const typed = ref<MdvSelectValue | null>(1)
       <MdvSelect v-model="filled" label="Filled size" variant="filled" placeholder="Choose a size" :options="sizes" full-width />
     </div>
     <MdvSelect v-model="typed" label="Strict value types" :options="typedOptions" full-width />
+    <MdvSelect
+      label="Archived projects"
+      :options="[]"
+      no-options-text="No archived projects"
+      full-width
+    />
     <p role="status" class="break-words text-sm text-mdv-on-surface-variant">Outlined: {{ JSON.stringify(outlined) }} · Filled: {{ JSON.stringify(filled) }} · Typed: {{ typeof typed }} {{ JSON.stringify(typed) }}</p>
   </div>
 </template>
@@ -214,7 +221,7 @@ function reset() {
   </template>
 </DemoBlock>
 
-异步加载选项时，请在字段外显示加载、失败或重试状态。弹层的内置空列表文案固定为中文。
+通过 `no-options-text` 提供空列表提示，可以打开上方的 Archived projects 字段体验。异步加载、错误和重试由应用管理。
 
 ---
 

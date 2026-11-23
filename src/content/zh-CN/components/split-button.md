@@ -13,7 +13,7 @@ const splitButtonProps: ApiTableItem[] = [
   { name: 'size', type: 'MdvButtonSize', default: "'s'", description: "可选 'xs'、's'、'm'、'l'、'xl'。" },
   { name: 'color', type: 'MdvButtonColor', description: '主题色、语义色或 #RGB/#RRGGBB 种子色。' },
   { name: 'expanded', type: 'boolean', default: 'false', description: '已接受的菜单展开状态，用于箭头、形状和 aria-expanded；组件自身不会切换该值。' },
-  { name: 'menuButtonLabel', type: 'string', description: '必填，描述相关选项的可访问名称，例如“更多保存选项”。' },
+  { name: 'menuButtonLabel', type: 'string', description: '尾部菜单按钮的无障碍名称，例如“更多保存选项”。' },
   { name: 'disabled', type: 'boolean', default: 'false', description: '同时禁用主操作和菜单按钮。' },
   { name: 'actionDisabled / menuDisabled', type: 'boolean', default: 'false', description: '仅禁用对应一侧。' },
   { name: 'loading', type: 'boolean', default: 'false', description: '在主操作上显示进度；不会禁用菜单入口。' },

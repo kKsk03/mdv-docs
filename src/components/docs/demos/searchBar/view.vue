@@ -34,7 +34,7 @@ function choose(title: string, close: MdvSearchSlotProps['close']) {
       <MdvSelect :model-value="layout" :options="layouts" label="Search layout" @update:model-value="layout = $event as MdvSearchLayout" />
     </div>
     <div class="rounded-xl bg-mdv-surface-container-low py-6">
-      <MdvSearchView v-model="query" v-model:open="open" :variant="variant" :layout="layout" placeholder="Search messages" clear-label="Clear messages query" back-label="Back to messages" :status-text="`${results.length} matching messages`" @search="selected = `Submitted: ${$event || '(all messages)'}`">
+      <MdvSearchView v-model="query" v-model:open="open" :variant="variant" :layout="layout" placeholder="Search messages" results-label="Message search results" clear-label="Clear messages query" back-label="Back to messages" :status-text="`${results.length} matching messages`" @search="selected = `Submitted: ${$event || '(all messages)'}`">
         <template #default="{ close }">
           <div class="px-4 pb-2"><MdvCheckbox v-model="unreadOnly" label="Unread only" /></div>
           <MdvList v-if="results.length" :variant="variant === 'contained' ? 'expressive' : 'baseline'">

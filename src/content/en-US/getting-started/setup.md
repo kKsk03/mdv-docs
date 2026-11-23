@@ -83,3 +83,22 @@ import { MdvButton } from '@mdv-ui/mdv'
   <MdvButton>Get started</MdvButton>
 </template>
 ```
+
+## Component copy and validation
+
+Starting with MDV 0.1.10, components use the text and accessible names you supply. When upgrading an example that relied on a default label, pass the matching prop, slot content, or native ARIA attribute. For icon-only actions, provide an accessible name when readers need one.
+
+Pass translated strings directly if your app uses Vue I18n. In this example, `emailTaken` is the result of the application's availability check.
+
+```vue:line-numbers
+<MdvTextField
+  v-model="email"
+  :label="t('profile.email.label')"
+  type="email"
+  required
+  :error="emailTaken"
+  :error-text="emailTaken ? t('profile.email.taken') : undefined"
+/>
+```
+
+The browser supplies messages for native constraints such as `required` and `type="email"`. To include an application error in native validation, call the field's `setCustomValidity(message)` method. For date and time pickers, use `locale` for regional formats and `labels` for messages and control text. Picker validation still applies when a message is omitted.
