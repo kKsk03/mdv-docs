@@ -24,7 +24,7 @@ const pickerProps: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: 'Prevents editing/opening; the accepted value can still be submitted.' },
   { name: 'required', type: 'boolean', default: 'false', description: 'Requires a valid date through the visible native input and picker validation.' },
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Adds an entry-field clear action requesting null. Required validation still applies.' },
-  { name: 'label', type: 'string', default: 'labels.dateLabel', description: 'Visible entry label and native input name for assistive technology.' },
+  { name: 'label', type: 'string', description: 'Optional visible entry label. If omitted, labels.dateLabel supplies it only when present.' },
   { name: 'name', type: 'string', description: 'Form field name for the accepted ISO value. The formatted display text is not submitted a second time.' },
   { name: 'placeholder', type: 'string', description: 'Optional placeholder shared by the entry fields and the panel text inputs.' },
   { name: 'supportingText', type: 'string', description: 'Supporting text below the input. When omitted, a format hint appears only if labels.formatHint is supplied.' },

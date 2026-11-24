@@ -107,7 +107,7 @@ Batch 13 adds English and Simplified Chinese guides for Time Picker, Toolbar, an
 - The focused checks passed (19 tests), covering demo interactions, six localized routes and articles, heading permalinks, source parity, and drawer ordering and badges. `pnpm check` stopped with `spawn EPERM` and the approval service could not complete a retry. The separate `pnpm type-check`, `pnpm test:unit` (23 files, 220 tests), and `pnpm build-only` (819 modules) all passed. Vite still warns about chunks over 500 kB; the main JavaScript chunk is 728.58 kB (226.71 kB gzip).
 - Browser checks remain open: direct loading and language switching, heading scrolling, desktop/mobile layout, light/dark and scoped themes, visual focus, physical pointer and touch input, native overlay stacking, and reduced motion. The DOM tests use minimal Dialog and Popover mocks and do not verify those browser behaviors.
 
-Next: **Review Setup** against the installed package. This is a follow-up guide task, not another component batch.
+Next: **Add theme/style guidance** for light/dark/system and scoped themes. This is a follow-up guide task, not another component batch.
 
 ## Component copy in MDV 0.1.10
 
@@ -143,7 +143,7 @@ These are follow-up documentation tasks, separate from the component-page count.
 
 - [x] Make Introduction a landing page with a centered, theme-aware wordmark and a CSS-only animated backdrop above the flat component grid. Accent the M, D, and V initials and keep the backdrop still with reduced motion. The hero links to Setup, the catalog, and the library repository. The version and public component count follow the package at build time.
 - [x] Add an App Bar palette picker with 20 fixed swatches, including the original MDV palette. Apply non-default presets through MDV's lazy-loaded dynamic color API, separate from light/dark/system mode. Use the same swatches in a desktop anchored panel and the compact More options dialog.
-- [ ] Review Setup against the installed package, including optional icon data, individual component imports, CSS order, consumer-side Tailwind generation, and font behavior.
+- [x] Review Setup against the installed @mdv-ui/mdv 0.1.10 package: optional icon data, individual component imports, CSS order, consumer-side Tailwind generation, local Roboto/font fallback behavior, and application-supplied component copy and native validation.
 - [ ] Add theme/style guidance covering light/dark/system and local scopes, MDV color roles, CSS variables and Tailwind mappings, typography/fonts, shapes, elevation, motion, and reduced motion.
 - [ ] Add dynamic-color guidance for `createMdvColorScheme`, `applyMdvColorScheme`, their public types, seed requirements, scoped application, cleanup, and server/browser boundaries.
 - [ ] Add integration guidance for native forms, accessible names and keyboard interaction, IME, overlay composition, routing, SSR/hydration limits, and individual imports/bundle considerations.
@@ -153,7 +153,7 @@ Introduction and navigation validation: The registry supplies one card per compo
 
 App Bar palette validation: `pnpm check` passed with MDV 0.1.6 (type checking, 224 tests in 24 files, and production build). The existing Vite chunk-size warning remains. Integration tests cover preset switching, persistence, restoring the default, and independence from light/dark mode. Earlier Chromium checks covered refresh persistence, desktop keyboard navigation and Escape, the 320px dialog's layout and focus return, and dismissal across the 768px breakpoint. Introduction uses unmodified `MdvButton` links and relies on MDV for the visited-link color fix. Browser painting after the upgrade, forced colors, reduced motion, and other browsers were not checked in this pass.
 
-Component editorial review validation: `pnpm check` passed (23 files, 220 tests, and a production build). All internal article links and fragments resolved, and retained demos and displayed source matched across locales. Production preview spot checks covered the Chinese Navigation Rail outline, rail expansion and example code, and the English Date Range Picker link to Date Picker localization. With both sidebars visible at 1280px, the unchanged Date Range Picker text-entry demo clipped the end field on the right; investigate its container layout separately. Broader browser coverage and the existing Vite chunk-size warning remain open.
+Component editorial review validation: `pnpm check` passed (24 files, 225 tests, and a production build) against @mdv-ui/mdv 0.1.10. The final source scan found 41 of 41 registered component pages in both locales, public prop tables cover the installed declaration props, and localized fences remain identical where examples are shared. Production preview spot checks previously covered the Chinese Navigation Rail outline, rail expansion and example code, and the English Date Range Picker link to Date Picker localization. Computer Use could not complete a final local URL verification, so broader browser coverage, the existing Vite chunk-size warning, and the previously observed Date Range Picker narrow-layout clipping remain open.
 
 ## Maintaining this file
 

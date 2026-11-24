@@ -91,14 +91,26 @@ Starting with MDV 0.1.10, components use the text and accessible names you suppl
 Pass translated strings directly if your app uses Vue I18n. In this example, `emailTaken` is the result of the application's availability check.
 
 ```vue:line-numbers
-<MdvTextField
-  v-model="email"
-  :label="t('profile.email.label')"
-  type="email"
-  required
-  :error="emailTaken"
-  :error-text="emailTaken ? t('profile.email.taken') : undefined"
-/>
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { MdvTextField } from '@mdv-ui/mdv'
+
+const { t } = useI18n()
+const email = ref('')
+const emailTaken = computed(() => email.value.toLowerCase() === 'existing@example.com')
+</script>
+
+<template>
+  <MdvTextField
+    v-model="email"
+    :label="t('profile.email.label')"
+    type="email"
+    required
+    :error="emailTaken"
+    :error-text="emailTaken ? t('profile.email.taken') : undefined"
+  />
+</template>
 ```
 
 The browser supplies messages for native constraints such as `required` and `type="email"`. To include an application error in native validation, call the field's `setCustomValidity(message)` method. For date and time pickers, use `locale` for regional formats and `labels` for messages and control text. Picker validation still applies when a message is omitted.

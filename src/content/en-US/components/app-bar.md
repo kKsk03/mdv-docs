@@ -31,11 +31,11 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'image', description: 'Brand image above the medium/large title. Receives { scrolled, collapsed }; not shown in Small.' },
 ]
 const scaffoldProps: ApiTableItem[] = [
-  { name: 'contentAttrs', type: 'HTMLAttributes', description: 'Native attributes and events for the content scroll region. Its default role is region and its tabindex is 0. Use aria-label or aria-labelledby to name it.' },
+  { name: 'contentAttrs', type: 'HTMLAttributes', description: 'Native attributes and events for the content scroll region. Its default role is region and its tabindex is 0; no accessible name is generated automatically. Use aria-label or aria-labelledby when the region needs a name.' },
 ]
 const scaffoldSlots: SlotTableItem[] = [
   { name: 'appbar', description: 'One MdvAppBar, optionally through a wrapper component. Automatically follows this Scaffold content scroll area.' },
-  { name: 'default', description: 'Content. Does not automatically add a main landmark or content padding.' },
+  { name: 'default', description: 'Content. Does not automatically add a main landmark or content padding. The scroll region has no implicit accessible name.' },
 ]
 </script>
 # App Bar

@@ -22,7 +22,7 @@ const props: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: '禁止编辑和打开选择器，但仍可随表单提交。' },
   { name: 'required', type: 'boolean', default: 'false', description: '必须输入有效且可用的时间。' },
   { name: 'clearable', type: 'boolean', default: 'false', description: '非空且可编辑时提供清除操作，即使字段必填也可以清除。' },
-  { name: 'label', type: 'string', description: '外部输入框的可见标签，默认使用 labels.time。' },
+  { name: 'label', type: 'string', description: '可选的外部输入标签。仅在已提供 labels.time 时用其作为标签。' },
   { name: 'placeholder', type: 'string', description: '主时间输入框的可选占位提示。' },
   { name: 'supportingText', type: 'string', description: '输入框下方的辅助说明。省略后，只有传入 labels.formatHint 才会显示格式提示。' },
   { name: 'error', type: 'boolean', default: 'false', description: '设置业务错误，阻止弹窗确认并使原生校验失败。' },

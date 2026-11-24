@@ -22,7 +22,7 @@ const props: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: 'Prevents editing or opening without excluding the value from submission.' },
   { name: 'required', type: 'boolean', default: 'false', description: 'Requires a valid, available time.' },
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Shows a clear action on a nonempty editable field, even when required.' },
-  { name: 'label', type: 'string', description: 'Visible input label. Falls back to labels.time.' },
+  { name: 'label', type: 'string', description: 'Optional visible input label. labels.time supplies it only when present.' },
   { name: 'placeholder', type: 'string', description: 'Optional placeholder for the main time input.' },
   { name: 'supportingText', type: 'string', description: 'Supporting text below the input. When omitted, a format hint appears only if labels.formatHint is supplied.' },
   { name: 'error', type: 'boolean', default: 'false', description: 'Reports an application error and blocks confirmation and native validity.' },

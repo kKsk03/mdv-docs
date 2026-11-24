@@ -8,6 +8,7 @@ import CarouselBasicDemo from '@/components/docs/demos/carousel/basic.vue'
 import CarouselVariantDemo from '@/components/docs/demos/carousel/variant.vue'
 import CarouselFullScreenDemo from '@/components/docs/demos/carousel/fullScreen.vue'
 import CarouselContentDemo from '@/components/docs/demos/carousel/content.vue'
+import CarouselItemsDemo from '@/components/docs/demos/carousel/items.vue'
 
 const carouselProps: ApiTableItem[] = [
   { name: 'items', type: 'readonly T[]', description: '必填的条目数组，T extends object；每项必须具有有效、唯一且稳定的 key。' },
@@ -27,7 +28,7 @@ const carouselSlots: SlotTableItem[] = [
   { name: 'item', description: '自定义条目内容，接收 { item, index, active }。自行负责原生控件、名称、禁用和业务操作。' },
   { name: 'header', description: '视口上方内容，接收公共控制插槽参数。' },
   { name: 'controls', description: '替代视口下方的上一项/序号/下一项控件；接收公共控制插槽参数，需要 showControls=true。' },
-  { name: 'empty', description: '替换空状态内容。参数 { text } 来自 labels.empty，省略时为 undefined。列表为空时保留空状态容器。' },
+  { name: 'empty', description: '替换空状态内容，接收 { text?: string }，值来自 labels.empty。列表为空时保留空状态容器。' },
 ]
 </script>
 # 轮播
@@ -76,6 +77,63 @@ const labels: MdvCarouselLabels = {
       @item-click="message = `Opened ${$event.item.label}.`"
     />
     <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current }} · {{ message }}</p>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+## 动态条目与空状态
+
+删除或恢复条目时，浏览 key 仍跟随对应条目。可选空状态文案会传入插槽，空状态容器保持挂载。
+
+<DemoBlock>
+  <CarouselItemsDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref } from 'vue'
+import { MdvButton, MdvCarousel } from '@mdv-ui/mdv'
+import type { MdvCarouselItem, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
+
+const initial: MdvCarouselItem[] = [
+  { key: 'design', label: 'Design' },
+  { key: 'research', label: 'Research' },
+  { key: 'drafts', label: 'Drafts', disabled: true },
+  { key: 'archive', label: 'Archive' },
+]
+const items = ref([...initial])
+const current = ref<MdvCarouselKey | null>('design')
+const labels: MdvCarouselLabels = {
+  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
+  skip: 'Skip carousel', empty: 'No collections left. Restore them to continue.',
+  item: (index, count) => `Collection ${index + 1} of ${count}`,
+}
+
+function rotate() {
+  if (items.value.length) items.value = [...items.value.slice(1), items.value[0]!]
+}
+
+function reset() {
+  items.value = [...initial]
+  current.value = 'design'
+}
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvCarousel v-model="current" :items="items" :labels="labels" :height="150" aria-label="Dynamic collections">
+      <template #empty="{ text }"><p>{{ text }}</p></template>
+    </MdvCarousel>
+    <div class="flex flex-wrap gap-3">
+      <MdvButton variant="tonal" :disabled="!items.length" @click="rotate">Move first to end</MdvButton>
+      <MdvButton variant="outlined" :disabled="current === null" @click="items = items.filter(item => item.key !== current)">Remove current</MdvButton>
+      <MdvButton variant="text" :disabled="!items.length" @click="items = []">Clear</MdvButton>
+      <MdvButton variant="text" @click="reset">Restore</MdvButton>
+    </div>
+    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current ?? '(none)' }} · {{ items.length }} collections</p>
   </div>
 </template>
 ```
@@ -253,7 +311,7 @@ const labels: MdvCarouselLabels = {
 | `key` | `string \| number` | 默认 `itemKey` 字段所使用的唯一稳定 key，数字必须有限。 |
 | `src` | `string` | 默认渲染器的可选图片地址。 |
 | `alt` | `string` | 有意义的图片文字替代；装饰图片使用空字符串。 |
-| `label` | `string` | 图片叠加文字及主要可访问名称，省略时回退为 `alt` 或已本地化的项序号。 |
+| `label` | `string` | 可选的图片叠加文字及主要可访问名称。省略时名称使用 `alt` 或应用提供的 `labels.item(index, count)`；组件不生成项序号文案。 |
 | `href` | `string` | 将默认操作渲染为原生链接，否则为 `type="button"` 按钮。 |
 | `target` | `string` | 原生链接目标；`_blank` 且未提供 `rel` 时使用安全默认值。 |
 | `rel` | `string` | 显式原生链接关系。 |

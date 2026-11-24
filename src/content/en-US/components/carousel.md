@@ -8,6 +8,7 @@ import CarouselBasicDemo from '@/components/docs/demos/carousel/basic.vue'
 import CarouselVariantDemo from '@/components/docs/demos/carousel/variant.vue'
 import CarouselFullScreenDemo from '@/components/docs/demos/carousel/fullScreen.vue'
 import CarouselContentDemo from '@/components/docs/demos/carousel/content.vue'
+import CarouselItemsDemo from '@/components/docs/demos/carousel/items.vue'
 
 const carouselProps: ApiTableItem[] = [
   { name: 'items', type: 'readonly T[]', description: 'Required item array. T extends object; every item needs a valid, unique stable key.' },
@@ -27,7 +28,7 @@ const carouselSlots: SlotTableItem[] = [
   { name: 'item', description: 'Custom item content, receiving { item, index, active }. Owns its native controls, names, disabling, and business actions.' },
   { name: 'header', description: 'Content above the viewport. Receives the shared controls slot props.' },
   { name: 'controls', description: 'Replaces the default previous/position/next controls below the viewport. Receives the shared controls slot props; needs showControls=true.' },
-  { name: 'empty', description: 'Replaces the empty-state content and receives { text } from labels.empty. Text is undefined when omitted. The container stays present when items is empty.' },
+  { name: 'empty', description: 'Replaces the empty-state content and receives { text?: string } sourced from labels.empty. The empty-state container remains when items is empty.' },
 ]
 </script>
 # Carousel
@@ -76,6 +77,63 @@ const labels: MdvCarouselLabels = {
       @item-click="message = `Opened ${$event.item.label}.`"
     />
     <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current }} · {{ message }}</p>
+  </div>
+</template>
+```
+
+  </template>
+</DemoBlock>
+
+## Dynamic items and empty state
+
+Removing and restoring items keeps the browsing key attached to the same item. The optional empty label is passed to the slot, while the empty-state container stays mounted.
+
+<DemoBlock>
+  <CarouselItemsDemo />
+  <template #source>
+
+```vue:line-numbers
+<script setup lang="ts">
+import { ref } from 'vue'
+import { MdvButton, MdvCarousel } from '@mdv-ui/mdv'
+import type { MdvCarouselItem, MdvCarouselKey, MdvCarouselLabels } from '@mdv-ui/mdv'
+
+const initial: MdvCarouselItem[] = [
+  { key: 'design', label: 'Design' },
+  { key: 'research', label: 'Research' },
+  { key: 'drafts', label: 'Drafts', disabled: true },
+  { key: 'archive', label: 'Archive' },
+]
+const items = ref([...initial])
+const current = ref<MdvCarouselKey | null>('design')
+const labels: MdvCarouselLabels = {
+  carousel: 'Carousel', slide: 'Slide', previous: 'Previous', next: 'Next',
+  skip: 'Skip carousel', empty: 'No collections left. Restore them to continue.',
+  item: (index, count) => `Collection ${index + 1} of ${count}`,
+}
+
+function rotate() {
+  if (items.value.length) items.value = [...items.value.slice(1), items.value[0]!]
+}
+
+function reset() {
+  items.value = [...initial]
+  current.value = 'design'
+}
+</script>
+
+<template>
+  <div class="grid gap-4">
+    <MdvCarousel v-model="current" :items="items" :labels="labels" :height="150" aria-label="Dynamic collections">
+      <template #empty="{ text }"><p>{{ text }}</p></template>
+    </MdvCarousel>
+    <div class="flex flex-wrap gap-3">
+      <MdvButton variant="tonal" :disabled="!items.length" @click="rotate">Move first to end</MdvButton>
+      <MdvButton variant="outlined" :disabled="current === null" @click="items = items.filter(item => item.key !== current)">Remove current</MdvButton>
+      <MdvButton variant="text" :disabled="!items.length" @click="items = []">Clear</MdvButton>
+      <MdvButton variant="text" @click="reset">Restore</MdvButton>
+    </div>
+    <p class="text-sm text-mdv-on-surface-variant" role="status">Current: {{ current ?? '(none)' }} · {{ items.length }} collections</p>
   </div>
 </template>
 ```
@@ -253,7 +311,7 @@ These are `MdvCarouselItem` object fields inside `items`, not separate component
 | `key` | `string \| number` | Stable unique key for the default `itemKey` field. Numbers must be finite. |
 | `src` | `string` | Optional image URL for the default renderer. |
 | `alt` | `string` | Meaningful image text alternative, or an empty string for decorative images. |
-| `label` | `string` | Visible overlay text and primary accessible name. Falls back to `alt` or the localized item position. |
+| `label` | `string` | Optional visible overlay text and primary accessible name. When omitted, the item name uses `alt` or caller-supplied `labels.item(index, count)`; no position label is generated. |
 | `href` | `string` | Makes the default action a native link; otherwise it is a `type="button"` button. |
 | `target` | `string` | Native link target. `_blank` receives a safe default `rel` when omitted. |
 | `rel` | `string` | Explicit native link relationship. |

@@ -31,11 +31,11 @@ const appBarSlots: SlotTableItem[] = [
   { name: 'image', description: '中、大款标题上方的品牌图像。接收 { scrolled, collapsed }；Small 不显示此插槽。' },
 ]
 const scaffoldProps: ApiTableItem[] = [
-  { name: 'contentAttrs', type: 'HTMLAttributes', description: '传给正文滚动区的原生属性和事件。默认 role 为 region，tabindex 为 0。可通过 aria-label 或 aria-labelledby 命名。' },
+  { name: 'contentAttrs', type: 'HTMLAttributes', description: '传给正文滚动区的原生属性和事件。默认 role 为 region、tabindex 为 0，不自动生成可访问名称。需要命名时可传入 aria-label 或 aria-labelledby。' },
 ]
 const scaffoldSlots: SlotTableItem[] = [
   { name: 'appbar', description: '放置一个 MdvAppBar，可经过包装组件。自动关联当前 Scaffold 的正文滚动区。' },
-  { name: 'default', description: '正文内容。不会自动添加 main 地标或正文 padding。' },
+  { name: 'default', description: '正文内容。不会自动添加 main 地标或正文 padding；滚动区没有隐式可访问名称。' },
 ]
 </script>
 # 应用栏

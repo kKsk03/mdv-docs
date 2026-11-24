@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { flushPromises, mount } from '@vue/test-utils'
 import type { VueWrapper } from '@vue/test-utils'
 import { expect, test } from 'vitest'
@@ -55,6 +57,15 @@ test('dynamic carousel demo preserves key identity after reordering and accepts 
   await button(wrapper, 'Restore').trigger('click')
   await flushPromises()
   expect(wrapper.get('[role="status"]').text()).toBe('Current: design · 4 collections')
+})
+
+test('Carousel empty-state article example stays in sync in both locales', async () => {
+  const source = (await readFile(resolve(process.cwd(), 'src/components/docs/demos/carousel/items.vue'), 'utf8')).trimEnd()
+  for (const locale of ['en-US', 'zh-CN'] as const) {
+    const article = await readFile(resolve(process.cwd(), `src/content/${locale}/components/carousel.md`), 'utf8')
+    expect(article).toContain('<CarouselItemsDemo />')
+    expect([...article.matchAll(/```vue:line-numbers\n([\s\S]*?)\n```/g)].map(match => match[1]?.trimEnd())).toContain(source)
+  }
 })
 
 test('custom notebook demo keeps edited values and native inputs while browsing with external controls', async () => {

@@ -24,7 +24,7 @@ const pickerProps: ApiTableItem[] = [
   { name: 'readonly', type: 'boolean', default: 'false', description: '禁止编辑和打开，已接受的值仍可参与表单提交。' },
   { name: 'required', type: 'boolean', default: 'false', description: '通过可见原生输入及选择器校验要求有效日期。' },
   { name: 'clearable', type: 'boolean', default: 'false', description: '在字段中添加清除操作，请求 null；仍遵循必填校验。' },
-  { name: 'label', type: 'string', default: 'labels.dateLabel', description: '可见字段标签及辅助技术读取的输入名称。' },
+  { name: 'label', type: 'string', description: '可选的可见字段标签。省略时，仅在 labels.dateLabel 已传入时使用。' },
   { name: 'name', type: 'string', description: '已接受 ISO 日期的表单字段名，不会重复提交本地化显示文字。' },
   { name: 'placeholder', type: 'string', description: '字段与面板文本输入共用的可选占位提示。' },
   { name: 'supportingText', type: 'string', description: '输入框下方的辅助说明。省略后，只有传入 labels.formatHint 才会显示格式提示。' },

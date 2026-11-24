@@ -91,14 +91,26 @@ import { MdvButton } from '@mdv-ui/mdv'
 如果应用使用 Vue I18n，可以直接传入翻译结果。这个示例中的 `emailTaken` 来自应用对邮箱可用性的判断。
 
 ```vue:line-numbers
-<MdvTextField
-  v-model="email"
-  :label="t('profile.email.label')"
-  type="email"
-  required
-  :error="emailTaken"
-  :error-text="emailTaken ? t('profile.email.taken') : undefined"
-/>
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { MdvTextField } from '@mdv-ui/mdv'
+
+const { t } = useI18n()
+const email = ref('')
+const emailTaken = computed(() => email.value.toLowerCase() === 'existing@example.com')
+</script>
+
+<template>
+  <MdvTextField
+    v-model="email"
+    :label="t('profile.email.label')"
+    type="email"
+    required
+    :error="emailTaken"
+    :error-text="emailTaken ? t('profile.email.taken') : undefined"
+  />
+</template>
 ```
 
 `required` 和 `type="email"` 等原生约束的提示由浏览器提供。需要把业务错误纳入原生校验时，可调用字段的 `setCustomValidity(message)` 方法。日期和时间选择器的 `locale` 控制地区格式，`labels` 接收提示和操作文案。省略文案时，选择器仍会校验。
